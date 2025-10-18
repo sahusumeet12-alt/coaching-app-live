@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - UNIQUE STUDY POINT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1f2937;
+            line-height: 1.6;
+        }
+
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .sidebar-header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-header p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-section-title {
+            padding: 0 20px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.7;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #fbbf24;
+            color: white;
+        }
+
+        .nav-item .icon {
+            width: 20px;
+            text-align: center;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+
+        .nav-item .label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 0;
+            background: #f8fafc;
+        }
+
+        .top-bar {
+            background: white;
+            padding: 16px 32px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .top-bar-left h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .admin-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 16px;
+            background: #f8fafc;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .admin-profile:hover {
+            background: #e5e7eb;
+        }
+
+        .admin-avatar {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .admin-info h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .admin-info p {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        /* Content Area */
+        .content-area {
+            padding: 32px;
+        }
+
+        .page-section {
+            display: none;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        /* Dashboard Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .stat-card.students::before {
+            background: linear-gradient(90deg, #3b82f6, #1e3a8a);
+        }
+
+        .stat-card.revenue::before {
+            background: linear-gradient(90deg, #10b981, #059669);
+        }
+
+        .stat-card.tests::before {
+            background: linear-gradient(90deg, #f59e0b, #d97706);
+        }
+
+        .stat-card.attendance::before {
+            background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+
+        .stat-card.students .stat-icon {
+            background: linear-gradient(135deg, #3b82f6, #1e3a8a);
+        }
+
+        .stat-card.revenue .stat-icon {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .stat-card.tests .stat-icon {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .stat-card.attendance .stat-icon {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .stat-change {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 6px;
+            margin-top: 8px;
+            display: inline-block;
+        }
+
+        .stat-change.positive {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        /* Forms */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        .form-section h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1e3a8a);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+
+        /* Success Message */
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #a7f3d0;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .data-table td {
+            padding: 16px;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:hover {
+            background: #f9fafb;
+        }
+
+        /* Widget */
+        .widget {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+            margin-bottom: 24px;
+        }
+
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .widget-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        /* Search and filters */
+        .search-filter-bar {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .filter-select {
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .content-area {
+                padding: 16px;
+            }
+
+            .top-bar {
+                padding: 16px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-filter-bar {
+                flex-direction: column;
+            }
+
+            .search-box {
+                min-width: auto;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h1>UNIQUE STUDY POINT</h1>
+                <p>Admin Dashboard</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <div class="nav-item active" onclick="showPage('dashboard')">
+                        <div class="icon">📊</div>
+                        <div class="label">Dashboard</div>
+                    </div>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Student Management</div>
+                    <div class="nav-item" onclick="showPage('students')">
+                        <div class="icon">👥</div>
+                        <div class="label">All Students</div>
+                    </div>
+                    <div class="nav-item" onclick="showPage('attendance')">
+                        <div class="icon">📅</div>
+                        <div class="label">Attendance</div>
+                    </div>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Academic</div>
+                    <div class="nav-item" onclick="showPage('materials')">
+                        <div class="icon">📚</div>
+                        <div class="label">Study Materials</div>
+                    </div>
+                    <div class="nav-item" onclick="showPage('results')">
+                        <div class="icon">🏆</div>
+                        <div class="label">Results & Marks</div>
+                    </div>
+                    <div class="nav-item" onclick="showPage('exams')">
+                        <div class="icon">📝</div>
+                        <div class="label">Exams & Tests</div>
+                    </div>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Finance</div>
+                    <div class="nav-item" onclick="showPage('fees')">
+                        <div class="icon">💰</div>
+                        <div class="label">Fee Management</div>
+                    </div>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Communication</div>
+                    <div class="nav-item" onclick="showPage('notifications')">
+                        <div class="icon">🔔</div>
+                        <div class="label">Notifications</div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="top-bar-left">
+                    <h2 id="pageTitle">Dashboard</h2>
+                </div>
+                <div class="top-bar-right">
+                    <div class="admin-profile" onclick="showProfileMenu()">
+                        <div class="admin-avatar">SS</div>
+                        <div class="admin-info">
+                            <h4>Sumeet Sahu</h4>
+                            <p>Administrator</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Dashboard Page -->
+                <div class="page-section active" id="dashboard">
+                    <div class="stats-grid">
+                        <div class="stat-card students">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-number" id="totalStudents">156</div>
+                                    <div class="stat-label">Total Students</div>
+                                    <div class="stat-change positive">+12 this month</div>
+                                </div>
+                                <div class="stat-icon">👥</div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card revenue">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-number" id="monthlyRevenue">₹3.9L</div>
+                                    <div class="stat-label">Monthly Revenue</div>
+                                    <div class="stat-change positive">+8.2% vs last month</div>
+                                </div>
+                                <div class="stat-icon">💰</div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card tests">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-number" id="testsCompleted">24</div>
+                                    <div class="stat-label">Tests This Month</div>
+                                    <div class="stat-change positive">+3 vs last month</div>
+                                </div>
+                                <div class="stat-icon">📝</div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card attendance">
+                            <div class="stat-header">
+                                <div>
+                                    <div class="stat-number" id="avgAttendance">85%</div>
+                                    <div class="stat-label">Average Attendance</div>
+                                    <div class="stat-change positive">+2% vs last month</div>
+                                </div>
+                                <div class="stat-icon">📊</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Study Materials Page -->
+                <div class="page-section" id="materials">
+                    <div class="search-filter-bar">
+                        <input type="text" class="search-box" placeholder="Search materials by title, subject, or class...">
+                        <select class="filter-select">
+                            <option value="">All Classes</option>
+                            <option value="VI">Class VI</option>
+                            <option value="VII">Class VII</option>
+                            <option value="VIII">Class VIII</option>
+                            <option value="IX">Class IX</option>
+                            <option value="X">Class X</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="showMaterialUploadForm()">+ Add Material</button>
+                    </div>
+
+                    <div class="form-grid">
+                        <!-- Upload Study Materials Form -->
+                        <div class="form-section">
+                            <h3>📚 Upload Study Material</h3>
+                            <div class="success-message" id="materialSuccess">
+                                Study material uploaded successfully!
+                            </div>
+                            <form onsubmit="uploadStudyMaterial(event)">
+                                <div class="form-group">
+                                    <label for="materialTitle">Material Title</label>
+                                    <input type="text" id="materialTitle" placeholder="e.g., Chapter 5 - Quadratic Equations" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="materialClass">Class</label>
+                                    <select id="materialClass" required>
+                                        <option value="">Select Class</option>
+                                        <option value="VI">Class VI</option>
+                                        <option value="VII">Class VII</option>
+                                        <option value="VIII">Class VIII</option>
+                                        <option value="IX">Class IX</option>
+                                        <option value="X">Class X</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="materialSubject">Subject</label>
+                                    <select id="materialSubject" required>
+                                        <option value="">Select Subject</option>
+                                        <option value="mathematics">Mathematics</option>
+                                        <option value="science">Science</option>
+                                        <option value="social">Social Science</option>
+                                        <option value="english">English</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="materialType">Material Type</label>
+                                    <select id="materialType" required>
+                                        <option value="">Select Type</option>
+                                        <option value="notes">📝 Chapter Notes</option>
+                                        <option value="daily_notes">📄 Daily Notes</option>
+                                        <option value="questions">❓ Practice Questions</option>
+                                        <option value="test_paper">📋 Test Paper</option>
+                                        <option value="assignment">📚 Assignment</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="materialChapter">Chapter/Topic</label>
+                                    <input type="text" id="materialChapter" placeholder="Enter chapter or topic name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="materialFile">Upload File</label>
+                                    <input type="file" id="materialFile" accept=".pdf,.doc,.docx,.ppt,.pptx" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="materialDescription">Description</label>
+                                    <textarea id="materialDescription" placeholder="Enter material description..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">📚 Upload Material</button>
+                            </form>
+                        </div>
+
+                        <!-- Quick Daily Notes -->
+                        <div class="form-section">
+                            <h3>📝 Quick Daily Notes</h3>
+                            <div class="success-message" id="notesSuccess">
+                                Daily notes added successfully!
+                            </div>
+                            <form onsubmit="addDailyNotes(event)">
+                                <div class="form-group">
+                                    <label for="notesDate">Date</label>
+                                    <input type="date" id="notesDate" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="notesClass">Class</label>
+                                    <select id="notesClass" required>
+                                        <option value="">Select Class</option>
+                                        <option value="VI">Class VI</option>
+                                        <option value="VII">Class VII</option>
+                                        <option value="VIII">Class VIII</option>
+                                        <option value="IX">Class IX</option>
+                                        <option value="X">Class X</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="notesSubject">Subject</label>
+                                    <select id="notesSubject" required>
+                                        <option value="">Select Subject</option>
+                                        <option value="mathematics">Mathematics</option>
+                                        <option value="science">Science</option>
+                                        <option value="social">Social Science</option>
+                                        <option value="english">English</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="notesTitle">Topic/Title</label>
+                                    <input type="text" id="notesTitle" placeholder="Today's topic" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="notesContent">Notes Content</label>
+                                    <textarea id="notesContent" placeholder="Enter today's lesson notes..." required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="notesHomework">Homework/Assignment</label>
+                                    <textarea id="notesHomework" placeholder="Enter homework details..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-success">📝 Add Daily Notes</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results & Marks Page -->
+                <div class="page-section" id="results">
+                    <div class="search-filter-bar">
+                        <input type="text" class="search-box" placeholder="Search by student name or test...">
+                        <select class="filter-select">
+                            <option value="">All Classes</option>
+                            <option value="VI">Class VI</option>
+                            <option value="VII">Class VII</option>
+                            <option value="VIII">Class VIII</option>
+                            <option value="IX">Class IX</option>
+                            <option value="X">Class X</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="showBulkMarksUpload()">📊 Bulk Upload</button>
+                    </div>
+
+                    <div class="form-grid">
+                        <!-- Individual Marks Entry -->
+                        <div class="form-section">
+                            <h3>📊 Enter Test Marks</h3>
+                            <div class="success-message" id="marksSuccess">
+                                Marks entered successfully!
+                            </div>
+                            <form onsubmit="enterTestMarks(event)">
+                                <div class="form-group">
+                                    <label for="studentSelect">Select Student</label>
+                                    <select id="studentSelect" required>
+                                        <option value="">Choose Student</option>
+                                        <option value="rahul_sharma">Rahul Sharma (Class IX)</option>
+                                        <option value="priya_patel">Priya Patel (Class X)</option>
+                                        <option value="amit_kumar">Amit Kumar (Class VIII)</option>
+                                        <option value="sneha_verma">Sneha Verma (Class VII)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="testName">Test/Exam Name</label>
+                                    <input type="text" id="testName" placeholder="e.g., Unit Test 1 - Algebra" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="testSubject">Subject</label>
+                                    <select id="testSubject" required>
+                                        <option value="">Select Subject</option>
+                                        <option value="mathematics">Mathematics</option>
+                                        <option value="science">Science</option>
+                                        <option value="social">Social Science</option>
+                                        <option value="english">English</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="testDate">Test Date</label>
+                                    <input type="date" id="testDate" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="marksObtained">Marks Obtained</label>
+                                    <input type="number" id="marksObtained" min="0" placeholder="Enter marks scored" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="totalMarks">Total Marks</label>
+                                    <input type="number" id="totalMarks" min="1" placeholder="Enter total marks" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="testRemarks">Remarks/Comments</label>
+                                    <textarea id="testRemarks" placeholder="Performance feedback..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">📊 Submit Marks</button>
+                            </form>
+                        </div>
+
+                        <!-- Bulk Marks Upload -->
+                        <div class="form-section">
+                            <h3>📈 Bulk Marks Upload</h3>
+                            <div class="success-message" id="bulkMarksSuccess">
+                                Bulk marks uploaded successfully!
+                            </div>
+                            <form onsubmit="uploadBulkMarks(event)">
+                                <div class="form-group">
+                                    <label for="bulkTestName">Test Name</label>
+                                    <input type="text" id="bulkTestName" placeholder="e.g., Monthly Test - October 2025" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="bulkSubject">Subject</label>
+                                    <select id="bulkSubject" required>
+                                        <option value="">Select Subject</option>
+                                        <option value="mathematics">Mathematics</option>
+                                        <option value="science">Science</option>
+                                        <option value="social">Social Science</option>
+                                        <option value="english">English</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="bulkClass">Class</label>
+                                    <select id="bulkClass" required>
+                                        <option value="">Select Class</option>
+                                        <option value="VI">Class VI</option>
+                                        <option value="VII">Class VII</option>
+                                        <option value="VIII">Class VIII</option>
+                                        <option value="IX">Class IX</option>
+                                        <option value="X">Class X</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="bulkTestDate">Test Date</label>
+                                    <input type="date" id="bulkTestDate" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="bulkTotalMarks">Total Marks</label>
+                

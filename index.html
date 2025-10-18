@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNIQUE STUDY POINT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%);
+            min-height: 100vh;
+            color: #1f2937;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: #ffffff;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.15);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 24px 20px 20px;
+            text-align: center;
+            position: relative;
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 4px 20px rgba(30, 58, 138, 0.3);
+        }
+
+        .header h1 {
+            font-size: 20px;
+            margin-bottom: 4px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .header .subtitle {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-bottom: 2px;
+            font-weight: 500;
+        }
+
+        .header .contact {
+            font-size: 12px;
+            opacity: 0.8;
+            background: rgba(255,255,255,0.15);
+            padding: 6px 12px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-top: 6px;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .screen {
+            display: none;
+            padding: 24px 20px;
+            min-height: calc(100vh - 120px);
+            padding-bottom: 100px;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .login-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            min-height: calc(100vh - 120px);
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 32px;
+            color: white;
+            font-size: 32px;
+            font-weight: 800;
+            box-shadow: 0 8px 32px rgba(30, 58, 138, 0.3);
+        }
+
+        .welcome-text {
+            margin-bottom: 40px;
+        }
+
+        .welcome-text h2 {
+            font-size: 28px;
+            color: #1e3a8a;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .welcome-text p {
+            color: #64748b;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background: #ffffff;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            max-width: 320px;
+            padding: 16px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
+            box-shadow: 0 4px 16px rgba(107, 114, 128, 0.3);
+        }
+
+        .btn.success {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn.warning {
+            background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+            color: white;
+            box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn.danger {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn.small {
+            padding: 10px 16px;
+            font-size: 14px;
+            width: auto;
+            min-width: 120px;
+        }
+
+        .screen-title {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .screen-title h2 {
+            font-size: 24px;
+            color: #1e3a8a;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .screen-title p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .dashboard-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 16px;
+            padding: 24px 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            border-color: #3b82f6;
+        }
+
+        .dashboard-card .icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+            filter: grayscale(0.2);
+        }
+
+        .dashboard-card h3 {
+            font-size: 15px;
+            margin-bottom: 6px;
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .dashboard-card p {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.4;
+        }
+
+        .badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 414px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0 8px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-item {
+            text-align: center;
+            cursor: pointer;
+            padding: 8px 12px;
+            color: #64748b;
+            transition: all 0.3s ease;
+            flex: 1;
+            border-radius: 8px;
+            margin: 0 4px;
+        }
+
+        .nav-item.active, .nav-item:hover {
+            color: #1e3a8a;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .nav-item .icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .nav-item .label {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .welcome-card {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 32px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(30, 58, 138, 0.3);
+        }
+
+        .welcome-card h2 {
+            font-size: 22px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .welcome-card p {
+            opacity: 0.9;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .section-divider {
+            margin: 32px 0;
+            text-align: center;
+        }
+
+        .section-divider h3 {
+            color: #1f2937;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .section-divider p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .exam-card {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3);
+        }
+
+        .exam-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(245, 158, 11, 0.4);
+        }
+
+        .exam-card.science {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            box-shadow: 0 4px 20px rgba(6, 182, 212, 0.3);
+        }
+
+        .exam-card.science:hover {
+            box-shadow: 0 8px 32px rgba(6, 182, 212, 0.4);
+        }
+
+        .exam-date {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .exam-subject {
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 480px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <button class="back-btn hidden" onclick="goBack()">←</button>
+            <h1>UNIQUE STUDY POINT</h1>
+            <div class="subtitle">BY SUMEET SAHU</div>
+            <div class="subtitle">AMITESH NAGAR, INDORE</div>
+            <div class="contact">📞 8103405051</div>
+        </div>
+
+        <!-- Login/Registration Screen -->
+        <div class="screen active" id="loginScreen">
+            <div class="login-screen">
+                <div class="logo">USP</div>
+                <div class="welcome-text">
+                    <h2>Welcome Back!</h2>
+                    <p>Sign in to continue your learning journey</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="mobileNumber">Mobile Number</label>
+                    <input type="tel" id="mobileNumber" placeholder="Enter 10-digit mobile number" maxlength="10">
+                </div>
+                
+                <div class="form-group hidden" id="otpGroup">
+                    <label for="otpInput">Enter OTP</label>
+                    <input type="text" id="otpInput" placeholder="Enter 6-digit OTP" maxlength="6">
+                </div>
+                
+                <button class="btn" onclick="handleLogin()">Send OTP</button>
+                <button class="btn secondary" onclick="showAdminLogin()">Admin Login</button>
+            </div>
+        </div>
+
+        <!-- Admin Login Screen -->
+        <div class="screen" id="adminLoginScreen">
+            <div class="login-screen">
+                <div class="logo">ADM</div>
+                <div class="welcome-text">
+                    <h2>Admin Portal</h2>
+                    <p>Secure access for administrators</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="adminUsername">Username</label>
+                    <input type="text" id="adminUsername" placeholder="Enter admin username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="adminPassword">Password</label>
+                    <input type="password" id="adminPassword" placeholder="Enter admin password">
+                </div>
+                
+                <button class="btn" onclick="handleAdminLogin()">Login as Admin</button>
+                <button class="btn secondary" onclick="showStudentLogin()">Back to Student Login</button>
+            </div>
+        </div>
+
+        <!-- Student Dashboard -->
+        <div class="screen" id="studentDashboard">
+            <div class="welcome-card">
+                <h2>Welcome, <span id="studentName">Student</span>! 👋</h2>
+                <p>Ready to excel in your studies today?</p>
+            </div>
+            
+            <!-- Upcoming Exams -->
+            <div class="section-divider">
+                <h3>Upcoming Exams</h3>
+                <p>Prepare well for your tests</p>
+            </div>
+            
+            <div class="exam-card" onclick="showExamDetails('math')">
+                <div class="exam-date">Mathematics Test</div>
+                <div class="exam-subject">Date: 20 Oct 2025 | Time: 10:00 AM</div>
+            </div>
+            
+            <div class="exam-card science" onclick="showExamDetails('science')">
+                <div class="exam-date">Science Test</div>
+                <div class="exam-subject">Date: 25 Oct 2025 | Time: 2:00 PM</div>
+            </div>
+
+            <div class="section-divider">
+                <h3>Quick Access</h3>
+                <p>Everything you need at your fingertips</p>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="dashboard-card" onclick="showStudyMaterials()">
+                    <div class="icon">📚</div>
+                    <h3>Study Materials</h3>
+                    <p>Access notes, questions & tests</p>
+                </div>
+                
+                <div class="dashboard-card" onclick="showResults()">
+                    <div class="icon">📊</div>
+                    <h3>My Results</h3>
+                    <p>View test scores & progress</p>
+                </div>
+                
+                <div class="dashboard-card" onclick="showProgress()">
+                    <div class="icon">📈</div>
+                    <h3>Progress Chart</h3>
+                    <p>Track your improvement</p>
+                </div>
+                
+                <div class="dashboard-card" onclick="showNotifications()">
+                    <div class="icon">🔔</div>
+                    <h3>Notifications</h3>
+                    <p>Important updates</p>
+                    <div class="badge" id="notificationBadge">3</div>
+                </div>
+                
+                <div class="dashboard-card" onclick="showAttendance()">
+                    <div class="icon">📅</div>
+                    <h3>Attendance</h3>
+                    <p>Track your presence</p>
+                </div>
+                
+                <div class="dashboard-card" onclick="showTimetable()">
+                    <div class="icon">⏰</div>
+                    <h3>Timetable</h3>
+                    <p>Daily class schedule</p>
+                </div>
+                
+                <div class="dashboard-card" onclick="showFees()">
+                    <div class="icon">💰</div>
+                    <h3>Fee Status</h3>
+                    <p>Payment information</p>
+                </div>
+                
+                <div class="dashboard-card" onclick="showQuizzes()">
+                    <div class="icon">🎯</div>
+                    <h3>Live Quiz</h3>
+                    <p>Take practice tests</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav" id="bottomNav">
+            <div class="nav-item active" onclick="showScreen('studentDashboard')">
+                <div class="icon">🏠</div>
+                <div class="label">Home</div>
+            </div>
+            <div class="nav-item" onclick="showStudyMaterials()">
+                <div class="icon">📚</div>
+                <div class="label">Study</div>
+            </div>
+            <div class="nav-item" onclick="showResults()">
+                <div class="icon">📊</div>
+                <div class="label">Results</div>
+            </div>
+            <div class="nav-item" onclick="showProgress()">
+                <div class="icon">📈</div>
+                <div class="label">Progress</div>
+            </div>
+            <div class="nav-item" onclick="logout()">
+                <div class="icon">🚪</div>
+                <div class="label">Logout</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentUser = null;
+        let isAdmin = false;
+
+        // Authentication functions
+        function handleLogin() {
+            const mobile = document.getElementById('mobileNumber').value;
+            const otp = document.getElementById('otpInput').value;
+            const sendBtn = document.querySelector('#loginScreen .btn');
+            
+            if (!mobile) {
+                alert('Please enter mobile number');
+                return;
+            }
+
+            if (mobile.length !== 10) {
+                alert('Please enter valid 10-digit mobile number');
+                return;
+            }
+
+            if (!document.getElementById('otpGroup').classList.contains('hidden')) {
+                // Verify OTP
+                if (otp === '123456') {
+                    currentUser = { mobile: mobile, name: 'Student' };
+                    document.getElementById('studentName').textContent = getStudentName(mobile);
+                    showStudentDashboard();
+                } else {
+                    alert('Invalid OTP. Please try again.');
+                }
+            } else {
+                // Send OTP
+                document.getElementById('otpGroup').classList.remove('hidden');
+                sendBtn.textContent = 'Verify OTP';
+                alert('OTP sent to ' + mobile + '. Use 123456 for demo.');
+            }
+        }
+
+        function getStudentName(mobile) {
+            const names = {
+                '9876543210': 'Rahul Sharma',
+                '9876543211': 'Priya Patel',
+                '9876543212': 'Amit Kumar',
+                '9876543213': 'Sneha Verma'
+            };
+            return names[mobile] || 'Student';
+        }
+
+        function handleAdminLogin() {
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+
+            if (username === 'admin' && password === 'admin123') {
+                isAdmin = true;
+                alert('Admin login successful! Redirecting to admin panel...');
+                // In real app, redirect to admin.html
+                window.location.href = 'admin.html';
+            } else {
+                alert('Invalid admin credentials');
+            }
+        }
+
+        function showAdminLogin() {
+            showScreen('adminLoginScreen');
+        }
+
+        function showStudentLogin() {
+            showScreen('loginScreen');
+        }
+
+        function showStudentDashboard() {
+            showScreen('studentDashboard');
+            document.getElementById('bottomNav').classList.remove('hidden');
+        }
+
+        // Navigation functions
+        function showScreen(screenId) {
+            // Hide all screens
+            const screens = document.querySelectorAll('.screen');
+            screens.forEach(screen => screen.classList.remove('active'));
+            
+            // Show selected screen
+            document.getElementById(screenId).classList.add('active');
+            
+            // Update navigation
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+            
+            // Show/hide back button
+            const backBtn = document.querySelector('.back-btn');
+            if (screenId === 'studentDashboard' || screenId === 'loginScreen' || screenId === 'adminLoginScreen') {
+                backBtn.classList.add('hidden');
+            } else {
+                backBtn.classList.remove('hidden');
+            }
+        }
+
+        function goBack() {
+            showStudentDashboard();
+        }
+
+        // Student functions
+        function showStudyMaterials() {
+            alert('📚 Study Materials\n\nAccess all your study materials:\n• Chapter Notes\n• Practice Questions\n• Test Papers\n• Video Lectures\n\nSelect your class and subject to browse materials.');
+        }
+
+        function showResults() {
+            alert('📊 My Results\n\nYour recent test results:\n• Mathematics: 84% (A grade)\n• Science: 92% (A+ grade)\n• Social Science: 78% (B+ grade)\n\nDetailed performance analysis available.');
+        }
+
+        function showProgress() {
+            alert('📈 Progress Tracking\n\nYour academic progress:\n• Overall Performance: 85%\n• Study Streak: 15 days\n• Tests Completed: 24\n• Improvement: +12% this month');
+        }
+
+        function showNotifications() {
+            alert('🔔 Notifications\n\n• New Mathematics test scheduled\n• Fee payment due Oct 25\n• Science notes uploaded\n• Great performance in last test!');
+        }
+
+        function showAttendance() {
+            alert('📅 Attendance\n\nYour attendance record:\n• Overall: 85%\n• Present Days: 22\n• Absent Days: 4\n• This Month: 18/20 days');
+        }
+
+        function showTimetable() {
+            alert('⏰ Today\'s Schedule\n\n9:00 AM - Mathematics\n10:00 AM - Science\n11:15 AM - Social Science\n12:15 PM - English\n\nAll classes with Sumeet Sahu Sir');
+        }
+
+        function showFees() {
+            alert('💰 Fee Status\n\nCurrent Month: ₹2,500\nStatus: Pending\nDue Date: Oct 25, 2025\n\nLast Payment: ₹2,500 (Sep 2025)\nStatus: Paid');
+        }
+
+        function showQuizzes() {
+            alert('🎯 Live Quiz\n\nAvailable Quizzes:\n• Mathematics - Quadratic Equations\n• Science - Light & Reflection\n• General Knowledge\n\nStart a quiz to test your knowledge!');
+        }
+
+        function showExamDetails(examType) {
+            const examDetails = {
+                'math': 'Mathematics Test\n\nDate: Oct 20, 2025\nTime: 10:00 AM\nDuration: 2 hours\nTopics: Algebra, Geometry\nTotal Marks: 50',
+                'science': 'Science Test\n\nDate: Oct 25, 2025\nTime: 2:00 PM\nDuration: 2 hours\nTopics: Light, Motion\nTotal Marks: 50'
+            };
+            
+            alert('📝 ' + examDetails[examType]);
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                currentUser = null;
+                isAdmin = false;
+                
+                // Reset forms
+                document.getElementById('mobileNumber').value = '';
+                document.getElementById('otpInput').value = '';
+                document.getElementById('otpGroup').classList.add('hidden');
+                document.querySelector('#loginScreen .btn').textContent = 'Send OTP';
+                
+                showScreen('loginScreen');
+                document.getElementById('bottomNav').classList.add('hidden');
+                
+                alert('👋 Logged out successfully!\n\nThank you for using UNIQUE STUDY POINT app.');
+            }
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('UNIQUE STUDY POINT App Loaded');
+        });
+    </script>
+</body>
+</html>
