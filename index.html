@@ -20,7 +20,7 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 .brand a{color:#ffd700;text-decoration:none}
 .login-card{background:#fff;border-radius:28px;padding:30px;width:100%}
 .tabs{display:flex;gap:12px;margin-bottom:20px}
-.tab-btn{flex:1;padding:15px;border:none;border-radius:16px;background:#f0f2f5;cursor:pointer;font-family:inherit;transition:all 0.3s}
+.tab-btn{flex:1;padding:15px;border:none;border-radius:16px;background:#f0f2f5;cursor:pointer;font-family:inherit}
 .tab-btn.active{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}
 .tab-btn .icon{font-size:24px;display:block;margin-bottom:4px}
 .tab-btn .label{font-size:13px;font-weight:700}
@@ -94,8 +94,6 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 .toast.error{background:#ff6b6b}
 .empty{text-align:center;padding:40px;color:#888}
 .tpl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.tpl-section{margin-bottom:12px}
-.tpl-title{font-size:11px;font-weight:700;color:#888;margin-bottom:8px}
 .alert-tpl{padding:12px 8px;border:none;border-radius:12px;cursor:pointer;text-align:center;font-family:inherit}
 .alert-tpl .alert-icon{font-size:20px;margin-bottom:4px}
 .alert-tpl .alert-label{font-size:9px;font-weight:600;color:#333}
@@ -103,9 +101,7 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 .tpl-pos{background:linear-gradient(135deg,#d4fc79,#96e6a1)}
 .tpl-info{background:linear-gradient(135deg,#a1c4fd,#c2e9fb)}
 .tpl-warn{background:linear-gradient(135deg,#fff3b0,#ffd93d)}
-.or-divider{text-align:center;color:#888;font-size:11px;margin:12px 0}
-.ws-card{background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;border-left:4px solid #667eea}
-.test-card{background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;border-left:4px solid #667eea}
+.test-card,.ws-card{background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;border-left:4px solid #667eea}
 .upload-box{background:linear-gradient(135deg,#667eea15,#764ba215);border:2px dashed #667eea;border-radius:16px;padding:30px;text-align:center;cursor:pointer;margin-bottom:15px}
 .file-preview{background:#f0f2f5;border-radius:12px;padding:12px;margin-bottom:15px;display:none;align-items:center;gap:10px}
 .photo-upload{width:80px;height:80px;border-radius:50%;border:3px dashed #667eea;margin:0 auto 15px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:#f0f2f5}
@@ -127,8 +123,8 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <div class="brand"><h1>✨ UNIQUE STUDY POINT</h1><p>By Sumeet Sahu</p><p style="margin-top:8px"><a href="https://uniquestudyonline.com" target="_blank">🌐 uniquestudyonline.com</a></p></div>
 <div class="login-card">
 <div class="tabs">
-<button class="tab-btn active" id="parentTab"><span class="icon">👨‍👩‍👧</span><span class="label">Parent</span></button>
-<button class="tab-btn" id="adminTab"><span class="icon">👨‍💼</span><span class="label">Admin</span></button>
+<button class="tab-btn active" id="parentTab" onclick="ut='parent';this.classList.add('active');document.getElementById('adminTab').classList.remove('active')"><span class="icon">👨‍👩‍👧</span><span class="label">Parent</span></button>
+<button class="tab-btn" id="adminTab" onclick="ut='admin';this.classList.add('active');document.getElementById('parentTab').classList.remove('active')"><span class="icon">👨‍💼</span><span class="label">Admin</span></button>
 </div>
 <div class="status" id="connStatus">● Connecting...</div>
 <div class="form-group"><label>USER ID</label><input type="text" id="userId" placeholder="Enter User ID"></div>
@@ -136,37 +132,26 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <button class="btn" id="loginBtn">🚀 Login</button>
 </div>
 </div>
-<!-- Parent Dashboard -->
 <div class="dashboard" id="parentDash">
-<div class="page active" id="pHome"><div class="header"><button class="logout-btn" id="pLogout">🚪</button><div class="profile-pic" id="pPhoto"><span id="pInit">S</span></div><h1 id="pWelcome">Welcome</h1><p>UNIQUE STUDY POINT</p></div><div class="stats"><div class="stat"><div class="stat-val" id="pAttDays">0</div><div class="stat-lbl">DAYS PRESENT</div></div><div class="stat"><div class="stat-val" id="pAvgPct">0%</div><div class="stat-lbl">AVG SCORE</div></div><div class="stat"><div class="stat-val" id="pTestCnt">0</div><div class="stat-lbl">TESTS</div></div></div><div class="section"><h3 class="section-title">🔔 Notifications</h3></div><div class="list" id="notifList"></div></div>
-<div class="page" id="pResults"><div class="header"><h1>📝 Results</h1></div><div class="filter-row" id="resFilters" style="margin-top:15px"></div><div id="resultsList"></div><div style="padding:15px 20px"><button class="btn btn-green" id="viewReportBtn">👁️ View Report</button></div></div>
+<div class="page active" id="pHome"><div class="header"><button class="logout-btn" onclick="logout()">🚪</button><div class="profile-pic" id="pPhoto"><span id="pInit">S</span></div><h1 id="pWelcome">Welcome</h1><p>UNIQUE STUDY POINT</p></div><div class="stats"><div class="stat"><div class="stat-val" id="pAttDays">0</div><div class="stat-lbl">DAYS PRESENT</div></div><div class="stat"><div class="stat-val" id="pAvgPct">0%</div><div class="stat-lbl">AVG SCORE</div></div><div class="stat"><div class="stat-val" id="pTestCnt">0</div><div class="stat-lbl">TESTS</div></div></div><div class="section"><h3 class="section-title">🔔 Notifications</h3></div><div class="list" id="notifList"></div></div>
+<div class="page" id="pResults"><div class="header"><h1>📝 Results</h1></div><div class="filter-row" id="resFilters" style="margin-top:15px"></div><div id="resultsList"></div><div style="padding:15px 20px"><button class="btn btn-green" onclick="viewReport()">👁️ View Report</button></div></div>
 <div class="page" id="pProgress"><div class="header"><h1>📊 Progress</h1></div><div class="chart-box"><h3>📈 Performance Trend</h3><div class="chart-wrap"><canvas id="lineChart"></canvas></div></div><div class="chart-box"><h3>📊 Subject Analysis</h3><div class="chart-wrap"><canvas id="pieChart"></canvas></div></div></div>
-<div class="page" id="pAttendance"><div class="header"><h1>📋 Attendance</h1></div><div class="stats" style="margin-top:0"><div class="stat"><div class="stat-val" id="pTotalDays">0</div><div class="stat-lbl">TOTAL</div></div><div class="stat"><div class="stat-val" id="pPresentDays">0</div><div class="stat-lbl">PRESENT</div></div><div class="stat"><div class="stat-val" id="pAttPercent">0%</div><div class="stat-lbl">PERCENTAGE</div></div></div><div style="padding:15px 20px"><button class="btn btn-dl" id="downloadAttBtn">📥 Download Attendance PDF</button></div><div id="attMonthList"></div></div>
+<div class="page" id="pAttendance"><div class="header"><h1>📋 Attendance</h1></div><div class="stats" style="margin-top:0"><div class="stat"><div class="stat-val" id="pTotalDays">0</div><div class="stat-lbl">TOTAL</div></div><div class="stat"><div class="stat-val" id="pPresentDays">0</div><div class="stat-lbl">PRESENT</div></div><div class="stat"><div class="stat-val" id="pAttPercent">0%</div><div class="stat-lbl">PERCENTAGE</div></div></div><div style="padding:15px 20px"><button class="btn btn-dl" onclick="downloadAttPDF()">📥 Download Attendance PDF</button></div><div id="attMonthList"></div></div>
 <div class="page" id="pFees"><div class="header"><h1>💰 Fees</h1></div><div class="fee-card"><div style="font-size:12px;opacity:0.9">Pending Amount</div><div class="fee-amt" id="feePend">₹0</div><div class="fee-status" id="feeStat">Clear</div></div><div class="section"><h3 class="section-title">💳 Payment History</h3></div><div class="list" id="feeList"></div></div>
 <div class="nav" id="pNav"></div>
 </div>
-<!-- Admin Dashboard -->
 <div class="dashboard" id="adminDash">
-<div class="page active" id="aHome"><div class="header" style="padding-bottom:50px"><button class="logout-btn" id="aLogout">🚪</button><p>Admin Panel</p><h1>Sumeet Sahu</h1></div><div class="stats" style="margin-top:-30px"><div class="stat"><div class="stat-val" id="aStu">0</div><div class="stat-lbl">STUDENTS</div></div><div class="stat"><div class="stat-val" id="aPre">0</div><div class="stat-lbl">PRESENT</div></div><div class="stat"><div class="stat-val" id="aTst">0</div><div class="stat-lbl">TESTS</div></div></div><div class="section"><h3 class="section-title">⚡ Quick Actions</h3><div class="actions" id="quickActions"></div><h3 class="section-title">👨‍🎓 Students</h3></div><div class="filter-row" id="clsFilters"></div><div class="list" id="aList"></div></div>
-<div class="page" id="aAtt"><div class="header"><h1>📋 Attendance</h1></div><div class="section" style="padding-top:15px"><div class="form-group"><label>Select Date</label><input type="date" id="attD"></div><div style="display:flex;gap:8px"><button class="btn btn-sms" id="attSmsBtn" style="flex:1">📱 SMS Absent</button><button class="btn btn-wa" id="attWaBtn" style="flex:1">💬 WhatsApp</button></div></div><div class="list" id="attL" style="margin-top:12px"></div></div>
-<div class="page" id="aTests"><div class="header"><h1>📝 Tests</h1></div><div class="section" style="padding-top:15px"><button class="btn" id="createTestBtn">➕ Create New Test</button></div><div class="list" id="testL" style="margin-top:12px"></div></div>
-<div class="page" id="aWorksheets"><div class="header"><h1>📚 Worksheets</h1></div><div class="section" style="padding-top:15px"><button class="btn btn-green" id="uploadWsBtn">📤 Upload Worksheet</button></div><div class="filter-row" id="wsClsFilters" style="margin-top:15px"></div><div class="list" id="aWsList" style="margin-top:12px"></div></div>
-<div class="page" id="aFees"><div class="header"><h1>💰 Fees</h1></div><div class="section" style="padding-top:15px"><button class="btn" id="recFeeBtn">💰 Record Payment</button></div><div class="list" id="feeL" style="margin-top:12px"></div></div>
+<div class="page active" id="aHome"><div class="header" style="padding-bottom:50px"><button class="logout-btn" onclick="logout()">🚪</button><p>Admin Panel</p><h1>Sumeet Sahu</h1></div><div class="stats" style="margin-top:-30px"><div class="stat"><div class="stat-val" id="aStu">0</div><div class="stat-lbl">STUDENTS</div></div><div class="stat"><div class="stat-val" id="aPre">0</div><div class="stat-lbl">PRESENT</div></div><div class="stat"><div class="stat-val" id="aTst">0</div><div class="stat-lbl">TESTS</div></div></div><div class="section"><h3 class="section-title">⚡ Quick Actions</h3><div class="actions" id="quickActions"></div><h3 class="section-title">👨‍🎓 Students</h3></div><div class="filter-row" id="clsFilters"></div><div class="list" id="aList"></div></div>
+<div class="page" id="aAtt"><div class="header"><h1>📋 Attendance</h1></div><div class="section" style="padding-top:15px"><div class="form-group"><label>Select Date</label><input type="date" id="attD" onchange="renAtt()"></div><div style="display:flex;gap:8px"><button class="btn btn-sms" onclick="sendAttSMS()" style="flex:1">📱 SMS Absent</button><button class="btn btn-wa" onclick="sendAttWA()" style="flex:1">💬 WhatsApp</button></div></div><div class="list" id="attL" style="margin-top:12px"></div></div>
+<div class="page" id="aTests"><div class="header"><h1>📝 Tests</h1></div><div class="section" style="padding-top:15px"><button class="btn" onclick="openM('addTModal')">➕ Create New Test</button></div><div class="list" id="testL" style="margin-top:12px"></div></div>
+<div class="page" id="aWorksheets"><div class="header"><h1>📚 Worksheets</h1></div><div class="section" style="padding-top:15px"><button class="btn btn-green" onclick="openM('wsModal')">📤 Upload Worksheet</button></div><div class="filter-row" id="wsClsFilters" style="margin-top:15px"></div><div class="list" id="aWsList" style="margin-top:12px"></div></div>
+<div class="page" id="aFees"><div class="header"><h1>💰 Fees</h1></div><div class="section" style="padding-top:15px"><button class="btn" onclick="ldDD();openM('addFModal')">💰 Record Payment</button></div><div class="list" id="feeL" style="margin-top:12px"></div></div>
 <div class="nav" id="aNav"></div>
 </div>
 </div>
-<!-- Report View -->
-<div class="report-view" id="reportView">
-<div class="report-header">
-<button onclick="closeReport()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:10px 15px;border-radius:10px;cursor:pointer">← Back</button>
-<h3>Progress Report</h3>
-<button onclick="downloadReport()" style="background:#25D366;border:none;color:#fff;padding:10px 15px;border-radius:10px;cursor:pointer">📥 Download</button>
-</div>
-<div class="report-content" id="reportContent"></div>
-</div>
-<!-- Modals -->
+<div class="report-view" id="reportView"><div class="report-header"><button onclick="closeReport()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:10px 15px;border-radius:10px;cursor:pointer">← Back</button><h3>Progress Report</h3><button onclick="downloadReport()" style="background:#25D366;border:none;color:#fff;padding:10px 15px;border-radius:10px;cursor:pointer">📥</button></div><div class="report-content" id="reportContent"></div></div>
 <div class="modal" id="addSModal"><div class="modal-content"><div class="modal-header"><h2 class="modal-title">➕ Add Student</h2><button class="modal-close" onclick="closeM('addSModal')">×</button></div><div class="modal-body">
-<div class="photo-upload" id="addPhotoBox" onclick="document.getElementById('addPhotoInput').click()"><span style="font-size:28px">📷</span></div><input type="file" id="addPhotoInput" accept="image/*" style="display:none">
+<div class="photo-upload" id="addPhotoBox" onclick="document.getElementById('addPhotoInput').click()"><span style="font-size:28px">📷</span></div><input type="file" id="addPhotoInput" accept="image/*" style="display:none" onchange="uploadPhoto(this,'add')">
 <div class="form-group"><label>Full Name *</label><input type="text" id="sN"></div>
 <div class="form-group"><label>Class *</label><select id="sC"><option value="">Select</option><option>VI</option><option>VII</option><option>VIII</option><option>IX</option><option>X</option><option>XI</option><option>XII</option></select></div>
 <div class="form-group"><label>Mobile *</label><input type="tel" id="sM" maxlength="10"></div>
@@ -174,10 +159,9 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <div class="form-group"><label>Password *</label><input type="text" id="sP"></div>
 <div class="form-group"><label>Monthly Fee (₹)</label><input type="number" id="sFee" value="500"></div>
 <div class="form-group"><label>Joining Date</label><input type="date" id="sJoin"></div>
-</div><div class="modal-footer"><button class="btn" id="saveS">Add Student</button></div></div></div>
-
+</div><div class="modal-footer"><button class="btn" onclick="saveStudent()">Add Student</button></div></div></div>
 <div class="modal" id="editSModal"><div class="modal-content"><div class="modal-header"><h2 class="modal-title">✏️ Edit Student</h2><button class="modal-close" onclick="closeM('editSModal')">×</button></div><div class="modal-body">
-<div class="photo-upload" id="editPhotoBox" onclick="document.getElementById('editPhotoInput').click()"><span style="font-size:28px">📷</span></div><input type="file" id="editPhotoInput" accept="image/*" style="display:none"><input type="hidden" id="editSId">
+<div class="photo-upload" id="editPhotoBox" onclick="document.getElementById('editPhotoInput').click()"><span style="font-size:28px">📷</span></div><input type="file" id="editPhotoInput" accept="image/*" style="display:none" onchange="uploadPhoto(this,'edit')"><input type="hidden" id="editSId">
 <div class="form-group"><label>Full Name *</label><input type="text" id="editSN"></div>
 <div class="form-group"><label>Class *</label><select id="editSC"><option value="">Select</option><option>VI</option><option>VII</option><option>VIII</option><option>IX</option><option>X</option><option>XI</option><option>XII</option></select></div>
 <div class="form-group"><label>Mobile *</label><input type="tel" id="editSM" maxlength="10"></div>
@@ -185,72 +169,66 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <div class="form-group"><label>Password *</label><input type="text" id="editSP"></div>
 <div class="form-group"><label>Monthly Fee (₹)</label><input type="number" id="editSFee"></div>
 <div class="form-group"><label>Joining Date</label><input type="date" id="editSJoin"></div>
-</div><div class="modal-footer"><button class="btn btn-green" id="updateS">💾 Update</button><button class="btn btn-del" id="deleteS">🗑️ Delete</button></div></div></div>
-
+</div><div class="modal-footer"><button class="btn btn-green" onclick="updateStudent()">💾 Update</button><button class="btn btn-del" onclick="deleteStudent()">🗑️ Delete</button></div></div></div>
 <div class="modal" id="addTModal"><div class="modal-content"><div class="modal-header"><h2 class="modal-title">📝 Create Test</h2><button class="modal-close" onclick="closeM('addTModal')">×</button></div><div class="modal-body">
-<div class="form-group"><label>Test Name *</label><input type="text" id="tN" placeholder="e.g., Unit Test 1"></div>
-<div class="form-group"><label>Subject *</label><select id="tSubjSel" onchange="document.getElementById('otherSubjGroup').style.display=this.value==='other'?'block':'none'"><option value="">Select Subject</option><option value="Mathematics">Mathematics</option><option value="Science">Science</option><option value="Social Science">Social Science</option><option value="Hindi">Hindi</option><option value="English">English</option><option value="GK">General Knowledge</option><option value="other">Other</option></select></div>
+<div class="form-group"><label>Test Name *</label><input type="text" id="tN"></div>
+<div class="form-group"><label>Subject *</label><select id="tSubjSel" onchange="document.getElementById('otherSubjGroup').style.display=this.value==='other'?'block':'none'"><option value="">Select</option><option value="Mathematics">Mathematics</option><option value="Science">Science</option><option value="Social Science">Social Science</option><option value="Hindi">Hindi</option><option value="English">English</option><option value="GK">GK</option><option value="other">Other</option></select></div>
 <div class="form-group" id="otherSubjGroup" style="display:none"><label>Enter Subject</label><input type="text" id="tSOther"></div>
 <div class="form-group"><label>Total Marks</label><input type="number" id="tM" value="100"></div>
 <div class="form-group"><label>Test Date</label><input type="date" id="tD"></div>
-<div class="form-group"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="tNotify" style="width:auto"> Notify all parents via SMS</label></div>
-</div><div class="modal-footer"><button class="btn" id="saveT">Create Test</button></div></div></div>
-
+<div class="form-group"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="tNotify" style="width:auto"> Notify all parents</label></div>
+</div><div class="modal-footer"><button class="btn" onclick="saveTest()">Create Test</button></div></div></div>
 <div class="modal" id="editTModal"><div class="modal-content"><div class="modal-header"><h2 class="modal-title">✏️ Edit Test</h2><button class="modal-close" onclick="closeM('editTModal')">×</button></div><div class="modal-body"><input type="hidden" id="editTId">
-<div class="form-group"><label>Test Name *</label><input type="text" id="editTN"></div>
-<div class="form-group"><label>Subject *</label><input type="text" id="editTS"></div>
+<div class="form-group"><label>Test Name</label><input type="text" id="editTN"></div>
+<div class="form-group"><label>Subject</label><input type="text" id="editTS"></div>
 <div class="form-group"><label>Total Marks</label><input type="number" id="editTM"></div>
-<div class="form-group"><label>Test Date</label><input type="date" id="editTD"></div>
-</div><div class="modal-footer"><button class="btn btn-green" id="updateT">💾 Update</button><button class="btn btn-del" id="deleteT">🗑️ Delete</button></div></div></div>
-
-<div class="modal" id="addMkModal"><div class="modal-content"><div class="modal-header"><h2 class="modal-title">📝 <span id="mkTN"></span></h2><button class="modal-close" onclick="closeM('addMkModal')">×</button></div><div class="modal-body"><div id="mkL"></div></div><div class="modal-footer"><button class="btn" id="saveMk">💾 Save</button><button class="btn btn-sms" id="mkSms">📱 SMS</button><button class="btn btn-wa" id="mkWa">💬 WA</button></div></div></div>
-
+<div class="form-group"><label>Date</label><input type="date" id="editTD"></div>
+</div><div class="modal-footer"><button class="btn btn-green" onclick="updateTest()">💾 Update</button><button class="btn btn-del" onclick="deleteTest()">🗑️ Delete</button></div></div></div>
+<div class="modal" id="addMkModal"><div class="modal-content"><div class="modal-header"><h2 class="modal-title">📝 <span id="mkTN"></span></h2><button class="modal-close" onclick="closeM('addMkModal')">×</button></div><div class="modal-body"><div id="mkL"></div></div><div class="modal-footer"><button class="btn" onclick="saveMk()">💾 Save</button><button class="btn btn-sms" onclick="saveMk();setTimeout(sendMkSMS,500)">📱 SMS</button><button class="btn btn-wa" onclick="saveMk();setTimeout(sendMkWA,500)">💬 WA</button></div></div></div>
 <div class="modal" id="addFModal"><div class="modal-content"><div class="modal-header"><h2 class="modal-title">💰 Record Fee</h2><button class="modal-close" onclick="closeM('addFModal')">×</button></div><div class="modal-body">
-<div class="form-group"><label>Student *</label><select id="fStu"></select></div>
-<div class="form-group"><label>Amount (₹) *</label><input type="number" id="fAmt"></div>
+<div class="form-group"><label>Student</label><select id="fStu"></select></div>
+<div class="form-group"><label>Amount (₹)</label><input type="number" id="fAmt"></div>
 <div class="form-group"><label>Date</label><input type="date" id="fDate"></div>
-</div><div class="modal-footer"><button class="btn" id="saveF">Save</button></div></div></div>
-
+</div><div class="modal-footer"><button class="btn" onclick="saveFee()">Save</button></div></div></div>
 <div class="modal" id="alertModal"><div class="modal-content"><div class="modal-header"><h2 class="modal-title">🔔 Send Alert</h2><button class="modal-close" onclick="closeM('alertModal')">×</button></div><div class="modal-body">
-<div class="form-group"><label>Select Student *</label><select id="alertStu"></select></div>
-<div class="tpl-section"><div class="tpl-title">⚠️ ALERTS</div><div class="tpl-grid" id="alertTpls"></div></div>
-<div class="or-divider">── OR Custom ──</div>
-<div class="form-group"><textarea id="alertMsg" rows="2" placeholder="Type message..."></textarea></div>
-</div><div class="modal-footer"><button class="btn btn-sms" id="sendAlert">📱 SMS</button><button class="btn btn-wa" id="sendAlertWA">💬 WhatsApp</button></div></div></div>
-
+<div class="form-group"><label>Student</label><select id="alertStu"></select></div>
+<div class="tpl-grid">
+<button class="alert-tpl tpl-neg" onclick="document.getElementById('alertMsg').value='was absent today'"><div class="alert-icon">❌</div><div class="alert-label">Absent</div></button>
+<button class="alert-tpl tpl-neg" onclick="document.getElementById('alertMsg').value='has pending homework'"><div class="alert-icon">📚</div><div class="alert-label">HW Due</div></button>
+<button class="alert-tpl tpl-pos" onclick="document.getElementById('alertMsg').value='performed excellently!'"><div class="alert-icon">⭐</div><div class="alert-label">Excellent</div></button>
+<button class="alert-tpl tpl-warn" onclick="document.getElementById('alertMsg').value='has pending fees'"><div class="alert-icon">💰</div><div class="alert-label">Fee Due</div></button>
+<button class="alert-tpl tpl-info" onclick="document.getElementById('alertMsg').value='Test tomorrow. Please prepare.'"><div class="alert-icon">📝</div><div class="alert-label">Test</div></button>
+<button class="alert-tpl tpl-info" onclick="document.getElementById('alertMsg').value='Tomorrow is holiday.'"><div class="alert-icon">🏖️</div><div class="alert-label">Holiday</div></button>
+</div>
+<div class="form-group" style="margin-top:12px"><textarea id="alertMsg" rows="2" placeholder="Type message..."></textarea></div>
+</div><div class="modal-footer"><button class="btn btn-sms" onclick="sendAlertSMS()">📱 SMS</button><button class="btn btn-wa" onclick="sendAlertWA()">💬 WhatsApp</button></div></div></div>
 <div class="modal" id="wsModal"><div class="modal-content"><div class="modal-header"><h2 class="modal-title">📤 Upload Worksheet</h2><button class="modal-close" onclick="closeM('wsModal')">×</button></div><div class="modal-body">
-<div class="form-group"><label>Class *</label><select id="wsClass"><option value="">Select</option><option>VI</option><option>VII</option><option>VIII</option><option>IX</option><option>X</option><option>XI</option><option>XII</option><option>ALL</option></select></div>
-<div class="form-group"><label>Subject *</label><input type="text" id="wsSubject"></div>
-<div class="form-group"><label>Title *</label><input type="text" id="wsTitle"></div>
-<div class="upload-box" id="uploadBox" onclick="document.getElementById('wsFile').click()"><div style="font-size:40px">📁</div><div style="font-size:13px;color:#667eea;font-weight:600">Click to Select File</div></div>
-<div class="file-preview" id="filePreview"><span style="font-size:24px">📄</span><span id="fileName" style="flex:1;font-size:12px"></span><button onclick="document.getElementById('wsFile').value='';document.getElementById('filePreview').style.display='none';document.getElementById('uploadBox').style.display='block'" style="background:#ff6b6b;color:#fff;border:none;width:28px;height:28px;border-radius:8px;cursor:pointer">×</button></div>
-<input type="file" id="wsFile" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
-</div><div class="modal-footer"><button class="btn btn-green" id="saveWs">📤 Upload</button></div></div></div>
-
+<div class="form-group"><label>Class</label><select id="wsClass"><option value="">Select</option><option>VI</option><option>VII</option><option>VIII</option><option>IX</option><option>X</option><option>ALL</option></select></div>
+<div class="form-group"><label>Subject</label><input type="text" id="wsSubject"></div>
+<div class="form-group"><label>Title</label><input type="text" id="wsTitle"></div>
+<div class="upload-box" onclick="document.getElementById('wsFile').click()"><div style="font-size:40px">📁</div><div style="color:#667eea;font-weight:600">Click to Select</div></div>
+<div class="file-preview" id="filePreview"><span style="font-size:24px">📄</span><span id="fileName" style="flex:1"></span><button onclick="document.getElementById('wsFile').value='';document.getElementById('filePreview').style.display='none';document.querySelector('.upload-box').style.display='block'" style="background:#ff6b6b;color:#fff;border:none;width:28px;height:28px;border-radius:8px">×</button></div>
+<input type="file" id="wsFile" style="display:none" onchange="if(this.files.length){document.getElementById('fileName').textContent=this.files[0].name;document.getElementById('filePreview').style.display='flex';document.querySelector('.upload-box').style.display='none'}">
+</div><div class="modal-footer"><button class="btn btn-green" onclick="saveWs()">📤 Upload</button></div></div></div>
 <div class="toast" id="toast"></div>
-
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script>
 firebase.initializeApp({apiKey:"AIzaSyA5FjFHqFRBiGlLVe-jn7njpfXzf8hQ1cY",authDomain:"unique-study-point-2.firebaseapp.com",databaseURL:"https://unique-study-point-2-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"unique-study-point-2"});
-var db=firebase.database(),cu=null,ut='parent',stu=[],tst=[],res=[],att=[],fee=[],alerts=[],worksheets=[],ctid=null,curFilter='all',wsFilter='all',lineChart=null,pieChart=null,
+var db=firebase.database(),cu=null,ut='parent',stu=[],tst=[],res=[],att=[],fee=[],alerts=[],worksheets=[],ctid=null,curFilter='all',wsFilter='all',lineChart=null,pieChart=null,addPhotoUrl='',editPhotoUrl='',
 td=new Date().toISOString().split('T')[0],
 SMS_KEY='P3WtxzoqRgB58mSnZ1vJAwGQ2p7UTY0ci6dLjlhbkDCf4auKHI2qKczUL1AMVRj6WSDItJekFaZxP8no',
-CLOUD_NAME='dukrrfqf6',addPhotoUrl='',editPhotoUrl='';
-
-document.getElementById('tD').value=td;
-document.getElementById('fDate').value=td;
-document.getElementById('attD').value=td;
-document.getElementById('sJoin').value=td;
-
+CLOUD='dukrrfqf6';
+document.getElementById('tD').value=td;document.getElementById('fDate').value=td;document.getElementById('attD').value=td;document.getElementById('sJoin').value=td;
 function toast(m,t){var e=document.getElementById('toast');e.textContent=m;e.className='toast show '+(t||'');setTimeout(function(){e.classList.remove('show')},3000)}
 function openM(id){document.getElementById(id).classList.add('active')}
 function closeM(id){document.getElementById(id).classList.remove('active')}
-function sendSMS(n,m){fetch('https://www.fast2sms.com/dev/bulkV2?authorization='+SMS_KEY+'&route=q&message='+encodeURIComponent(m)+'&flash=0&numbers='+n,{method:'GET',mode:'no-cors'}).then(function(){toast('SMS Sent!','success')})}
+function logout(){cu=null;localStorage.removeItem('usp_user');location.reload()}
+function sendSMS(n,m){fetch('https://www.fast2sms.com/dev/bulkV2?authorization='+SMS_KEY+'&route=q&message='+encodeURIComponent(m)+'&flash=0&numbers='+n,{method:'GET',mode:'no-cors'});toast('SMS Sent!','success')}
 function formatDate(d){return d?new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'N/A'}
-function uploadCloud(f,cb){var fd=new FormData();fd.append('file',f);fd.append('upload_preset','ml_default');fetch('https://api.cloudinary.com/v1_1/'+CLOUD_NAME+'/auto/upload',{method:'POST',body:fd}).then(function(r){return r.json()}).then(function(d){cb(d.secure_url||null)}).catch(function(){cb(null)})}
-function getGrade(p){if(p>=90)return{g:'A+',c:'#27ae60',r:'Outstanding!'};if(p>=80)return{g:'A',c:'#2ecc71',r:'Excellent!'};if(p>=70)return{g:'B+',c:'#3498db',r:'Very Good!'};if(p>=60)return{g:'B',c:'#9b59b6',r:'Good effort.'};if(p>=50)return{g:'C',c:'#f1c40f',r:'Average.'};if(p>=40)return{g:'D',c:'#e67e22',r:'Needs improvement.'};return{g:'F',c:'#e74c3c',r:'Below expectations.'}}
-
+function uploadCloud(f,cb){var fd=new FormData();fd.append('file',f);fd.append('upload_preset','ml_default');fetch('https://api.cloudinary.com/v1_1/'+CLOUD+'/auto/upload',{method:'POST',body:fd}).then(function(r){return r.json()}).then(function(d){cb(d.secure_url||null)}).catch(function(){cb(null)})}
+function uploadPhoto(inp,type){if(inp.files.length){toast('Uploading...','');uploadCloud(inp.files[0],function(url){if(url){if(type==='add'){addPhotoUrl=url;document.getElementById('addPhotoBox').innerHTML='<img src="'+url+'">'}else{editPhotoUrl=url;document.getElementById('editPhotoBox').innerHTML='<img src="'+url+'">'}toast('Done!','success')}})}}
+function getGrade(p){if(p>=90)return{g:'A+',c:'#27ae60',r:'Outstanding!'};if(p>=80)return{g:'A',c:'#2ecc71',r:'Excellent!'};if(p>=70)return{g:'B+',c:'#3498db',r:'Very Good!'};if(p>=60)return{g:'B',c:'#9b59b6',r:'Good effort.'};if(p>=50)return{g:'C',c:'#f1c40f',r:'Average.'};if(p>=40)return{g:'D',c:'#e67e22',r:'Needs work.'};return{g:'F',c:'#e74c3c',r:'Below expectations.'}}
 db.ref('.info/connected').on('value',function(s){document.getElementById('connStatus').textContent=s.val()?'✅ Connected':'⚠️ Offline'});
 db.ref('students').on('value',function(s){stu=[];s.forEach(function(c){stu.push(Object.assign({id:c.key},c.val()))});render()});
 db.ref('tests').on('value',function(s){tst=[];s.forEach(function(c){if(c.val()&&c.val().name)tst.push(Object.assign({id:c.key},c.val()))});render()});
@@ -259,355 +237,62 @@ db.ref('attendance').on('value',function(s){att=[];s.forEach(function(c){att.pus
 db.ref('fees').on('value',function(s){fee=[];s.forEach(function(c){fee.push(Object.assign({id:c.key},c.val()))});render()});
 db.ref('alerts').on('value',function(s){alerts=[];s.forEach(function(c){alerts.push(Object.assign({id:c.key},c.val()))});render()});
 db.ref('worksheets').on('value',function(s){worksheets=[];s.forEach(function(c){worksheets.push(Object.assign({id:c.key},c.val()))});render()});
-
-var sv=localStorage.getItem('usp_user');
-if(sv){cu=JSON.parse(sv);if(cu.role==='admin')showAdmin();else showParent()}
-
-document.getElementById('parentTab').onclick=function(){ut='parent';this.classList.add('active');document.getElementById('adminTab').classList.remove('active')};
-document.getElementById('adminTab').onclick=function(){ut='admin';this.classList.add('active');document.getElementById('parentTab').classList.remove('active')};
-
-document.getElementById('loginBtn').onclick=function(){
-var u=document.getElementById('userId').value.trim(),p=document.getElementById('password').value;
-if(!u||!p)return toast('Enter credentials','error');
-if(ut==='admin'){
-if(u==='admin'&&p==='admin123'){cu={role:'admin'};localStorage.setItem('usp_user',JSON.stringify(cu));showAdmin()}
-else toast('Invalid','error')
-}else{
-var s=null;for(var i=0;i<stu.length;i++){if(stu[i].userId===u&&stu[i].password===p){s=stu[i];break}}
-if(s){cu={role:'parent',id:s.id,name:s.name};localStorage.setItem('usp_user',JSON.stringify(cu));showParent()}
-else toast('Invalid','error')
-}
-};
-
-document.getElementById('pLogout').onclick=document.getElementById('aLogout').onclick=function(){cu=null;localStorage.removeItem('usp_user');location.reload()};
-
+var sv=localStorage.getItem('usp_user');if(sv){cu=JSON.parse(sv);if(cu.role==='admin')showAdmin();else showParent()}
+document.getElementById('loginBtn').onclick=function(){var u=document.getElementById('userId').value.trim(),p=document.getElementById('password').value;if(!u||!p)return toast('Enter credentials','error');if(ut==='admin'){if(u==='admin'&&p==='admin123'){cu={role:'admin'};localStorage.setItem('usp_user',JSON.stringify(cu));showAdmin()}else toast('Invalid','error')}else{var s=stu.find(function(x){return x.userId===u&&x.password===p});if(s){cu={role:'parent',id:s.id,name:s.name};localStorage.setItem('usp_user',JSON.stringify(cu));showParent()}else toast('Invalid','error')}};
 function showAdmin(){document.getElementById('loginPage').style.display='none';document.getElementById('adminDash').classList.add('active');initAdmin();toast('Welcome Admin!','success')}
 function showParent(){document.getElementById('loginPage').style.display='none';document.getElementById('parentDash').classList.add('active');initParent();toast('Welcome!','success')}
-
 function initParent(){
-document.getElementById('pNav').innerHTML='<button class="nav-item active" data-p="pHome"><span>🏠</span><span>Home</span></button><button class="nav-item" data-p="pResults"><span>📝</span><span>Results</span></button><button class="nav-item" data-p="pProgress"><span>📊</span><span>Progress</span></button><button class="nav-item" data-p="pAttendance"><span>📋</span><span>Attend</span></button><button class="nav-item" data-p="pFees"><span>💰</span><span>Fees</span></button>';
-document.querySelectorAll('#pNav .nav-item').forEach(function(b){b.onclick=function(){
-document.querySelectorAll('#parentDash .page').forEach(function(p){p.classList.remove('active')});
-document.getElementById(this.dataset.p).classList.add('active');
-document.querySelectorAll('#pNav .nav-item').forEach(function(x){x.classList.remove('active')});
-this.classList.add('active');
-if(this.dataset.p==='pProgress')renPProgress();
-if(this.dataset.p==='pAttendance')renPAtt();
-}});
-document.getElementById('resFilters').innerHTML='<button class="filter-btn active" data-f="all">All</button><button class="filter-btn" data-f="5">Last 5</button><button class="filter-btn" data-f="10">Last 10</button>';
-document.querySelectorAll('#resFilters .filter-btn').forEach(function(b){b.onclick=function(){
-document.querySelectorAll('#resFilters .filter-btn').forEach(function(x){x.classList.remove('active')});
-this.classList.add('active');renPRes(this.dataset.f);
-}});
-document.getElementById('viewReportBtn').onclick=viewReport;
-document.getElementById('downloadAttBtn').onclick=downloadAttPDF;
+document.getElementById('pNav').innerHTML='<button class="nav-item active" onclick="showPage(\'pHome\',\'pNav\')"><span>🏠</span><span>Home</span></button><button class="nav-item" onclick="showPage(\'pResults\',\'pNav\')"><span>📝</span><span>Results</span></button><button class="nav-item" onclick="showPage(\'pProgress\',\'pNav\');renPProgress()"><span>📊</span><span>Progress</span></button><button class="nav-item" onclick="showPage(\'pAttendance\',\'pNav\');renPAtt()"><span>📋</span><span>Attend</span></button><button class="nav-item" onclick="showPage(\'pFees\',\'pNav\')"><span>💰</span><span>Fees</span></button>';
+document.getElementById('resFilters').innerHTML='<button class="filter-btn active" onclick="setResFilter(this,\'all\')">All</button><button class="filter-btn" onclick="setResFilter(this,\'5\')">Last 5</button><button class="filter-btn" onclick="setResFilter(this,\'10\')">Last 10</button>';
 }
-
 function initAdmin(){
-document.getElementById('aNav').innerHTML='<button class="nav-item active" data-p="aHome"><span>🏠</span><span>Home</span></button><button class="nav-item" data-p="aAtt"><span>📋</span><span>Attend</span></button><button class="nav-item" data-p="aTests"><span>📝</span><span>Tests</span></button><button class="nav-item" data-p="aWorksheets"><span>📚</span><span>Sheets</span></button><button class="nav-item" data-p="aFees"><span>💰</span><span>Fees</span></button>';
-document.querySelectorAll('#aNav .nav-item').forEach(function(b){b.onclick=function(){
-document.querySelectorAll('#adminDash .page').forEach(function(p){p.classList.remove('active')});
-document.getElementById(this.dataset.p).classList.add('active');
-document.querySelectorAll('#aNav .nav-item').forEach(function(x){x.classList.remove('active')});
-this.classList.add('active');
-if(this.dataset.p==='aAtt')renAtt();
-if(this.dataset.p==='aWorksheets')renAWs();
-}});
-document.getElementById('quickActions').innerHTML='<button class="action" data-a="addS"><div class="action-icon">➕</div><div class="action-label">Add Student</div></button><button class="action" data-a="att"><div class="action-icon">📋</div><div class="action-label">Attendance</div></button><button class="action" data-a="test"><div class="action-icon">📝</div><div class="action-label">Add Test</div></button><button class="action" data-a="alert"><div class="action-icon">🔔</div><div class="action-label">Send Alert</div></button>';
-document.querySelectorAll('#quickActions .action').forEach(function(b){b.onclick=function(){
-var a=this.dataset.a;
-if(a==='addS')openM('addSModal');
-if(a==='att'){document.querySelectorAll('#adminDash .page').forEach(function(p){p.classList.remove('active')});document.getElementById('aAtt').classList.add('active');renAtt()}
-if(a==='test')openM('addTModal');
-if(a==='alert'){ldDD();openM('alertModal')}
-}});
-document.getElementById('clsFilters').innerHTML='<button class="filter-btn active" data-c="all">All</button><button class="filter-btn" data-c="VI">VI</button><button class="filter-btn" data-c="VII">VII</button><button class="filter-btn" data-c="VIII">VIII</button><button class="filter-btn" data-c="IX">IX</button><button class="filter-btn" data-c="X">X</button>';
-document.querySelectorAll('#clsFilters .filter-btn').forEach(function(b){b.onclick=function(){
-document.querySelectorAll('#clsFilters .filter-btn').forEach(function(x){x.classList.remove('active')});
-this.classList.add('active');curFilter=this.dataset.c;renStu();
-}});
-document.getElementById('wsClsFilters').innerHTML='<button class="filter-btn active" data-c="all">All</button><button class="filter-btn" data-c="VI">VI</button><button class="filter-btn" data-c="VII">VII</button><button class="filter-btn" data-c="VIII">VIII</button>';
-document.querySelectorAll('#wsClsFilters .filter-btn').forEach(function(b){b.onclick=function(){
-document.querySelectorAll('#wsClsFilters .filter-btn').forEach(function(x){x.classList.remove('active')});
-this.classList.add('active');wsFilter=this.dataset.c;renAWs();
-}});
-document.getElementById('createTestBtn').onclick=function(){openM('addTModal')};
-document.getElementById('recFeeBtn').onclick=function(){ldDD();openM('addFModal')};
-document.getElementById('attD').onchange=renAtt;
-document.getElementById('attSmsBtn').onclick=sendAttSMS;
-document.getElementById('attWaBtn').onclick=sendAttWA;
-document.getElementById('uploadWsBtn').onclick=function(){openM('wsModal')};
-// Alert templates
-document.getElementById('alertTpls').innerHTML='<button class="alert-tpl tpl-neg" data-msg="was absent today"><div class="alert-icon">❌</div><div class="alert-label">Absent</div></button><button class="alert-tpl tpl-neg" data-msg="has incomplete homework"><div class="alert-icon">📚</div><div class="alert-label">HW Pending</div></button><button class="alert-tpl tpl-pos" data-msg="performed excellently!"><div class="alert-icon">⭐</div><div class="alert-label">Excellent</div></button><button class="alert-tpl tpl-warn" data-msg="has pending fees"><div class="alert-icon">💰</div><div class="alert-label">Fee Due</div></button><button class="alert-tpl tpl-info" data-msg="Test tomorrow. Please prepare."><div class="alert-icon">📝</div><div class="alert-label">Test Alert</div></button><button class="alert-tpl tpl-info" data-msg="Tomorrow is holiday."><div class="alert-icon">🏖️</div><div class="alert-label">Holiday</div></button>';
-document.querySelectorAll('.alert-tpl').forEach(function(b){b.onclick=function(){document.getElementById('alertMsg').value=this.dataset.msg}});
-// File upload
-document.getElementById('wsFile').onchange=function(e){if(e.target.files.length){document.getElementById('fileName').textContent=e.target.files[0].name;document.getElementById('filePreview').style.display='flex';document.getElementById('uploadBox').style.display='none'}};
-// Photo uploads
-document.getElementById('addPhotoInput').onchange=function(e){if(e.target.files.length){toast('Uploading...','');uploadCloud(e.target.files[0],function(url){if(url){addPhotoUrl=url;document.getElementById('addPhotoBox').innerHTML='<img src="'+url+'">';toast('Done!','success')}})}};
-document.getElementById('editPhotoInput').onchange=function(e){if(e.target.files.length){toast('Uploading...','');uploadCloud(e.target.files[0],function(url){if(url){editPhotoUrl=url;document.getElementById('editPhotoBox').innerHTML='<img src="'+url+'">';toast('Done!','success')}})}};
+document.getElementById('aNav').innerHTML='<button class="nav-item active" onclick="showPage(\'aHome\',\'aNav\')"><span>🏠</span><span>Home</span></button><button class="nav-item" onclick="showPage(\'aAtt\',\'aNav\');renAtt()"><span>📋</span><span>Attend</span></button><button class="nav-item" onclick="showPage(\'aTests\',\'aNav\')"><span>📝</span><span>Tests</span></button><button class="nav-item" onclick="showPage(\'aWorksheets\',\'aNav\');renAWs()"><span>📚</span><span>Sheets</span></button><button class="nav-item" onclick="showPage(\'aFees\',\'aNav\')"><span>💰</span><span>Fees</span></button>';
+document.getElementById('quickActions').innerHTML='<button class="action" onclick="openM(\'addSModal\')"><div class="action-icon">➕</div><div class="action-label">Add Student</div></button><button class="action" onclick="showPage(\'aAtt\',\'aNav\');renAtt()"><div class="action-icon">📋</div><div class="action-label">Attendance</div></button><button class="action" onclick="openM(\'addTModal\')"><div class="action-icon">📝</div><div class="action-label">Add Test</div></button><button class="action" onclick="ldDD();openM(\'alertModal\')"><div class="action-icon">🔔</div><div class="action-label">Send Alert</div></button>';
+document.getElementById('clsFilters').innerHTML='<button class="filter-btn active" onclick="setClsFilter(this,\'all\')">All</button><button class="filter-btn" onclick="setClsFilter(this,\'VI\')">VI</button><button class="filter-btn" onclick="setClsFilter(this,\'VII\')">VII</button><button class="filter-btn" onclick="setClsFilter(this,\'VIII\')">VIII</button><button class="filter-btn" onclick="setClsFilter(this,\'IX\')">IX</button><button class="filter-btn" onclick="setClsFilter(this,\'X\')">X</button>';
+document.getElementById('wsClsFilters').innerHTML='<button class="filter-btn active" onclick="setWsFilter(this,\'all\')">All</button><button class="filter-btn" onclick="setWsFilter(this,\'VI\')">VI</button><button class="filter-btn" onclick="setWsFilter(this,\'VII\')">VII</button><button class="filter-btn" onclick="setWsFilter(this,\'VIII\')">VIII</button>';
 }
-
-function render(){
-if(cu&&cu.role==='admin'){updAdmin();renStu();renTests();renFees();renAWs();ldDD()}
-if(cu&&cu.role==='parent'){renPHome();renPRes('all');renPFees()}
-}
-
-// Parent functions
-function renPHome(){
-if(!cu||cu.role!=='parent')return;
-var s=null;for(var i=0;i<stu.length;i++){if(stu[i].id===cu.id){s=stu[i];break}}
-if(!s)return;
-if(s.photo)document.getElementById('pPhoto').innerHTML='<img src="'+s.photo+'">';
-else document.getElementById('pInit').textContent=s.name.charAt(0);
-document.getElementById('pWelcome').textContent='Welcome, '+s.name;
-var myAtt=[],pres=0;for(var i=0;i<att.length;i++){if(att[i].sid===cu.id){myAtt.push(att[i]);if(att[i].status==='present')pres++}}
-document.getElementById('pAttDays').textContent=pres;
-var myRes=[],avgPct=0;for(var i=0;i<res.length;i++){if(res[i].sid===cu.id)myRes.push(res[i])}
-if(myRes.length){var t=0;for(var i=0;i<myRes.length;i++){var test=null;for(var j=0;j<tst.length;j++){if(tst[j].id===myRes[i].tid){test=tst[j];break}}if(test)t+=Math.round((myRes[i].marks/test.totalMarks)*100)}avgPct=Math.round(t/myRes.length)}
-document.getElementById('pAvgPct').textContent=avgPct+'%';
-document.getElementById('pTestCnt').textContent=myRes.length;
-var myAlerts=[],html='';for(var i=0;i<alerts.length;i++){if(alerts[i].sid===cu.id||alerts[i].sid==='ALL')myAlerts.push(alerts[i])}
-myAlerts.sort(function(a,b){return(b.time||0)-(a.time||0)});
-myAlerts=myAlerts.slice(0,5);
-for(var i=0;i<myAlerts.length;i++){html+='<div class="card"><div class="avatar">🔔</div><div class="card-info"><div class="card-title">'+myAlerts[i].msg+'</div><div class="card-sub">'+formatDate(myAlerts[i].time)+'</div></div></div>'}
-document.getElementById('notifList').innerHTML=html||'<div class="empty">No notifications</div>';
-}
-
-function renPRes(filter){
-if(!cu||cu.role!=='parent')return;
-var myRes=[];for(var i=0;i<res.length;i++){if(res[i].sid===cu.id){var t=null;for(var j=0;j<tst.length;j++){if(tst[j].id===res[i].tid){t=tst[j];break}}if(t)myRes.push({marks:res[i].marks,test:t})}}
-myRes.sort(function(a,b){return(b.test.createdAt||0)-(a.test.createdAt||0)});
-if(filter==='5')myRes=myRes.slice(0,5);
-else if(filter==='10')myRes=myRes.slice(0,10);
-var html='';for(var i=0;i<myRes.length;i++){var r=myRes[i],pct=Math.round((r.marks/r.test.totalMarks)*100),g=getGrade(pct);html+='<div class="result-card"><div class="score-circle" style="background:'+g.c+'">'+g.g+'</div><div class="card-info"><div class="card-title">'+r.test.name+' - '+pct+'%</div><div class="card-sub">'+r.marks+'/'+r.test.totalMarks+' • '+r.test.subject+'</div></div></div>'}
-document.getElementById('resultsList').innerHTML=html||'<div class="empty">No results</div>';
-}
-
-function renPProgress(){
-if(!cu||cu.role!=='parent')return;
-var myRes=[];for(var i=0;i<res.length;i++){if(res[i].sid===cu.id){var t=null;for(var j=0;j<tst.length;j++){if(tst[j].id===res[i].tid){t=tst[j];break}}if(t)myRes.push({marks:res[i].marks,test:t})}}
-myRes.sort(function(a,b){return(a.test.createdAt||0)-(b.test.createdAt||0)});
-var labels=[],data=[];for(var i=0;i<myRes.length;i++){labels.push(myRes[i].test.name.substring(0,6));data.push(Math.round((myRes[i].marks/myRes[i].test.totalMarks)*100))}
-if(lineChart)lineChart.destroy();
-lineChart=new Chart(document.getElementById('lineChart'),{type:'line',data:{labels:labels,datasets:[{label:'%',data:data,borderColor:'#667eea',backgroundColor:'rgba(102,126,234,0.1)',fill:true,tension:0.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100}}}});
-var subjects={};for(var i=0;i<myRes.length;i++){var subj=myRes[i].test.subject;if(!subjects[subj])subjects[subj]={total:0,cnt:0};subjects[subj].total+=Math.round((myRes[i].marks/myRes[i].test.totalMarks)*100);subjects[subj].cnt++}
-var subLabels=Object.keys(subjects),subData=[];for(var i=0;i<subLabels.length;i++){subData.push(Math.round(subjects[subLabels[i]].total/subjects[subLabels[i]].cnt))}
-if(pieChart)pieChart.destroy();
-pieChart=new Chart(document.getElementById('pieChart'),{type:'doughnut',data:{labels:subLabels,datasets:[{data:subData,backgroundColor:['#667eea','#f093fb','#25D366','#ffd700','#ff6b6b']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
-}
-
-function renPAtt(){
-if(!cu||cu.role!=='parent')return;
-var s=null;for(var i=0;i<stu.length;i++){if(stu[i].id===cu.id){s=stu[i];break}}
-if(!s)return;
-var myAtt=[],total=0,pres=0;for(var i=0;i<att.length;i++){if(att[i].sid===cu.id){myAtt.push(att[i]);total++;if(att[i].status==='present')pres++}}
-document.getElementById('pTotalDays').textContent=total;
-document.getElementById('pPresentDays').textContent=pres;
-document.getElementById('pAttPercent').textContent=total?Math.round((pres/total)*100)+'%':'0%';
-var months={};for(var i=0;i<myAtt.length;i++){var d=new Date(myAtt[i].date),k=d.toLocaleString('en-IN',{month:'long',year:'numeric'});if(!months[k])months[k]={p:0,a:0};if(myAtt[i].status==='present')months[k].p++;else months[k].a++}
-var html='',keys=Object.keys(months).reverse();for(var i=0;i<keys.length;i++){var m=months[keys[i]],mp=Math.round((m.p/(m.p+m.a))*100);html+='<div class="att-detail"><h4 style="color:#667eea;margin-bottom:10px">📅 '+keys[i]+'</h4><div class="att-row"><span>Present</span><span style="color:#25D366;font-weight:700">'+m.p+'</span></div><div class="att-row"><span>Absent</span><span style="color:#ff6b6b;font-weight:700">'+m.a+'</span></div><div class="att-row"><span>%</span><span style="color:#667eea;font-weight:700">'+mp+'%</span></div></div>'}
-document.getElementById('attMonthList').innerHTML=html||'<div class="empty">No records</div>';
-}
-
-function downloadAttPDF(){
-var s=null;for(var i=0;i<stu.length;i++){if(stu[i].id===cu.id){s=stu[i];break}}
-if(!s)return;
-var myAtt=[];for(var i=0;i<att.length;i++){if(att[i].sid===cu.id)myAtt.push(att[i])}
-if(!myAtt.length)return toast('No records','error');
-var jsPDF=window.jspdf.jsPDF,doc=new jsPDF();
-doc.setFillColor(102,126,234);doc.rect(0,0,210,40,'F');doc.setTextColor(255);doc.setFontSize(20);doc.text('UNIQUE STUDY POINT',105,18,{align:'center'});doc.setFontSize(10);doc.text('Attendance: '+s.name+' ('+s.class+')',105,30,{align:'center'});
-var months={};for(var i=0;i<myAtt.length;i++){var d=new Date(myAtt[i].date),k=d.toLocaleString('en-IN',{month:'long',year:'numeric'});if(!months[k])months[k]=[];months[k].push(myAtt[i])}
-var tableData=[],total=myAtt.length,totalP=0;for(var i=0;i<myAtt.length;i++){if(myAtt[i].status==='present')totalP++}
-Object.keys(months).forEach(function(k){var m=months[k],p=0;for(var i=0;i<m.length;i++){if(m[i].status==='present')p++}tableData.push([k,p,m.length-p,m.length,Math.round((p/m.length)*100)+'%'])});
-tableData.push(['TOTAL',totalP,total-totalP,total,Math.round((totalP/total)*100)+'%']);
-doc.autoTable({startY:50,head:[['Month','Present','Absent','Total','%']],body:tableData,theme:'grid',headStyles:{fillColor:[102,126,234]}});
-doc.save(s.name+'_Attendance.pdf');toast('Downloaded!','success');
-}
-
-function renPFees(){
-if(!cu||cu.role!=='parent')return;
-var s=null;for(var i=0;i<stu.length;i++){if(stu[i].id===cu.id){s=stu[i];break}}
-if(!s)return;
-var myFee=[],paid=0;for(var i=0;i<fee.length;i++){if(fee[i].sid===cu.id){myFee.push(fee[i]);paid+=fee[i].amount}}
-var join=new Date(s.joinDate||td),now=new Date(),months=Math.max(1,(now.getFullYear()-join.getFullYear())*12+(now.getMonth()-join.getMonth())+1);
-var due=(s.fee||500)*months,pending=Math.max(0,due-paid);
-document.getElementById('feePend').textContent='₹'+pending;
-document.getElementById('feeStat').textContent=pending>0?'⚠️ Due':'✅ Clear';
-var html='';myFee.sort(function(a,b){return new Date(b.date)-new Date(a.date)});for(var i=0;i<myFee.length;i++){html+='<div class="card"><div class="avatar" style="background:#d4fc79;color:#333">💰</div><div class="card-info"><div class="card-title">₹'+myFee[i].amount+'</div><div class="card-sub">'+formatDate(myFee[i].date)+'</div></div></div>'}
-document.getElementById('feeList').innerHTML=html||'<div class="empty">No payments</div>';
-}
-
-function viewReport(){
-var s=null;for(var i=0;i<stu.length;i++){if(stu[i].id===cu.id){s=stu[i];break}}
-if(!s)return;
-var myRes=[];for(var i=0;i<res.length;i++){if(res[i].sid===cu.id){var t=null;for(var j=0;j<tst.length;j++){if(tst[j].id===res[i].tid){t=tst[j];break}}if(t)myRes.push({marks:res[i].marks,test:t})}}
-if(!myRes.length)return toast('No results','error');
-myRes.sort(function(a,b){return(a.test.createdAt||0)-(b.test.createdAt||0)});
-var totalPct=0;for(var i=0;i<myRes.length;i++){totalPct+=Math.round((myRes[i].marks/myRes[i].test.totalMarks)*100)}
-var avgPct=Math.round(totalPct/myRes.length),overall=getGrade(avgPct);
-var subjects={};for(var i=0;i<myRes.length;i++){var subj=myRes[i].test.subject,pct=Math.round((myRes[i].marks/myRes[i].test.totalMarks)*100);if(!subjects[subj])subjects[subj]={total:0,cnt:0,marks:0,max:0};subjects[subj].total+=pct;subjects[subj].cnt++;subjects[subj].marks+=myRes[i].marks;subjects[subj].max+=myRes[i].test.totalMarks}
-var html='<div style="text-align:center;margin-bottom:20px"><div style="background:linear-gradient(135deg,#667eea,#764ba2);padding:20px;border-radius:16px;color:#fff"><h2>UNIQUE STUDY POINT</h2><p>By Sumeet Sahu</p></div>';
-if(s.photo)html+='<img src="'+s.photo+'" style="width:80px;height:80px;border-radius:50%;margin-top:15px;border:3px solid #667eea;object-fit:cover">';
-html+='<h3 style="margin-top:10px">'+s.name+'</h3><p style="color:#888">Class '+(s.class||'')+'</p></div>';
-html+='<div class="chart-container"><h4 style="color:#667eea;margin-bottom:15px">📊 Summary</h4><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center"><div style="background:#f8f9fa;padding:15px;border-radius:12px"><div style="font-size:24px;font-weight:800;color:'+overall.c+'">'+overall.g+'</div><div style="font-size:10px;color:#888">GRADE</div></div><div style="background:#f8f9fa;padding:15px;border-radius:12px"><div style="font-size:24px;font-weight:800;color:#667eea">'+avgPct+'%</div><div style="font-size:10px;color:#888">AVERAGE</div></div><div style="background:#f8f9fa;padding:15px;border-radius:12px"><div style="font-size:24px;font-weight:800;color:#667eea">'+myRes.length+'</div><div style="font-size:10px;color:#888">TESTS</div></div></div></div>';
-html+='<div class="chart-container"><h4 style="color:#667eea;margin-bottom:15px">📈 Trend</h4><canvas id="reportLineChart" height="150"></canvas></div>';
-html+='<div class="chart-container"><h4 style="color:#667eea;margin-bottom:15px">📊 Subjects</h4><canvas id="reportPieChart" height="150"></canvas></div>';
-html+='<div class="chart-container"><h4 style="color:#667eea;margin-bottom:15px">📝 Subject Remarks</h4>';
-var subKeys=Object.keys(subjects);for(var i=0;i<subKeys.length;i++){var subj=subKeys[i],avg=Math.round(subjects[subj].total/subjects[subj].cnt),g=getGrade(avg);html+='<div class="subject-row"><div><div style="font-weight:600">'+subj+'</div><div style="font-size:10px;color:#888">'+g.r+'</div></div><div style="text-align:right"><div style="color:#667eea;font-weight:600">'+subjects[subj].marks+'/'+subjects[subj].max+'</div><div style="font-size:11px;color:'+g.c+';font-weight:700">'+avg+'% ('+g.g+')</div></div></div>'}
-html+='<div class="remark-box"><strong>Overall:</strong> '+overall.r+'</div></div>';
-document.getElementById('reportContent').innerHTML=html;
-document.getElementById('reportView').classList.add('active');
-setTimeout(function(){
-var labels=[],data=[];for(var i=0;i<myRes.length;i++){labels.push(myRes[i].test.name.substring(0,6));data.push(Math.round((myRes[i].marks/myRes[i].test.totalMarks)*100))}
-new Chart(document.getElementById('reportLineChart'),{type:'line',data:{labels:labels,datasets:[{data:data,borderColor:'#667eea',backgroundColor:'rgba(102,126,234,0.1)',fill:true,tension:0.4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{min:0,max:100}}}});
-var pieLabels=[],pieData=[];for(var i=0;i<subKeys.length;i++){pieLabels.push(subKeys[i]);pieData.push(Math.round(subjects[subKeys[i]].total/subjects[subKeys[i]].cnt))}
-new Chart(document.getElementById('reportPieChart'),{type:'doughnut',data:{labels:pieLabels,datasets:[{data:pieData,backgroundColor:['#667eea','#f093fb','#25D366','#ffd700','#ff6b6b']}]},options:{responsive:true,plugins:{legend:{position:'bottom'}}}});
-},100);
-}
+function showPage(pid,navId){var dash=navId==='pNav'?'parentDash':'adminDash';document.querySelectorAll('#'+dash+' .page').forEach(function(p){p.classList.remove('active')});document.getElementById(pid).classList.add('active');document.querySelectorAll('#'+navId+' .nav-item').forEach(function(b){b.classList.remove('active')});event.target.closest('.nav-item').classList.add('active')}
+function setResFilter(btn,f){document.querySelectorAll('#resFilters .filter-btn').forEach(function(b){b.classList.remove('active')});btn.classList.add('active');renPRes(f)}
+function setClsFilter(btn,c){document.querySelectorAll('#clsFilters .filter-btn').forEach(function(b){b.classList.remove('active')});btn.classList.add('active');curFilter=c;renStu()}
+function setWsFilter(btn,c){document.querySelectorAll('#wsClsFilters .filter-btn').forEach(function(b){b.classList.remove('active')});btn.classList.add('active');wsFilter=c;renAWs()}
+function render(){if(cu&&cu.role==='admin'){updAdmin();renStu();renTests();renFees();renAWs();ldDD()}if(cu&&cu.role==='parent'){renPHome();renPRes('all');renPFees()}}
+function renPHome(){if(!cu||cu.role!=='parent')return;var s=stu.find(function(x){return x.id===cu.id});if(!s)return;if(s.photo)document.getElementById('pPhoto').innerHTML='<img src="'+s.photo+'">';else document.getElementById('pInit').textContent=s.name?s.name.charAt(0):'S';document.getElementById('pWelcome').textContent='Welcome, '+(s.name||'');var pres=att.filter(function(a){return a.sid===cu.id&&a.status==='present'}).length;document.getElementById('pAttDays').textContent=pres;var myRes=res.filter(function(r){return r.sid===cu.id}),avgPct=0;if(myRes.length){var t=0;myRes.forEach(function(r){var test=tst.find(function(x){return x.id===r.tid});if(test)t+=Math.round((r.marks/test.totalMarks)*100)});avgPct=Math.round(t/myRes.length)}document.getElementById('pAvgPct').textContent=avgPct+'%';document.getElementById('pTestCnt').textContent=myRes.length;var myAlerts=alerts.filter(function(a){return a.sid===cu.id||a.sid==='ALL'}).sort(function(a,b){return(b.time||0)-(a.time||0)}).slice(0,5),html='';myAlerts.forEach(function(a){html+='<div class="card"><div class="avatar">🔔</div><div class="card-info"><div class="card-title">'+a.msg+'</div><div class="card-sub">'+formatDate(a.time)+'</div></div></div>'});document.getElementById('notifList').innerHTML=html||'<div class="empty">No notifications</div>'}
+function renPRes(filter){if(!cu||cu.role!=='parent')return;var myRes=[];res.filter(function(r){return r.sid===cu.id}).forEach(function(r){var t=tst.find(function(x){return x.id===r.tid});if(t)myRes.push({marks:r.marks,test:t})});myRes.sort(function(a,b){return(b.test.createdAt||0)-(a.test.createdAt||0)});if(filter==='5')myRes=myRes.slice(0,5);else if(filter==='10')myRes=myRes.slice(0,10);var html='';myRes.forEach(function(r){var pct=Math.round((r.marks/r.test.totalMarks)*100),g=getGrade(pct);html+='<div class="result-card"><div class="score-circle" style="background:'+g.c+'">'+g.g+'</div><div class="card-info"><div class="card-title">'+r.test.name+' - '+pct+'%</div><div class="card-sub">'+r.marks+'/'+r.test.totalMarks+' • '+r.test.subject+'</div></div></div>'});document.getElementById('resultsList').innerHTML=html||'<div class="empty">No results</div>'}
+function renPProgress(){if(!cu||cu.role!=='parent')return;var myRes=[];res.filter(function(r){return r.sid===cu.id}).forEach(function(r){var t=tst.find(function(x){return x.id===r.tid});if(t)myRes.push({marks:r.marks,test:t})});myRes.sort(function(a,b){return(a.test.createdAt||0)-(b.test.createdAt||0)});var labels=[],data=[];myRes.forEach(function(r){labels.push(r.test.name.substring(0,6));data.push(Math.round((r.marks/r.test.totalMarks)*100))});if(lineChart)lineChart.destroy();lineChart=new Chart(document.getElementById('lineChart'),{type:'line',data:{labels:labels,datasets:[{data:data,borderColor:'#667eea',backgroundColor:'rgba(102,126,234,0.1)',fill:true,tension:0.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100}}}});var subjects={};myRes.forEach(function(r){var subj=r.test.subject;if(!subjects[subj])subjects[subj]={total:0,cnt:0};subjects[subj].total+=Math.round((r.marks/r.test.totalMarks)*100);subjects[subj].cnt++});var subLabels=Object.keys(subjects),subData=subLabels.map(function(s){return Math.round(subjects[s].total/subjects[s].cnt)});if(pieChart)pieChart.destroy();pieChart=new Chart(document.getElementById('pieChart'),{type:'doughnut',data:{labels:subLabels,datasets:[{data:subData,backgroundColor:['#667eea','#f093fb','#25D366','#ffd700','#ff6b6b']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}})}
+function renPAtt(){if(!cu||cu.role!=='parent')return;var myAtt=att.filter(function(a){return a.sid===cu.id}),total=myAtt.length,pres=myAtt.filter(function(a){return a.status==='present'}).length;document.getElementById('pTotalDays').textContent=total;document.getElementById('pPresentDays').textContent=pres;document.getElementById('pAttPercent').textContent=total?Math.round((pres/total)*100)+'%':'0%';var months={};myAtt.forEach(function(a){var d=new Date(a.date),k=d.toLocaleString('en-IN',{month:'long',year:'numeric'});if(!months[k])months[k]={p:0,a:0};if(a.status==='present')months[k].p++;else months[k].a++});var html='';Object.keys(months).reverse().forEach(function(k){var m=months[k],mp=Math.round((m.p/(m.p+m.a))*100);html+='<div class="att-detail"><h4 style="color:#667eea;margin-bottom:10px">📅 '+k+'</h4><div class="att-row"><span>Present</span><span style="color:#25D366;font-weight:700">'+m.p+'</span></div><div class="att-row"><span>Absent</span><span style="color:#ff6b6b;font-weight:700">'+m.a+'</span></div><div class="att-row"><span>%</span><span style="color:#667eea;font-weight:700">'+mp+'%</span></div></div>'});document.getElementById('attMonthList').innerHTML=html||'<div class="empty">No records</div>'}
+function downloadAttPDF(){var s=stu.find(function(x){return x.id===cu.id});if(!s)return;var myAtt=att.filter(function(a){return a.sid===cu.id});if(!myAtt.length)return toast('No records','error');var jsPDF=window.jspdf.jsPDF,doc=new jsPDF();doc.setFillColor(102,126,234);doc.rect(0,0,210,40,'F');doc.setTextColor(255);doc.setFontSize(20);doc.text('UNIQUE STUDY POINT',105,18,{align:'center'});doc.setFontSize(10);doc.text('Attendance: '+s.name,105,30,{align:'center'});var months={};myAtt.forEach(function(a){var d=new Date(a.date),k=d.toLocaleString('en-IN',{month:'long',year:'numeric'});if(!months[k])months[k]=[];months[k].push(a)});var tableData=[],total=myAtt.length,totalP=myAtt.filter(function(a){return a.status==='present'}).length;Object.keys(months).forEach(function(k){var m=months[k],p=m.filter(function(a){return a.status==='present'}).length;tableData.push([k,p,m.length-p,m.length,Math.round((p/m.length)*100)+'%'])});tableData.push(['TOTAL',totalP,total-totalP,total,Math.round((totalP/total)*100)+'%']);doc.autoTable({startY:50,head:[['Month','Present','Absent','Total','%']],body:tableData,theme:'grid',headStyles:{fillColor:[102,126,234]}});doc.save(s.name+'_Attendance.pdf');toast('Downloaded!','success')}
+function renPFees(){if(!cu||cu.role!=='parent')return;var s=stu.find(function(x){return x.id===cu.id});if(!s)return;var myFee=fee.filter(function(f){return f.sid===cu.id}),paid=myFee.reduce(function(t,f){return t+f.amount},0);var join=new Date(s.joinDate||td),now=new Date(),months=Math.max(1,(now.getFullYear()-join.getFullYear())*12+(now.getMonth()-join.getMonth())+1),due=(s.fee||500)*months,pending=Math.max(0,due-paid);document.getElementById('feePend').textContent='₹'+pending;document.getElementById('feeStat').textContent=pending>0?'⚠️ Due':'✅ Clear';var html='';myFee.sort(function(a,b){return new Date(b.date)-new Date(a.date)}).forEach(function(f){html+='<div class="card"><div class="avatar" style="background:#d4fc79;color:#333">💰</div><div class="card-info"><div class="card-title">₹'+f.amount+'</div><div class="card-sub">'+formatDate(f.date)+'</div></div></div>'});document.getElementById('feeList').innerHTML=html||'<div class="empty">No payments</div>'}
+function viewReport(){var s=stu.find(function(x){return x.id===cu.id});if(!s)return;var myRes=[];res.filter(function(r){return r.sid===cu.id}).forEach(function(r){var t=tst.find(function(x){return x.id===r.tid});if(t)myRes.push({marks:r.marks,test:t})});if(!myRes.length)return toast('No results','error');var totalPct=0;myRes.forEach(function(r){totalPct+=Math.round((r.marks/r.test.totalMarks)*100)});var avgPct=Math.round(totalPct/myRes.length),overall=getGrade(avgPct);var subjects={};myRes.forEach(function(r){var subj=r.test.subject,pct=Math.round((r.marks/r.test.totalMarks)*100);if(!subjects[subj])subjects[subj]={total:0,cnt:0,marks:0,max:0};subjects[subj].total+=pct;subjects[subj].cnt++;subjects[subj].marks+=r.marks;subjects[subj].max+=r.test.totalMarks});var html='<div style="text-align:center;margin-bottom:20px"><div style="background:linear-gradient(135deg,#667eea,#764ba2);padding:20px;border-radius:16px;color:#fff"><h2>UNIQUE STUDY POINT</h2><p>By Sumeet Sahu</p></div>';if(s.photo)html+='<img src="'+s.photo+'" style="width:80px;height:80px;border-radius:50%;margin-top:15px;border:3px solid #667eea;object-fit:cover">';html+='<h3 style="margin-top:10px">'+s.name+'</h3><p style="color:#888">Class '+(s.class||'')+'</p></div>';html+='<div class="chart-container"><h4 style="color:#667eea;margin-bottom:15px">📊 Summary</h4><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center"><div style="background:#f8f9fa;padding:15px;border-radius:12px"><div style="font-size:24px;font-weight:800;color:'+overall.c+'">'+overall.g+'</div><div style="font-size:10px;color:#888">GRADE</div></div><div style="background:#f8f9fa;padding:15px;border-radius:12px"><div style="font-size:24px;font-weight:800;color:#667eea">'+avgPct+'%</div><div style="font-size:10px;color:#888">AVERAGE</div></div><div style="background:#f8f9fa;padding:15px;border-radius:12px"><div style="font-size:24px;font-weight:800;color:#667eea">'+myRes.length+'</div><div style="font-size:10px;color:#888">TESTS</div></div></div></div>';html+='<div class="chart-container"><h4 style="color:#667eea;margin-bottom:15px">📈 Trend</h4><canvas id="reportLineChart" height="150"></canvas></div>';html+='<div class="chart-container"><h4 style="color:#667eea;margin-bottom:15px">📝 Subject Remarks</h4>';Object.keys(subjects).forEach(function(subj){var avg=Math.round(subjects[subj].total/subjects[subj].cnt),g=getGrade(avg);html+='<div class="subject-row"><div><div style="font-weight:600">'+subj+'</div><div style="font-size:10px;color:#888">'+g.r+'</div></div><div style="text-align:right"><div style="color:#667eea;font-weight:600">'+subjects[subj].marks+'/'+subjects[subj].max+'</div><div style="font-size:11px;color:'+g.c+';font-weight:700">'+avg+'% ('+g.g+')</div></div></div>'});html+='<div class="remark-box"><strong>Overall:</strong> '+overall.r+'</div></div>';document.getElementById('reportContent').innerHTML=html;document.getElementById('reportView').classList.add('active');setTimeout(function(){var labels=[],data=[];myRes.forEach(function(r){labels.push(r.test.name.substring(0,6));data.push(Math.round((r.marks/r.test.totalMarks)*100))});new Chart(document.getElementById('reportLineChart'),{type:'line',data:{labels:labels,datasets:[{data:data,borderColor:'#667eea',backgroundColor:'rgba(102,126,234,0.1)',fill:true,tension:0.4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{min:0,max:100}}}})},100)}
 function closeReport(){document.getElementById('reportView').classList.remove('active')}
-function downloadReport(){
-var s=null;for(var i=0;i<stu.length;i++){if(stu[i].id===cu.id){s=stu[i];break}}
-if(!s)return;
-var myRes=[];for(var i=0;i<res.length;i++){if(res[i].sid===cu.id){var t=null;for(var j=0;j<tst.length;j++){if(tst[j].id===res[i].tid){t=tst[j];break}}if(t)myRes.push({marks:res[i].marks,test:t})}}
-if(!myRes.length)return toast('No results','error');
-var totalPct=0;for(var i=0;i<myRes.length;i++){totalPct+=Math.round((myRes[i].marks/myRes[i].test.totalMarks)*100)}
-var avgPct=Math.round(totalPct/myRes.length),overall=getGrade(avgPct);
-var subjects={};for(var i=0;i<myRes.length;i++){var subj=myRes[i].test.subject,pct=Math.round((myRes[i].marks/myRes[i].test.totalMarks)*100);if(!subjects[subj])subjects[subj]={total:0,cnt:0};subjects[subj].total+=pct;subjects[subj].cnt++}
-var jsPDF=window.jspdf.jsPDF,doc=new jsPDF();
-doc.setFillColor(102,126,234);doc.rect(0,0,210,45,'F');doc.setTextColor(255);doc.setFontSize(22);doc.text('UNIQUE STUDY POINT',105,20,{align:'center'});doc.setFontSize(10);doc.text('Progress Report',105,32,{align:'center'});
-doc.setTextColor(60);doc.setFontSize(10);doc.text('Student: '+s.name,20,60);doc.text('Class: '+(s.class||''),150,60);doc.text('Grade: '+overall.g+' ('+avgPct+'%)',20,68);
-var tableData=[];for(var i=0;i<myRes.length;i++){var r=myRes[i],pct=Math.round((r.marks/r.test.totalMarks)*100),g=getGrade(pct);tableData.push([i+1,r.test.name,r.test.subject,r.marks+'/'+r.test.totalMarks,pct+'%',g.g])}
-doc.autoTable({startY:75,head:[['#','Test','Subject','Marks','%','Grade']],body:tableData,theme:'grid',headStyles:{fillColor:[102,126,234]}});
-var y=doc.lastAutoTable.finalY+10;doc.setFontSize(10);doc.text('Subject Remarks:',20,y);y+=8;
-Object.keys(subjects).forEach(function(subj){var avg=Math.round(subjects[subj].total/subjects[subj].cnt),g=getGrade(avg);doc.setFontSize(9);doc.text(subj+': '+avg+'% - '+g.r,20,y);y+=6});
-doc.save(s.name+'_Report.pdf');toast('Downloaded!','success');
-}
-
-// Admin functions
-function updAdmin(){document.getElementById('aStu').textContent=stu.length;document.getElementById('aTst').textContent=tst.length;var p=0;for(var i=0;i<att.length;i++){if(att[i].date===td&&att[i].status==='present')p++}document.getElementById('aPre').textContent=p}
-
-function renStu(){
-var f=curFilter==='all'?stu:stu.filter(function(s){return s.class===curFilter});
-var html='';for(var i=0;i<f.length;i++){var s=f[i],av=s.photo?'<img src="'+s.photo+'">':s.name.charAt(0);html+='<div class="card" style="cursor:pointer" onclick="openEditS(\''+s.id+'\')"><div class="avatar">'+av+'</div><div class="card-info"><div class="card-title">'+s.name+'</div><div class="card-sub">Class '+s.class+' • '+s.mobile+'</div></div></div>'}
-document.getElementById('aList').innerHTML=html||'<div class="empty">No students</div>';
-}
-
-function openEditS(id){
-var s=null;for(var i=0;i<stu.length;i++){if(stu[i].id===id){s=stu[i];break}}
-if(!s)return;
-document.getElementById('editSId').value=s.id;
-document.getElementById('editSN').value=s.name;
-document.getElementById('editSC').value=s.class;
-document.getElementById('editSM').value=s.mobile;
-document.getElementById('editSU').value=s.userId;
-document.getElementById('editSP').value=s.password;
-document.getElementById('editSFee').value=s.fee||500;
-document.getElementById('editSJoin').value=s.joinDate||td;
-editPhotoUrl=s.photo||'';
-document.getElementById('editPhotoBox').innerHTML=s.photo?'<img src="'+s.photo+'">':'<span style="font-size:28px">📷</span>';
-openM('editSModal');
-}
-
-document.getElementById('updateS').onclick=function(){
-var id=document.getElementById('editSId').value,n=document.getElementById('editSN').value.trim(),c=document.getElementById('editSC').value,m=document.getElementById('editSM').value.trim(),u=document.getElementById('editSU').value.trim(),p=document.getElementById('editSP').value.trim(),f=document.getElementById('editSFee').value,j=document.getElementById('editSJoin').value;
-if(!n||!c||!m||!u||!p)return toast('Fill all','error');
-if(m.length!==10)return toast('Mobile: 10 digits','error');
-db.ref('students/'+id).update({name:n,class:c,mobile:m,userId:u,password:p,fee:parseInt(f)||500,joinDate:j,photo:editPhotoUrl}).then(function(){closeM('editSModal');toast('Updated!','success')});
-};
-
-document.getElementById('deleteS').onclick=function(){
-var id=document.getElementById('editSId').value,name=document.getElementById('editSN').value;
-if(confirm('Delete '+name+'?')){
-db.ref('students/'+id).remove();
-['attendance','results','fees','alerts'].forEach(function(path){db.ref(path).orderByChild('sid').equalTo(id).once('value',function(s){s.forEach(function(c){db.ref(path+'/'+c.key).remove()})})});
-closeM('editSModal');toast('Deleted!','success');
-}
-};
-
-function renAtt(){
-var d=document.getElementById('attD').value||td,html='';
-for(var i=0;i<stu.length;i++){var s=stu[i],a=null;for(var j=0;j<att.length;j++){if(att[j].sid===s.id&&att[j].date===d){a=att[j];break}}var st=a?a.status:'',av=s.photo?'<img src="'+s.photo+'">':s.name.charAt(0);html+='<div class="card"><div class="avatar">'+av+'</div><div class="card-info"><div class="card-title">'+s.name+'</div><div class="card-sub">'+s.class+'</div></div><div style="display:flex;gap:5px"><button class="btn-small" style="background:'+(st==='present'?'#25D366':'#e8e8e8')+';color:'+(st==='present'?'#fff':'#333')+'" onclick="mAtt(\''+s.id+'\',\'present\',this)">✓</button><button class="btn-small" style="background:'+(st==='absent'?'#ff6b6b':'#e8e8e8')+';color:'+(st==='absent'?'#fff':'#333')+'" onclick="mAtt(\''+s.id+'\',\'absent\',this)">✗</button></div></div>'}
-document.getElementById('attL').innerHTML=html;
-}
-
-function mAtt(sid,st,btn){
-var d=document.getElementById('attD').value||td,ex=null;for(var i=0;i<att.length;i++){if(att[i].sid===sid&&att[i].date===d){ex=att[i];break}}
-if(ex)db.ref('attendance/'+ex.id).update({status:st});
-else db.ref('attendance').push({sid:sid,date:d,status:st});
-var sibs=btn.parentElement.querySelectorAll('.btn-small');for(var i=0;i<sibs.length;i++){sibs[i].style.background='#e8e8e8';sibs[i].style.color='#333'}
-btn.style.background=st==='present'?'#25D366':'#ff6b6b';btn.style.color='#fff';
-toast('Marked!','success');
-}
-
-function sendAttSMS(){
-var d=document.getElementById('attD').value||td,absent=[];
-for(var i=0;i<stu.length;i++){for(var j=0;j<att.length;j++){if(att[j].sid===stu[i].id&&att[j].date===d&&att[j].status==='absent'){absent.push(stu[i]);break}}}
-if(absent.length){var nums=absent.map(function(s){return s.mobile}).join(',');sendSMS(nums,'UNIQUE STUDY POINT: Your ward was ABSENT on '+formatDate(d)+'. -Sumeet Sahu');toast('SMS sent!','success')}
-else toast('No absent','error');
-}
-
-function sendAttWA(){
-var d=document.getElementById('attD').value||td,idx=0;
-for(var i=0;i<stu.length;i++){var s=stu[i],a=null;for(var j=0;j<att.length;j++){if(att[j].sid===s.id&&att[j].date===d){a=att[j];break}}if(a){var status=a.status==='present'?'PRESENT ✅':'ABSENT ❌';(function(delay,stud,stat){setTimeout(function(){window.open('https://wa.me/91'+stud.mobile+'?text='+encodeURIComponent('UNIQUE STUDY POINT\n'+stud.name+'\n'+formatDate(d)+': '+stat+'\n-Sumeet Sahu'),'_blank')},delay*1500)})(idx,s,status);idx++}}
-if(idx)toast('Opening WA...','success');else toast('No attendance','error');
-}
-getElementById('tN').value.trim(),subj=document.getElementById('tSubjSel').value,m=document.getElementById('tM').value,d=document.getElementById('tD').value,notify=document.getElementById('tNotify').checked;
-if(subj==='other')subj=document.getElementById('tSOther').value.trim();
-if(!n||!subj)return toast('Fill name & subject','error');
-db.ref('tests').push({name:n,subject:subj,totalMarks:parseInt(m)||100,date:d,createdAt:Date.now()}).then(function(){
-if(notify&&stu.length){var nums=stu.map(function(s){return s.mobile}).join(',');sendSMS(nums,'UNIQUE STUDY POINT: Test "'+n+'" ('+subj+') on '+formatDate(d)+'. Please prepare. -Sumeet Sahu');db.ref('alerts').push({sid:'ALL',msg:'Test: '+n+' ('+subj+') on '+formatDate(d),time:Date.now()})}
-closeM('addTModal');document.getElementById('tN').value='';document.getElementById('tSubjSel').value='';document.getElementById('tSOther').value='';document.getElementById('otherSubjGroup').style.display='none';document.getElementById('tNotify').checked=false;toast('Created!','success');
-});
-};
-
-document.getElementById('saveF').onclick=function(){
-var sid=document.getElementById('fStu').value,amt=document.getElementById('fAmt').value,d=document.getElementById('fDate').value;
-if(!sid||!amt)return toast('Fill all','error');
-db.ref('fees').push({sid:sid,amount:parseInt(amt),date:d}).then(function(){closeM('addFModal');document.getElementById('fAmt').value='';toast('Saved!','success')});
-};
-
-document.getElementById('sendAlert').onclick=function(){
-var sid=document.getElementById('alertStu').value,msg=document.getElementById('alertMsg').value.trim();
-if(!sid)return toast('Select student','error');
-if(!msg)return toast('Enter message','error');
-if(sid==='ALL'){
-var nums=stu.map(function(s){return s.mobile}).join(',');
-sendSMS(nums,'UNIQUE STUDY POINT: '+msg+' -Sumeet Sahu');
-db.ref('alerts').push({sid:'ALL',msg:msg,time:Date.now()});
-}else{
-var s=null;for(var i=0;i<stu.length;i++){if(stu[i].id===sid){s=stu[i];break}}
-if(s){sendSMS(s.mobile,'UNIQUE STUDY POINT: '+s.name+' '+msg+' -Sumeet Sahu');db.ref('alerts').push({sid:sid,msg:s.name+' '+msg,time:Date.now()})}
-}
-closeM('alertModal');document.getElementById('alertMsg').value='';
-};
-
-document.getElementById('sendAlertWA').onclick=function(){
-var sid=document.getElementById('alertStu').value,msg=document.getElementById('alertMsg').value.trim();
-if(!sid)return toast('Select student','error');
-if(!msg)return toast('Enter message','error');
-if(sid==='ALL'){
-var idx=0;stu.forEach(function(s){setTimeout(function(){window.open('https://wa.me/91'+s.mobile+'?text='+encodeURIComponent('UNIQUE STUDY POINT\n\n'+msg+'\n\n-Sumeet Sahu'),'_blank')},idx*1500);idx++});
-db.ref('alerts').push({sid:'ALL',msg:msg,time:Date.now()});
-}else{
-var s=null;for(var i=0;i<stu.length;i++){if(stu[i].id===sid){s=stu[i];break}}
-if(s){window.open('https://wa.me/91'+s.mobile+'?text='+encodeURIComponent('UNIQUE STUDY POINT\n\n'+s.name+' '+msg+'\n\n-Sumeet Sahu'),'_blank');db.ref('alerts').push({sid:sid,msg:s.name+' '+msg,time:Date.now()})}
-}
-closeM('alertModal');document.getElementById('alertMsg').value='';toast('Opening WA...','success');
-};
-
-document.getElementById('saveWs').onclick=function(){
-var cls=document.getElementById('wsClass').value,subj=document.getElementById('wsSubject').value.trim(),title=document.getElementById('wsTitle').value.trim(),fileInput=document.getElementById('wsFile');
-if(!cls||!subj||!title)return toast('Fill all','error');
-if(!fileInput.files.length)return toast('Select file','error');
-toast('Uploading...','');
-uploadCloud(fileInput.files[0],function(url){
-if(url){
-db.ref('worksheets').push({class:cls,subject:subj,title:title,url:url,createdAt:Date.now()}).then(function(){
-closeM('wsModal');document.getElementById('wsClass').value='';document.getElementById('wsSubject').value='';document.getElementById('wsTitle').value='';document.getElementById('wsFile').value='';document.getElementById('filePreview').style.display='none';document.getElementById('uploadBox').style.display='block';toast('Uploaded!','success');
-});
-}else{toast('Upload failed','error')}
-});
-};
+function downloadReport(){var s=stu.find(function(x){return x.id===cu.id});if(!s)return;var myRes=[];res.filter(function(r){return r.sid===cu.id}).forEach(function(r){var t=tst.find(function(x){return x.id===r.tid});if(t)myRes.push({marks:r.marks,test:t})});if(!myRes.length)return toast('No results','error');var totalPct=0;myRes.forEach(function(r){totalPct+=Math.round((r.marks/r.test.totalMarks)*100)});var avgPct=Math.round(totalPct/myRes.length),overall=getGrade(avgPct);var jsPDF=window.jspdf.jsPDF,doc=new jsPDF();doc.setFillColor(102,126,234);doc.rect(0,0,210,45,'F');doc.setTextColor(255);doc.setFontSize(22);doc.text('UNIQUE STUDY POINT',105,20,{align:'center'});doc.setFontSize(10);doc.text('Progress Report - '+s.name,105,32,{align:'center'});var tableData=[];myRes.forEach(function(r,i){var pct=Math.round((r.marks/r.test.totalMarks)*100),g=getGrade(pct);tableData.push([i+1,r.test.name,r.test.subject,r.marks+'/'+r.test.totalMarks,pct+'%',g.g])});doc.autoTable({startY:55,head:[['#','Test','Subject','Marks','%','Grade']],body:tableData,theme:'grid',headStyles:{fillColor:[102,126,234]}});doc.save(s.name+'_Report.pdf');toast('Downloaded!','success')}
+function updAdmin(){document.getElementById('aStu').textContent=stu.length;document.getElementById('aTst').textContent=tst.length;document.getElementById('aPre').textContent=att.filter(function(a){return a.date===td&&a.status==='present'}).length}
+function renStu(){var f=curFilter==='all'?stu:stu.filter(function(s){return s.class===curFilter});var html='';f.forEach(function(s){var av=s.photo?'<img src="'+s.photo+'">':s.name.charAt(0);html+='<div class="card" style="cursor:pointer" onclick="openEditS(\''+s.id+'\')"><div class="avatar">'+av+'</div><div class="card-info"><div class="card-title">'+s.name+'</div><div class="card-sub">Class '+s.class+' • '+s.mobile+'</div></div></div>'});document.getElementById('aList').innerHTML=html||'<div class="empty">No students</div>'}
+function openEditS(id){var s=stu.find(function(x){return x.id===id});if(!s)return;document.getElementById('editSId').value=s.id;document.getElementById('editSN').value=s.name;document.getElementById('editSC').value=s.class;document.getElementById('editSM').value=s.mobile;document.getElementById('editSU').value=s.userId;document.getElementById('editSP').value=s.password;document.getElementById('editSFee').value=s.fee||500;document.getElementById('editSJoin').value=s.joinDate||td;editPhotoUrl=s.photo||'';document.getElementById('editPhotoBox').innerHTML=s.photo?'<img src="'+s.photo+'">':'<span style="font-size:28px">📷</span>';openM('editSModal')}
+function saveStudent(){var n=document.getElementById('sN').value.trim(),c=document.getElementById('sC').value,m=document.getElementById('sM').value.trim(),u=document.getElementById('sU').value.trim(),p=document.getElementById('sP').value.trim(),f=document.getElementById('sFee').value,j=document.getElementById('sJoin').value;if(!n||!c||!m||!u||!p)return toast('Fill all','error');if(m.length!==10)return toast('Mobile: 10 digits','error');db.ref('students').push({name:n,class:c,mobile:m,userId:u,password:p,fee:parseInt(f)||500,joinDate:j,photo:addPhotoUrl}).then(function(){closeM('addSModal');document.getElementById('sN').value='';document.getElementById('sC').value='';document.getElementById('sM').value='';document.getElementById('sU').value='';document.getElementById('sP').value='';addPhotoUrl='';document.getElementById('addPhotoBox').innerHTML='<span style="font-size:28px">📷</span>';toast('Added!','success')})}
+function updateStudent(){var id=document.getElementById('editSId').value,n=document.getElementById('editSN').value.trim(),c=document.getElementById('editSC').value,m=document.getElementById('editSM').value.trim(),u=document.getElementById('editSU').value.trim(),p=document.getElementById('editSP').value.trim(),f=document.getElementById('editSFee').value,j=document.getElementById('editSJoin').value;if(!n||!c||!m||!u||!p)return toast('Fill all','error');db.ref('students/'+id).update({name:n,class:c,mobile:m,userId:u,password:p,fee:parseInt(f)||500,joinDate:j,photo:editPhotoUrl}).then(function(){closeM('editSModal');toast('Updated!','success')})}
+function deleteStudent(){var id=document.getElementById('editSId').value,name=document.getElementById('editSN').value;if(confirm('Delete '+name+'?')){db.ref('students/'+id).remove();['attendance','results','fees','alerts'].forEach(function(path){db.ref(path).orderByChild('sid').equalTo(id).once('value',function(s){s.forEach(function(c){db.ref(path+'/'+c.key).remove()})})});closeM('editSModal');toast('Deleted!','success')}}
+function renAtt(){var d=document.getElementById('attD').value||td,html='';stu.forEach(function(s){var a=att.find(function(x){return x.sid===s.id&&x.date===d}),st=a?a.status:'',av=s.photo?'<img src="'+s.photo+'">':s.name.charAt(0);html+='<div class="card"><div class="avatar">'+av+'</div><div class="card-info"><div class="card-title">'+s.name+'</div><div class="card-sub">'+s.class+'</div></div><div style="display:flex;gap:5px"><button class="btn-small" style="background:'+(st==='present'?'#25D366':'#e8e8e8')+';color:'+(st==='present'?'#fff':'#333')+'" onclick="mAtt(\''+s.id+'\',\'present\',this)">✓</button><button class="btn-small" style="background:'+(st==='absent'?'#ff6b6b':'#e8e8e8')+';color:'+(st==='absent'?'#fff':'#333')+'" onclick="mAtt(\''+s.id+'\',\'absent\',this)">✗</button></div></div>'});document.getElementById('attL').innerHTML=html}
+function mAtt(sid,st,btn){var d=document.getElementById('attD').value||td,ex=att.find(function(a){return a.sid===sid&&a.date===d});if(ex)db.ref('attendance/'+ex.id).update({status:st});else db.ref('attendance').push({sid:sid,date:d,status:st});var sibs=btn.parentElement.querySelectorAll('.btn-small');sibs.forEach(function(b){b.style.background='#e8e8e8';b.style.color='#333'});btn.style.background=st==='present'?'#25D366':'#ff6b6b';btn.style.color='#fff';toast('Marked!','success')}
+function sendAttSMS(){var d=document.getElementById('attD').value||td,absent=stu.filter(function(s){return att.find(function(a){return a.sid===s.id&&a.date===d&&a.status==='absent'})});if(absent.length){sendSMS(absent.map(function(s){return s.mobile}).join(','),'UNIQUE STUDY POINT: Your ward was ABSENT on '+formatDate(d)+'. -Sumeet Sahu');toast('SMS sent to '+absent.length,'success')}else toast('No absent','error')}
+function sendAttWA(){var d=document.getElementById('attD').value||td,idx=0;stu.forEach(function(s){var a=att.find(function(x){return x.sid===s.id&&x.date===d});if(a){var status=a.status==='present'?'PRESENT ✅':'ABSENT ❌';setTimeout(function(){window.open('https://wa.me/91'+s.mobile+'?text='+encodeURIComponent('UNIQUE STUDY POINT\n'+s.name+'\n'+formatDate(d)+': '+status+'\n-Sumeet Sahu'),'_blank')},idx*1500);idx++}});if(idx)toast('Opening WA...','success')}
+function renTests(){var sorted=tst.slice().sort(function(a,b){return(b.createdAt||0)-(a.createdAt||0)});var html='';sorted.forEach(function(t){var cnt=res.filter(function(r){return r.tid===t.id}).length;html+='<div class="test-card"><div style="font-weight:700;font-size:14px;margin-bottom:4px">'+t.name+'</div><div style="font-size:11px;color:#888;margin-bottom:10px">📖 '+t.subject+' • 📅 '+formatDate(t.date)+' • '+t.totalMarks+' marks • '+cnt+' results</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-small" style="background:#667eea" onclick="openMk(\''+t.id+'\')">📝 Marks</button><button class="btn-small" style="background:#f093fb" onclick="openEditT(\''+t.id+'\')">✏️</button><button class="btn-small btn-del" onclick="delTest(\''+t.id+'\',\''+t.name+'\')">🗑️</button></div></div>'});document.getElementById('testL').innerHTML=html||'<div class="empty">No tests</div>'}
+function openEditT(id){var t=tst.find(function(x){return x.id===id});if(!t)return;document.getElementById('editTId').value=t.id;document.getElementById('editTN').value=t.name;document.getElementById('editTS').value=t.subject;document.getElementById('editTM').value=t.totalMarks;document.getElementById('editTD').value=t.date||'';openM('editTModal')}
+function saveTest(){var n=document.getElementById('tN').value.trim(),subj=document.getElementById('tSubjSel').value,m=document.getElementById('tM').value,d=document.getElementById('tD').value,notify=document.getElementById('tNotify').checked;if(subj==='other')subj=document.getElementById('tSOther').value.trim();if(!n||!subj)return toast('Fill name & subject','error');db.ref('tests').push({name:n,subject:subj,totalMarks:parseInt(m)||100,date:d,createdAt:Date.now()}).then(function(){if(notify&&stu.length){sendSMS(stu.map(function(s){return s.mobile}).join(','),'UNIQUE STUDY POINT: Test "'+n+'" ('+subj+') on '+formatDate(d)+'. -Sumeet Sahu');db.ref('alerts').push({sid:'ALL',msg:'Test: '+n+' on '+formatDate(d),time:Date.now()})}closeM('addTModal');document.getElementById('tN').value='';document.getElementById('tSubjSel').value='';document.getElementById('tSOther').value='';document.getElementById('otherSubjGroup').style.display='none';document.getElementById('tNotify').checked=false;toast('Created!','success')})}
+function updateTest(){var id=document.getElementById('editTId').value,n=document.getElementById('editTN').value.trim(),s=document.getElementById('editTS').value.trim(),m=document.getElementById('editTM').value,d=document.getElementById('editTD').value;if(!n||!s)return toast('Fill all','error');db.ref('tests/'+id).update({name:n,subject:s,totalMarks:parseInt(m)||100,date:d}).then(function(){closeM('editTModal');toast('Updated!','success')})}
+function deleteTest(){var id=document.getElementById('editTId').value,name=document.getElementById('editTN').value;delTest(id,name);closeM('editTModal')}
+function delTest(id,name){if(confirm('Delete '+name+'?')){db.ref('tests/'+id).remove();db.ref('results').orderByChild('tid').equalTo(id).once('value',function(s){s.forEach(function(c){db.ref('results/'+c.key).remove()})});toast('Deleted!','success')}}
+function openMk(tid){ctid=tid;var t=tst.find(function(x){return x.id===tid});if(!t)return;document.getElementById('mkTN').textContent=t.name+' ('+t.totalMarks+')';var html='';stu.forEach(function(s){var r=res.find(function(x){return x.tid===tid&&x.sid===s.id}),av=s.photo?'<img src="'+s.photo+'">':s.name.charAt(0);html+='<div class="card"><div class="avatar">'+av+'</div><div class="card-info"><div class="card-title">'+s.name+' <small style="color:#888">('+s.class+')</small></div></div><input type="number" id="mk_'+s.id+'" value="'+(r?r.marks:'')+'" placeholder="Marks" style="width:70px;padding:8px;border:2px solid #e8e8e8;border-radius:8px"></div>'});document.getElementById('mkL').innerHTML=html;openM('addMkModal')}
+function saveMk(){stu.forEach(function(s){var v=document.getElementById('mk_'+s.id);if(v&&v.value!==''){var ex=res.find(function(r){return r.tid===ctid&&r.sid===s.id});if(ex)db.ref('results/'+ex.id).update({marks:parseInt(v.value)});else db.ref('results').push({tid:ctid,sid:s.id,marks:parseInt(v.value)})}});closeM('addMkModal');toast('Saved!','success')}
+function sendMkSMS(){var t=tst.find(function(x){return x.id===ctid});if(!t)return;var nums=stu.filter(function(s){return res.find(function(r){return r.tid===ctid&&r.sid===s.id})}).map(function(s){return s.mobile});if(nums.length)sendSMS(nums.join(','),'UNIQUE STUDY POINT: '+t.name+' results out. Check app. -Sumeet Sahu')}
+function sendMkWA(){var t=tst.find(function(x){return x.id===ctid});if(!t)return;var idx=0;stu.forEach(function(s){var r=res.find(function(x){return x.tid===ctid&&x.sid===s.id});if(r){var pct=Math.round((r.marks/t.totalMarks)*100);setTimeout(function(){window.open('https://wa.me/91'+s.mobile+'?text='+encodeURIComponent('UNIQUE STUDY POINT\n'+s.name+'\n'+t.name+': '+r.marks+'/'+t.totalMarks+' ('+pct+'%)\n-Sumeet Sahu'),'_blank')},idx*1500);idx++}});if(idx)toast('Opening WA...','success')}
+function renAWs(){var f=wsFilter==='all'?worksheets:worksheets.filter(function(w){return w.class===wsFilter});f.sort(function(a,b){return(b.createdAt||0)-(a.createdAt||0)});var html='';f.forEach(function(w){html+='<div class="ws-card"><div style="font-weight:700;font-size:14px;margin-bottom:4px">'+w.title+'</div><div style="font-size:11px;color:#888;margin-bottom:10px">📖 '+w.subject+' • '+w.class+' • '+formatDate(w.createdAt)+'</div><div style="display:flex;gap:8px"><a href="'+w.url+'" target="_blank" class="btn-small" style="background:#667eea;text-decoration:none">📥</a><button class="btn-small btn-del" onclick="delWs(\''+w.id+'\')">🗑️</button></div></div>'});document.getElementById('aWsList').innerHTML=html||'<div class="empty">No worksheets</div>'}
+function delWs(id){if(confirm('Delete?')){db.ref('worksheets/'+id).remove();toast('Deleted!','success')}}
+function renFees(){var sorted=fee.slice().sort(function(a,b){return new Date(b.date)-new Date(a.date)});var html='';sorted.forEach(function(f){var s=stu.find(function(x){return x.id===f.sid});if(s)html+='<div class="card"><div class="avatar">💰</div><div class="card-info"><div class="card-title">'+s.name+'</div><div class="card-sub">₹'+f.amount+' • '+formatDate(f.date)+'</div></div></div>'});document.getElementById('feeL').innerHTML=html||'<div class="empty">No payments</div>'}
+function ldDD(){var opts='<option value="">Select</option><option value="ALL">📢 ALL STUDENTS</option>';stu.forEach(function(s){opts+='<option value="'+s.id+'">'+s.name+' ('+s.class+')</option>'});document.getElementById('alertStu').innerHTML=opts;document.getElementById('fStu').innerHTML='<option value="">Select</option>'+stu.map(function(s){return'<option value="'+s.id+'">'+s.name+'</option>'}).join('')}
+function saveFee(){var sid=document.getElementById('fStu').value,amt=document.getElementById('fAmt').value,d=document.getElementById('fDate').value;if(!sid||!amt)return toast('Fill all','error');db.ref('fees').push({sid:sid,amount:parseInt(amt),date:d}).then(function(){closeM('addFModal');document.getElementById('fAmt').value='';toast('Saved!','success')})}
+function sendAlertSMS(){var sid=document.getElementById('alertStu').value,msg=document.getElementById('alertMsg').value.trim();if(!sid)return toast('Select student','error');if(!msg)return toast('Enter message','error');if(sid==='ALL'){sendSMS(stu.map(function(s){return s.mobile}).join(','),'UNIQUE STUDY POINT: '+msg+' -Sumeet Sahu');db.ref('alerts').push({sid:'ALL',msg:msg,time:Date.now()})}else{var s=stu.find(function(x){return x.id===sid});if(s){sendSMS(s.mobile,'UNIQUE STUDY POINT: '+s.name+' '+msg+' -Sumeet Sahu');db.ref('alerts').push({sid:sid,msg:s.name+' '+msg,time:Date.now()})}}closeM('alertModal');document.getElementById('alertMsg').value=''}
+function sendAlertWA(){var sid=document.getElementById('alertStu').value,msg=document.getElementById('alertMsg').value.trim();if(!sid)return toast('Select student','error');if(!msg)return toast('Enter message','error');if(sid==='ALL'){var idx=0;stu.forEach(function(s){setTimeout(function(){window.open('https://wa.me/91'+s.mobile+'?text='+encodeURIComponent('UNIQUE STUDY POINT\n\n'+msg+'\n\n-Sumeet Sahu'),'_blank')},idx*1500);idx++});db.ref('alerts').push({sid:'ALL',msg:msg,time:Date.now()})}else{var s=stu.find(function(x){return x.id===sid});if(s){window.open('https://wa.me/91'+s.mobile+'?text='+encodeURIComponent('UNIQUE STUDY POINT\n\n'+s.name+' '+msg+'\n\n-Sumeet Sahu'),'_blank');db.ref('alerts').push({sid:sid,msg:s.name+' '+msg,time:Date.now()})}}closeM('alertModal');document.getElementById('alertMsg').value='';toast('Opening WA...','success')}
+function saveWs(){var cls=document.getElementById('wsClass').value,subj=document.getElementById('wsSubject').value.trim(),title=document.getElementById('wsTitle').value.trim(),fileInput=document.getElementById('wsFile');if(!cls||!subj||!title)return toast('Fill all','error');if(!fileInput.files.length)return toast('Select file','error');toast('Uploading...','');uploadCloud(fileInput.files[0],function(url){if(url){db.ref('worksheets').push({class:cls,subject:subj,title:title,url:url,createdAt:Date.now()}).then(function(){closeM('wsModal');document.getElementById('wsClass').value='';document.getElementById('wsSubject').value='';document.getElementById('wsTitle').value='';document.getElementById('wsFile').value='';document.getElementById('filePreview').style.display='none';document.querySelector('.upload-box').style.display='block';toast('Uploaded!','success')})}else toast('Upload failed','error')})}
 </script>
 </body>
 </html>
