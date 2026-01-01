@@ -321,11 +321,16 @@ function uploadToCloudinary(file,cb){
 toast('Uploading...','');
 var fd=new FormData();
 fd.append('file',file);
-fd.append('upload_preset','ml_default');
+fd.append('upload_preset','usp_uploads');
+fd.append('folder','usp_materials');
 fetch('https://api.cloudinary.com/v1_1/'+CLOUD+'/auto/upload',{method:'POST',body:fd})
 .then(function(r){return r.json()})
-.then(function(d){if(d.secure_url){cb(d.secure_url);toast('Uploaded!','success')}else{cb(null);toast('Upload failed','error')}})
-.catch(function(){cb(null);toast('Upload failed','error')})
+.then(function(d){
+console.log('Cloudinary response:',d);
+if(d.secure_url){cb(d.secure_url);toast('Uploaded!','success')}
+else{console.error('Upload error:',d);cb(null);toast('Upload failed: '+(d.error?d.error.message:'Unknown'),'error')}
+})
+.catch(function(e){console.error('Fetch error:',e);cb(null);toast('Upload failed','error')})
 }
 
 function upPhoto(inp,type){
@@ -476,7 +481,7 @@ myWs.sort(function(a,b){return(b.createdAt||0)-(a.createdAt||0)});
 var html='';
 for(var i=0;i<myWs.length;i++){
 var w=myWs[i];
-html+='<div class="card"><div class="avatar" style="background:#667eea">📄</div><div class="card-info"><div class="card-title">'+w.title+'</div><div class="card-sub">'+w.subject+' • '+formatDate(w.createdAt)+'</div></div><button class="btn-small" style="background:#25D366" onclick="downloadWs(\''+w.url+'\')">📥</button></div>';
+html+='<div class="card" data-url="'+w.url+'" onclick="openFile(this)"><div class="avatar" style="background:#667eea">📄</div><div class="card-info"><div class="card-title">'+w.title+'</div><div class="card-sub">'+w.subject+' • '+formatDate(w.createdAt)+'</div></div><button class="btn-small" style="background:#25D366">📥</button></div>';
 }
 document.getElementById('pMatList').innerHTML=html||'<div class="empty">No materials available</div>';
 }
@@ -484,6 +489,15 @@ document.getElementById('pMatList').innerHTML=html||'<div class="empty">No mater
 function downloadWs(url){
 if(!url){toast('File not found','error');return}
 window.open(url,'_blank');
+}
+
+function openFile(el){
+var url=el.getAttribute('data-url');
+if(url&&url!=='undefined'&&url!=='null'){
+window.open(url,'_blank');
+}else{
+toast('File not available','error');
+}
 }
 
 function renPAlerts(){
@@ -991,7 +1005,7 @@ f.sort(function(a,b){return(b.createdAt||0)-(a.createdAt||0)});
 var html='';
 for(var i=0;i<f.length;i++){
 var w=f[i];
-html+='<div class="ws-card"><div style="font-weight:700;font-size:14px;margin-bottom:4px">'+w.title+'</div><div style="font-size:11px;color:#888;margin-bottom:10px">📖 '+w.subject+' • Class '+w.class+' • '+formatDate(w.createdAt)+'</div><div style="display:flex;gap:8px"><button class="btn-small" style="background:#25D366" onclick="window.open(\''+w.url+'\',\'_blank\')">📥</button><button class="btn-small btn-del" onclick="delWs(\''+w.id+'\')">🗑️</button></div></div>';
+html+='<div class="ws-card" data-url="'+w.url+'" data-id="'+w.id+'"><div style="font-weight:700;font-size:14px;margin-bottom:4px">'+w.title+'</div><div style="font-size:11px;color:#888;margin-bottom:10px">📖 '+w.subject+' • Class '+w.class+' • '+formatDate(w.createdAt)+'</div><div style="display:flex;gap:8px"><button class="btn-small" style="background:#25D366" onclick="openFile(this.parentElement.parentElement)">📥</button><button class="btn-small btn-del" onclick="delWsById(this.parentElement.parentElement)">🗑️</button></div></div>';
 }
 document.getElementById('aWsList').innerHTML=html||'<div class="empty">No worksheets</div>';
 }
@@ -1014,6 +1028,14 @@ toast('Uploaded!','success');
 }
 
 function delWs(id){if(confirm('Delete?')){db.ref('worksheets/'+id).remove();toast('Deleted!','success')}}
+
+function delWsById(el){
+var id=el.getAttribute('data-id');
+if(id&&confirm('Delete this worksheet?')){
+db.ref('worksheets/'+id).remove();
+toast('Deleted!','success');
+}
+}
 </script>
 </body>
 </html>
