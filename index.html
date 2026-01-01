@@ -549,9 +549,9 @@ var jsPDF=window.jspdf.jsPDF,doc=new jsPDF();
 // Header - Dark blue
 doc.setFillColor(26,53,93);doc.rect(0,0,210,42,'F');
 // Orange circle with U
-doc.setFillColor(237,137,54);doc.circle(33,27,9,'F');
+doc.setFillColor(237,137,54);doc.roundedRect(18,12,30,20,3,3,'F');
 doc.setTextColor(255);doc.setFontSize(14);doc.setFont('helvetica','bold');
-doc.text('U',33,30,{align:'center'});
+doc.text('USP',33,25,{align:'center'});
 // Title
 doc.setFontSize(18);doc.text('UNIQUE STUDY POINT',105,18,{align:'center'});
 doc.setFontSize(9);doc.setFont('helvetica','normal');
@@ -645,10 +645,10 @@ myAlerts.sort(function(a,b){return(b.time||0)-(a.time||0)});
 var jsPDF=window.jspdf.jsPDF,doc=new jsPDF();
 // Header
 doc.setFillColor(26,53,93);doc.rect(0,0,210,42,'F');
-doc.setFillColor(237,137,54);doc.circle(33,27,9,'F');
-doc.setTextColor(255);doc.setFontSize(14);doc.setFont('helvetica','bold');
-doc.text('U',33,30,{align:'center'});
-doc.setFontSize(18);doc.text('UNIQUE STUDY POINT',105,18,{align:'center'});
+doc.setFillColor(237,137,54);doc.roundedRect(18,12,30,20,3,3,'F');
+doc.setTextColor(255);doc.setFontSize(12);doc.setFont('helvetica','bold');
+doc.text('USP',33,25,{align:'center'});
+doc.setFontSize(18);doc.text('UNIQUE STUDY POINT',115,18,{align:'center'});
 doc.setFontSize(9);doc.setFont('helvetica','normal');
 doc.text('By Sumeet Sahu | www.uniquestudyonline.com',105,28,{align:'center'});
 doc.setFillColor(237,137,54);doc.rect(0,42,210,11,'F');
@@ -671,18 +671,17 @@ if(!month)return toast('Select month','error');
 var monthName=new Date(month+'-01').toLocaleDateString('en-IN',{month:'long',year:'numeric'});
 var monthAtt=att.filter(function(a){return a.date&&a.date.startsWith(month)});
 var stuData={};
-for(var i=0;i<stu.length;i++){stuData[stu[i].id]={name:stu[i].name,class:stu[i].class,present:0,absent:0}}
-for(var i=0;i<monthAtt.length;i++){var a=monthAtt[i];if(stuData[a.sid]){if(a.status==='present')stuData[a.sid].present++;else stuData[a.sid].absent++}}
+for(var i=0;i<stu.length;i++){stuData[stu[i].id]={name:stu[i].name,class:stu[i].class,present:0,absent:0,presentDates:[],absentDates:[]}}
+for(var i=0;i<monthAtt.length;i++){var a=monthAtt[i];if(stuData[a.sid]){if(a.status==='present'){stuData[a.sid].present++;stuData[a.sid].presentDates.push(new Date(a.date).getDate())}else{stuData[a.sid].absent++;stuData[a.sid].absentDates.push(new Date(a.date).getDate())}}}
 
 var jsPDF=window.jspdf.jsPDF,doc=new jsPDF();
-// Header - same as report
 doc.setFillColor(26,53,93);doc.rect(0,0,210,42,'F');
-doc.setFillColor(237,137,54);doc.circle(33,27,9,'F');
-doc.setTextColor(255);doc.setFontSize(14);doc.setFont('helvetica','bold');
-doc.text('U',33,30,{align:'center'});
-doc.setFontSize(18);doc.text('UNIQUE STUDY POINT',105,18,{align:'center'});
+doc.setFillColor(237,137,54);doc.roundedRect(18,12,30,20,3,3,'F');
+doc.setTextColor(255);doc.setFontSize(12);doc.setFont('helvetica','bold');
+doc.text('USP',33,25,{align:'center'});
+doc.setFontSize(18);doc.text('UNIQUE STUDY POINT',115,18,{align:'center'});
 doc.setFontSize(9);doc.setFont('helvetica','normal');
-doc.text('By Sumeet Sahu | www.uniquestudyonline.com',105,28,{align:'center'});
+doc.text('By Sumeet Sahu | www.uniquestudyonline.com',115,28,{align:'center'});
 doc.setFillColor(237,137,54);doc.rect(0,42,210,11,'F');
 doc.setFontSize(11);doc.setFont('helvetica','bold');
 doc.text('MONTHLY ATTENDANCE REPORT - '+monthName.toUpperCase(),105,49,{align:'center'});
@@ -691,9 +690,11 @@ var tableData=[];var keys=Object.keys(stuData);
 for(var i=0;i<keys.length;i++){
 var d=stuData[keys[i]],total=d.present+d.absent,pct=total>0?Math.round((d.present/total)*100):0;
 var remark=pct>=90?'Excellent':pct>=75?'Good':pct>=50?'Average':'Poor';
-tableData.push([i+1,d.name,d.class,d.present,d.absent,total,pct+'%',remark]);
+var pDates=d.presentDates.sort(function(a,b){return a-b}).join(',');
+var aDates=d.absentDates.sort(function(a,b){return a-b}).join(',');
+tableData.push([i+1,d.name,d.class,d.present+'\n('+pDates+')',d.absent+'\n('+(aDates||'-')+')',pct+'%',remark]);
 }
-doc.autoTable({startY:58,head:[['#','Name','Class','Present','Absent','Total','%','Remark']],body:tableData,theme:'grid',headStyles:{fillColor:[26,53,93]},bodyStyles:{fontSize:8}});
+doc.autoTable({startY:58,head:[['#','Name','Class','Present (Dates)','Absent (Dates)','%','Remark']],body:tableData,theme:'grid',headStyles:{fillColor:[26,53,93],fontSize:8},bodyStyles:{fontSize:7},columnStyles:{3:{cellWidth:35},4:{cellWidth:35}}});
 
 doc.setFillColor(26,53,93);doc.rect(0,280,210,17,'F');
 doc.setTextColor(255);doc.setFontSize(7);
@@ -885,6 +886,134 @@ db.ref('alerts').push({sid:sid,msg:s.name+' '+msg,time:Date.now()});
 }
 closeM('alertModal');document.getElementById('alertMsg').value='';toast('Opening WA...','success');
 }
+
+function renTests(){
+var sorted=tst.slice().sort(function(a,b){return(b.createdAt||0)-(a.createdAt||0)});
+var html='';
+for(var i=0;i<sorted.length;i++){
+var t=sorted[i],cnt=0;
+for(var j=0;j<res.length;j++){if(res[j].tid===t.id)cnt++}
+html+='<div class="test-card"><div style="font-weight:700;font-size:14px;margin-bottom:4px">'+t.name+'</div><div style="font-size:11px;color:#888;margin-bottom:10px">📖 '+t.subject+' • 📅 '+formatDate(t.date)+' • '+(t.testClass||'All')+' • '+t.totalMarks+' marks • '+cnt+' results</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-small" style="background:#667eea" onclick="openMk(\''+t.id+'\')">📝 Marks</button><button class="btn-small btn-del" onclick="delTest(\''+t.id+'\')">🗑️</button></div></div>';
+}
+document.getElementById('testL').innerHTML=html||'<div class="empty">No tests</div>';
+}
+
+function saveT(){
+var n=document.getElementById('tN').value.trim(),subj=document.getElementById('tSubj').value,cls=document.getElementById('tClass').value,m=document.getElementById('tM').value,d=document.getElementById('tD').value,notify=document.getElementById('tNotify').value;
+if(!n||!subj){toast('Fill name & subject','error');return}
+db.ref('tests').push({name:n,subject:subj,testClass:cls||'All',totalMarks:parseInt(m)||50,date:d,createdAt:Date.now()}).then(function(){
+if(notify==='all'&&stu.length){
+var nums=stu.map(function(s){return s.mobile}).join(',');
+fetch('https://www.fast2sms.com/dev/bulkV2?authorization=P3WtxzoqRgB58mSnZ1vJAwGQ2p7UTY0ci6dLjlhbkDCf4auKHI2qKczUL1AMVRj6WSDItJekFaZxP8no&route=q&message='+encodeURIComponent('UNIQUE STUDY POINT: Test '+n+' ('+subj+') on '+formatDate(d)+'. -Sumeet Sahu')+'&flash=0&numbers='+nums,{method:'GET',mode:'no-cors'});
+db.ref('alerts').push({sid:'ALL',msg:'Test: '+n+' on '+formatDate(d),time:Date.now()});
+}else if(notify==='class'&&cls){
+var clsStu=stu.filter(function(s){return s.class===cls});
+if(clsStu.length){
+var nums=clsStu.map(function(s){return s.mobile}).join(',');
+fetch('https://www.fast2sms.com/dev/bulkV2?authorization=P3WtxzoqRgB58mSnZ1vJAwGQ2p7UTY0ci6dLjlhbkDCf4auKHI2qKczUL1AMVRj6WSDItJekFaZxP8no&route=q&message='+encodeURIComponent('UNIQUE STUDY POINT: Test '+n+' for Class '+cls+' on '+formatDate(d)+'. -Sumeet Sahu')+'&flash=0&numbers='+nums,{method:'GET',mode:'no-cors'});
+}
+}
+closeM('addTModal');
+document.getElementById('tN').value='';document.getElementById('tSubj').value='';document.getElementById('tClass').value='';document.getElementById('tNotify').value='none';
+toast('Test Created!','success');
+});
+}
+
+function delTest(id){
+if(confirm('Delete test and all results?')){
+db.ref('tests/'+id).remove();
+db.ref('results').orderByChild('tid').equalTo(id).once('value',function(s){s.forEach(function(c){db.ref('results/'+c.key).remove()})});
+toast('Deleted!','success');
+}
+}
+
+function openMk(tid){
+ctid=tid;
+var t=null;for(var i=0;i<tst.length;i++){if(tst[i].id===tid){t=tst[i];break}}
+if(!t)return;
+document.getElementById('mkTN').textContent=t.name+' ('+t.totalMarks+')';
+var html='';
+var testStu=t.testClass&&t.testClass!=='All'?stu.filter(function(s){return s.class===t.testClass}):stu;
+for(var i=0;i<testStu.length;i++){
+var s=testStu[i],r=null;
+for(var j=0;j<res.length;j++){if(res[j].tid===tid&&res[j].sid===s.id){r=res[j];break}}
+var av=s.photo?'<img src="'+s.photo+'">':s.name.charAt(0);
+html+='<div class="card"><div class="avatar">'+av+'</div><div class="card-info"><div class="card-title">'+s.name+' <small>('+s.class+')</small></div></div><input type="number" id="mk_'+s.id+'" value="'+(r?r.marks:'')+'" placeholder="Marks" style="width:70px;padding:8px;border:2px solid #e8e8e8;border-radius:8px"></div>';
+}
+document.getElementById('mkL').innerHTML=html;
+openM('addMkModal');
+}
+
+function saveMk(){
+var t=null;for(var i=0;i<tst.length;i++){if(tst[i].id===ctid){t=tst[i];break}}
+var testStu=t&&t.testClass&&t.testClass!=='All'?stu.filter(function(s){return s.class===t.testClass}):stu;
+for(var i=0;i<testStu.length;i++){
+var s=testStu[i],inp=document.getElementById('mk_'+s.id);
+if(inp&&inp.value!==''){
+var ex=null;
+for(var j=0;j<res.length;j++){if(res[j].tid===ctid&&res[j].sid===s.id){ex=res[j];break}}
+if(ex)db.ref('results/'+ex.id).update({marks:parseInt(inp.value)});
+else db.ref('results').push({tid:ctid,sid:s.id,marks:parseInt(inp.value)});
+}
+}
+closeM('addMkModal');toast('Marks Saved!','success');
+}
+
+function sendMkSMS(){
+var t=null;for(var i=0;i<tst.length;i++){if(tst[i].id===ctid){t=tst[i];break}}
+if(!t)return;
+var nums=[];
+for(var i=0;i<stu.length;i++){for(var j=0;j<res.length;j++){if(res[j].tid===ctid&&res[j].sid===stu[i].id){nums.push(stu[i].mobile);break}}}
+if(nums.length){
+fetch('https://www.fast2sms.com/dev/bulkV2?authorization=P3WtxzoqRgB58mSnZ1vJAwGQ2p7UTY0ci6dLjlhbkDCf4auKHI2qKczUL1AMVRj6WSDItJekFaZxP8no&route=q&message='+encodeURIComponent('UNIQUE STUDY POINT: '+t.name+' results out. -Sumeet Sahu, '+PHONE)+'&flash=0&numbers='+nums.join(','),{method:'GET',mode:'no-cors'});
+toast('SMS Sent!','success');
+}
+}
+
+function sendMkWA(){
+var t=null;for(var i=0;i<tst.length;i++){if(tst[i].id===ctid){t=tst[i];break}}
+if(!t)return;
+var idx=0;
+for(var i=0;i<stu.length;i++){
+var s=stu[i],r=null;
+for(var j=0;j<res.length;j++){if(res[j].tid===ctid&&res[j].sid===s.id){r=res[j];break}}
+if(r){
+var pct=Math.round((r.marks/t.totalMarks)*100);
+(function(d,st,mk,pc){setTimeout(function(){window.open('https://wa.me/91'+st.mobile+'?text='+encodeURIComponent('UNIQUE STUDY POINT\n'+st.name+'\n'+t.name+': '+mk+'/'+t.totalMarks+' ('+pc+'%)\n-Sumeet Sahu, '+PHONE),'_blank')},d*1500)})(idx,s,r.marks,pct);idx++;
+}
+}
+if(idx)toast('Opening WA...','success');
+}
+
+function renAWs(){
+var f=wsFilter==='all'?worksheets:worksheets.filter(function(w){return w.subject===wsFilter});
+f.sort(function(a,b){return(b.createdAt||0)-(a.createdAt||0)});
+var html='';
+for(var i=0;i<f.length;i++){
+var w=f[i];
+html+='<div class="ws-card"><div style="font-weight:700;font-size:14px;margin-bottom:4px">'+w.title+'</div><div style="font-size:11px;color:#888;margin-bottom:10px">📖 '+w.subject+' • Class '+w.class+' • '+formatDate(w.createdAt)+'</div><div style="display:flex;gap:8px"><button class="btn-small" style="background:#25D366" onclick="window.open(\''+w.url+'\',\'_blank\')">📥</button><button class="btn-small btn-del" onclick="delWs(\''+w.id+'\')">🗑️</button></div></div>';
+}
+document.getElementById('aWsList').innerHTML=html||'<div class="empty">No worksheets</div>';
+}
+
+function saveWs(){
+var cls=document.getElementById('wsClass').value,subj=document.getElementById('wsSubject').value,title=document.getElementById('wsTitle').value.trim(),fileInput=document.getElementById('wsFile');
+if(!cls||!subj||!title){toast('Fill all fields','error');return}
+if(!fileInput.files.length){toast('Select file','error');return}
+toast('Uploading...','');
+uploadToCloudinary(fileInput.files[0],function(url){
+if(url){
+db.ref('worksheets').push({class:cls,subject:subj,title:title,url:url,createdAt:Date.now()}).then(function(){
+closeM('wsModal');
+document.getElementById('wsClass').value='';document.getElementById('wsSubject').value='';document.getElementById('wsTitle').value='';document.getElementById('wsFile').value='';
+document.getElementById('filePreview').style.display='none';document.getElementById('uploadBox').style.display='block';
+toast('Uploaded!','success');
+});
+}
+});
+}
+
+function delWs(id){if(confirm('Delete?')){db.ref('worksheets/'+id).remove();toast('Deleted!','success')}}
 </script>
 </body>
 </html>
