@@ -124,7 +124,10 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <div class="dashboard" id="parentDash">
 <div class="page active" id="pHome">
 <div class="header">
-<button class="logout-btn" onclick="logout()">🚪</button>
+<div style="position:absolute;top:20px;right:20px;display:flex;gap:8px">
+<button id="notifBadge" onclick="showP('pAlerts');renPAlerts()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:8px 14px;border-radius:10px;cursor:pointer;position:relative">🔔<span id="notifCount" style="position:absolute;top:-5px;right:-5px;background:#ff6b6b;color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;display:none">0</span></button>
+<button class="logout-btn" onclick="logout()" style="position:static">🚪</button>
+</div>
 <div class="profile-pic" id="pPhoto"><span id="pInit">S</span></div>
 <h1 id="pWelcome">Welcome</h1>
 <p>UNIQUE STUDY POINT</p>
@@ -142,8 +145,12 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <div class="header"><h1>📝 Results</h1></div>
 <div class="filter-row" id="resFilters" style="margin-top:15px"></div>
 <div id="resultsList"></div>
-<div class="chart-box" id="chartBox" style="display:none">
-<h3>📊 Subject Analysis</h3>
+<div class="chart-box" id="barChartBox" style="display:none">
+<h3>📊 Performance Bar Chart</h3>
+<div class="chart-wrap"><canvas id="barChart"></canvas></div>
+</div>
+<div class="chart-box" id="pieChartBox" style="display:none">
+<h3>📈 Subject-wise Pie Chart</h3>
 <div class="chart-wrap"><canvas id="pieChart"></canvas></div>
 </div>
 <div style="padding:15px 20px"><button class="btn btn-dl" onclick="viewReport()">📥 Download Report Card</button></div>
@@ -159,6 +166,17 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <div class="header"><h1>🔔 Alert History</h1></div>
 <div style="padding:15px 20px"><button class="btn btn-dl" onclick="downloadAlertPDF()">📥 Download Report</button></div>
 <div class="list" id="pAlertsList"></div>
+</div>
+
+<div class="page" id="pAttendance">
+<div class="header"><h1>📋 My Attendance</h1></div>
+<div class="stats" style="margin-top:0">
+<div class="stat"><div class="stat-val" id="pTotalDays">0</div><div class="stat-lbl">TOTAL</div></div>
+<div class="stat"><div class="stat-val" id="pPresentDays">0</div><div class="stat-lbl">PRESENT</div></div>
+<div class="stat"><div class="stat-val" id="pAttPercent">0%</div><div class="stat-lbl">PERCENTAGE</div></div>
+</div>
+<div style="padding:15px 20px"><button class="btn btn-dl" onclick="downloadPAttPDF()">📥 Download Attendance Report</button></div>
+<div id="pAttMonthList" style="padding:0 20px"></div>
 </div>
 
 <div class="page" id="pFees">
@@ -279,11 +297,13 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <div class="form-group"><label>Student</label><select id="fStu"></select></div>
 <div class="form-group"><label>Amount</label><input type="number" id="fAmt"></div>
 <div class="form-group"><label>Date</label><input type="date" id="fDate"></div>
+<div class="form-group"><label>Remark</label><input type="text" id="fRemark" placeholder="e.g. June month fee"></div>
 </div><div class="modal-footer"><button class="btn" onclick="saveF()">Save</button></div></div></div>
 
 <div class="modal" id="alertModal"><div class="modal-content"><div class="modal-header"><h2 class="modal-title">🔔 Send Alert</h2><button class="modal-close" onclick="closeM('alertModal')">×</button></div><div class="modal-body">
 <div class="form-group"><label>Student</label><select id="alertStu"></select></div>
-<div class="form-group"><label>Message</label><textarea id="alertMsg" rows="3" placeholder="Type message..."></textarea></div>
+<div class="form-group"><label>Message</label><textarea id="alertMsg" rows="3" placeholder="Type or select template..."></textarea></div>
+<button type="button" class="btn" style="background:#f0f2f5;color:#667eea;margin-bottom:10px" onclick="openM('alertTplModal')">📝 Select Template</button>
 </div><div class="modal-footer"><button class="btn btn-sms" onclick="sendAlertSMS()">📱 SMS</button><button class="btn btn-wa" onclick="sendAlertWA()">💬 WA</button></div></div></div>
 
 <div class="modal" id="wsModal"><div class="modal-content"><div class="modal-header"><h2 class="modal-title">📤 Upload Worksheet</h2><button class="modal-close" onclick="closeM('wsModal')">×</button></div><div class="modal-body">
@@ -297,6 +317,41 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <div class="file-preview" id="filePreview"><span>📄</span><span id="fileName" style="flex:1"></span></div>
 <input type="file" id="wsFile" style="display:none" onchange="if(this.files.length){document.getElementById('fileName').textContent=this.files[0].name;document.getElementById('filePreview').style.display='flex';document.getElementById('uploadBox').style.display='none'}">
 </div><div class="modal-footer"><button class="btn btn-green" onclick="saveWs()">📤 Upload</button></div></div></div>
+
+<div class="modal" id="editFModal"><div class="modal-content"><div class="modal-header"><h2 class="modal-title">✏️ Edit Fee</h2><button class="modal-close" onclick="closeM('editFModal')">×</button></div><div class="modal-body">
+<input type="hidden" id="editFId">
+<div class="form-group"><label>Amount</label><input type="number" id="editFAmt"></div>
+<div class="form-group"><label>Date</label><input type="date" id="editFDate"></div>
+<div class="form-group"><label>Remark</label><input type="text" id="editFRemark" placeholder="e.g. June month fee"></div>
+</div><div class="modal-footer"><button class="btn btn-green" onclick="updateFee()">💾 Update</button><button class="btn btn-del" onclick="deleteFee()">🗑️ Delete</button></div></div></div>
+
+<div class="modal" id="alertTplModal"><div class="modal-content"><div class="modal-header"><h2 class="modal-title">📝 Alert Templates</h2><button class="modal-close" onclick="closeM('alertTplModal')">×</button></div><div class="modal-body">
+<h4 style="color:#ff6b6b;margin-bottom:8px">⚠️ Negative Alerts</h4>
+<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:15px">
+<button class="btn-small" style="background:#ff6b6b" onclick="setAlertTpl('was ABSENT today')">Absent</button>
+<button class="btn-small" style="background:#ff6b6b" onclick="setAlertTpl('came LATE to class')">Late</button>
+<button class="btn-small" style="background:#ff6b6b" onclick="setAlertTpl('homework not completed')">No HW</button>
+<button class="btn-small" style="background:#ff6b6b" onclick="setAlertTpl('poor performance in test')">Poor Test</button>
+<button class="btn-small" style="background:#ff6b6b" onclick="setAlertTpl('indiscipline in class')">Indiscipline</button>
+<button class="btn-small" style="background:#ff6b6b" onclick="setAlertTpl('fees pending, please clear')">Fee Due</button>
+</div>
+<h4 style="color:#25D366;margin-bottom:8px">✅ Positive Alerts</h4>
+<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:15px">
+<button class="btn-small" style="background:#25D366" onclick="setAlertTpl('excellent performance!')">Excellent</button>
+<button class="btn-small" style="background:#25D366" onclick="setAlertTpl('good progress in studies')">Good Progress</button>
+<button class="btn-small" style="background:#25D366" onclick="setAlertTpl('homework completed on time')">HW Done</button>
+<button class="btn-small" style="background:#25D366" onclick="setAlertTpl('topped in test!')">Test Topper</button>
+<button class="btn-small" style="background:#25D366" onclick="setAlertTpl('very active in class')">Active</button>
+<button class="btn-small" style="background:#25D366" onclick="setAlertTpl('fees paid, thank you!')">Fee Paid</button>
+</div>
+<h4 style="color:#667eea;margin-bottom:8px">ℹ️ Info Alerts</h4>
+<div style="display:flex;flex-wrap:wrap;gap:6px">
+<button class="btn-small" style="background:#667eea" onclick="setAlertTpl('holiday tomorrow')">Holiday</button>
+<button class="btn-small" style="background:#667eea" onclick="setAlertTpl('PTM scheduled this week')">PTM</button>
+<button class="btn-small" style="background:#667eea" onclick="setAlertTpl('exam starting from next week')">Exam Notice</button>
+<button class="btn-small" style="background:#667eea" onclick="setAlertTpl('new batch timings updated')">Timing Change</button>
+</div>
+</div></div></div>
 
 <div class="toast" id="toast"></div>
 
@@ -319,18 +374,32 @@ function getAlertType(msg){var neg=['absent','late','indiscipline','poor','low']
 
 function uploadToCloudinary(file,cb){
 toast('Uploading...','');
+// Convert file to base64 and store in Firebase
+var reader=new FileReader();
+reader.onload=function(e){
+var base64=e.target.result;
+// For images, store base64 directly
+if(file.type.startsWith('image/')){
+cb(base64);
+toast('Uploaded!','success');
+}else{
+// For PDFs and docs, upload to free file hosting
 var fd=new FormData();
 fd.append('file',file);
-fd.append('upload_preset','usp_uploads');
-fd.append('folder','usp_materials');
-fetch('https://api.cloudinary.com/v1_1/'+CLOUD+'/auto/upload',{method:'POST',body:fd})
+fetch('https://tmpfiles.org/api/v1/upload',{method:'POST',body:fd})
 .then(function(r){return r.json()})
 .then(function(d){
-console.log('Cloudinary response:',d);
-if(d.secure_url){cb(d.secure_url);toast('Uploaded!','success')}
-else{console.error('Upload error:',d);cb(null);toast('Upload failed: '+(d.error?d.error.message:'Unknown'),'error')}
+if(d.data&&d.data.url){
+var dlUrl=d.data.url.replace('tmpfiles.org/','tmpfiles.org/dl/');
+cb(dlUrl);
+toast('Uploaded!','success');
+}else{cb(null);toast('Upload failed','error')}
 })
-.catch(function(e){console.error('Fetch error:',e);cb(null);toast('Upload failed','error')})
+.catch(function(){cb(null);toast('Upload failed','error')});
+}
+};
+reader.onerror=function(){cb(null);toast('Read failed','error')};
+reader.readAsDataURL(file);
 }
 
 function upPhoto(inp,type){
@@ -372,7 +441,7 @@ function showAdmin(){document.getElementById('loginPage').style.display='none';d
 function showParent(){document.getElementById('loginPage').style.display='none';document.getElementById('parentDash').classList.add('active');initParent();toast('Welcome!','success')}
 
 function initParent(){
-document.getElementById('pNav').innerHTML='<button class="nav-item active" onclick="showP(\'pHome\')"><span>🏠</span><span>Home</span></button><button class="nav-item" onclick="showP(\'pResults\');renPRes()"><span>📝</span><span>Results</span></button><button class="nav-item" onclick="showP(\'pMaterials\');renPMat()"><span>📚</span><span>Materials</span></button><button class="nav-item" onclick="showP(\'pAlerts\');renPAlerts()"><span>🔔</span><span>Alerts</span></button><button class="nav-item" onclick="showP(\'pFees\')"><span>💰</span><span>Fees</span></button>';
+document.getElementById('pNav').innerHTML='<button class="nav-item active" onclick="showP(\'pHome\')"><span>🏠</span><span>Home</span></button><button class="nav-item" onclick="showP(\'pResults\');renPRes()"><span>📝</span><span>Results</span></button><button class="nav-item" onclick="showP(\'pAttendance\');renPAtt()"><span>📋</span><span>Attend</span></button><button class="nav-item" onclick="showP(\'pMaterials\');renPMat()"><span>📚</span><span>Materials</span></button><button class="nav-item" onclick="showP(\'pFees\')"><span>💰</span><span>Fees</span></button>';
 document.getElementById('resFilters').innerHTML='<button class="filter-btn active" onclick="setResF(this,\'all\')">All</button><button class="filter-btn" onclick="setResF(this,\'5\')">Last 5</button><button class="filter-btn" onclick="setResF(this,\'10\')">Last 10</button><button class="filter-btn" onclick="setResF(this,\'Mathematics\')">Maths</button><button class="filter-btn" onclick="setResF(this,\'Science\')">Science</button><button class="filter-btn" onclick="setResF(this,\'Social Science\')">Social Science</button>';
 document.getElementById('pMatFilters').innerHTML='<button class="filter-btn active" onclick="setMatF(this,\'all\')">All</button><button class="filter-btn" onclick="setMatF(this,\'Mathematics\')">Maths</button><button class="filter-btn" onclick="setMatF(this,\'Science\')">Science</button><button class="filter-btn" onclick="setMatF(this,\'Social Science\')">Social Science</button>';
 }
@@ -392,7 +461,7 @@ function setWsF(btn,c){document.querySelectorAll('#wsFilters .filter-btn').forEa
 function setResF(btn,f){document.querySelectorAll('#resFilters .filter-btn').forEach(function(b){b.classList.remove('active')});btn.classList.add('active');resFilter=f;renPRes()}
 function setMatF(btn,f){document.querySelectorAll('#pMatFilters .filter-btn').forEach(function(b){b.classList.remove('active')});btn.classList.add('active');matFilter=f;renPMat()}
 
-function render(){if(cu&&cu.role==='admin'){updAdmin();renStu();renTests();renFees();renAWs();ldDD()}if(cu&&cu.role==='parent'){renPHome();renPRes();renPMat();renPFees()}}
+function render(){if(cu&&cu.role==='admin'){updAdmin();renStu();renTests();renFees();renAWs();ldDD()}if(cu&&cu.role==='parent'){renPHome();renPRes();renPMat();renPFees();updateNotifBadge()}}
 // Parent Functions
 function renPHome(){
 if(!cu||cu.role!=='parent')return;
@@ -447,7 +516,8 @@ var r=myRes[i],pct=Math.round((r.marks/r.test.totalMarks)*100),g=getGrade(pct);
 html+='<div class="result-card"><div class="score-circle" style="background:'+g.c+'">'+g.g+'</div><div class="card-info"><div class="card-title">'+r.test.name+' - '+pct+'%</div><div class="card-sub">'+r.marks+'/'+r.test.totalMarks+' • '+r.test.subject+' • '+formatDate(r.test.date)+'</div></div></div>';
 }
 document.getElementById('resultsList').innerHTML=html||'<div class="empty">No results found</div>';
-// Render pie chart
+// Render charts
+renderBarChart(myRes);
 renderPieChart(myRes);
 }
 
@@ -591,16 +661,16 @@ doc.text(subjList||'All',150,66);doc.text(formatDate(Date.now()),150,73);
 var tableData=[];
 for(var i=0;i<myRes.length;i++){
 var r=myRes[i],pct=Math.round((r.marks/r.test.totalMarks)*100),g=getGrade(pct);
-tableData.push([r.test.name,r.test.subject,formatDate(r.test.date),r.marks+'/'+r.test.totalMarks,pct+'%',g.g]);
+tableData.push([r.test.name,formatDate(r.test.date),r.marks+'/'+r.test.totalMarks,pct+'%',g.g]);
 }
 doc.autoTable({
 startY:90,
-head:[['Test Name','Subject','Date','Marks','Percentage','Grade']],
+head:[['Test Name','Date','Marks','%','Grade']],
 body:tableData,
 theme:'grid',
 headStyles:{fillColor:[26,53,93],textColor:255,fontSize:9,fontStyle:'bold'},
 bodyStyles:{fontSize:9,textColor:80},
-columnStyles:{0:{cellWidth:40},1:{cellWidth:35},2:{cellWidth:28},3:{cellWidth:25},4:{cellWidth:25},5:{cellWidth:20}}
+columnStyles:{0:{cellWidth:55},1:{cellWidth:35},2:{cellWidth:30},3:{cellWidth:25},4:{cellWidth:20}}
 });
 
 var y=doc.lastAutoTable.finalY+8;
@@ -841,7 +911,7 @@ var html='';
 for(var i=0;i<sorted.length;i++){
 var f=sorted[i],s=null;
 for(var j=0;j<stu.length;j++){if(stu[j].id===f.sid){s=stu[j];break}}
-if(s)html+='<div class="card"><div class="avatar">💰</div><div class="card-info"><div class="card-title">'+s.name+'</div><div class="card-sub">₹'+f.amount+' • '+formatDate(f.date)+'</div></div></div>';
+if(s)html+='<div class="card"><div class="avatar">💰</div><div class="card-info"><div class="card-title">'+s.name+'</div><div class="card-sub">₹'+f.amount+' • '+formatDate(f.date)+(f.remark?' • '+f.remark:'')+'</div></div><button class="btn-small" style="background:#667eea" onclick="openEditF(\''+f.id+'\')">✏️</button></div>';
 }
 document.getElementById('feeL').innerHTML=html||'<div class="empty">No payments</div>';
 }
@@ -856,9 +926,9 @@ document.getElementById('fStu').innerHTML=fOpts;
 }
 
 function saveF(){
-var sid=document.getElementById('fStu').value,amt=document.getElementById('fAmt').value,d=document.getElementById('fDate').value;
+var sid=document.getElementById('fStu').value,amt=document.getElementById('fAmt').value,d=document.getElementById('fDate').value,rem=document.getElementById('fRemark').value;
 if(!sid||!amt)return toast('Fill all','error');
-db.ref('fees').push({sid:sid,amount:parseInt(amt),date:d}).then(function(){closeM('addFModal');document.getElementById('fAmt').value='';toast('Saved!','success')});
+db.ref('fees').push({sid:sid,amount:parseInt(amt),date:d,remark:rem}).then(function(){closeM('addFModal');document.getElementById('fAmt').value='';document.getElementById('fRemark').value='';toast('Saved!','success')});
 }
 
 function sendAlertSMS(){
@@ -915,6 +985,8 @@ document.getElementById('testL').innerHTML=html||'<div class="empty">No tests</d
 function saveT(){
 var n=document.getElementById('tN').value.trim(),subj=document.getElementById('tSubj').value,cls=document.getElementById('tClass').value,m=document.getElementById('tM').value,d=document.getElementById('tD').value,notify=document.getElementById('tNotify').value;
 if(!n||!subj){toast('Fill name & subject','error');return}
+// Always create alert for dashboard notification
+db.ref('alerts').push({sid:'ALL',msg:'📝 New Test: '+n+' ('+subj+') scheduled for '+formatDate(d),time:Date.now(),type:'info'});
 db.ref('tests').push({name:n,subject:subj,testClass:cls||'All',totalMarks:parseInt(m)||50,date:d,createdAt:Date.now()}).then(function(){
 if(notify==='all'&&stu.length){
 var nums=stu.map(function(s){return s.mobile}).join(',');
@@ -1036,6 +1108,137 @@ db.ref('worksheets/'+id).remove();
 toast('Deleted!','success');
 }
 }
+
+// Parent Attendance Functions
+function renPAtt(){
+if(!cu||cu.role!=='parent')return;
+var myAtt=att.filter(function(a){return a.sid===cu.id});
+var total=myAtt.length,pres=myAtt.filter(function(a){return a.status==='present'}).length;
+document.getElementById('pTotalDays').textContent=total;
+document.getElementById('pPresentDays').textContent=pres;
+document.getElementById('pAttPercent').textContent=total?Math.round((pres/total)*100)+'%':'0%';
+// Group by month
+var months={};
+myAtt.forEach(function(a){
+var d=new Date(a.date),k=d.toLocaleString('en-IN',{month:'long',year:'numeric'});
+if(!months[k]){months[k]={p:[],a:[]}}
+var day=d.getDate();
+if(a.status==='present')months[k].p.push(day);else months[k].a.push(day);
+});
+var html='';
+Object.keys(months).reverse().forEach(function(k){
+var m=months[k],mp=Math.round((m.p.length/(m.p.length+m.a.length))*100);
+html+='<div style="background:#fff;border-radius:16px;padding:15px;margin-bottom:12px"><h4 style="color:#667eea;margin-bottom:10px">📅 '+k+' ('+mp+'%)</h4>';
+html+='<div style="margin-bottom:8px"><span style="color:#25D366;font-weight:600">Present ('+m.p.length+'): </span><span style="font-size:12px">'+m.p.sort(function(a,b){return a-b}).join(', ')+'</span></div>';
+html+='<div><span style="color:#ff6b6b;font-weight:600">Absent ('+m.a.length+'): </span><span style="font-size:12px">'+(m.a.length?m.a.sort(function(a,b){return a-b}).join(', '):'-')+'</span></div></div>';
+});
+document.getElementById('pAttMonthList').innerHTML=html||'<div class="empty">No attendance records</div>';
+}
+
+function downloadPAttPDF(){
+var s=stu.find(function(x){return x.id===cu.id});
+if(!s)return;
+var myAtt=att.filter(function(a){return a.sid===cu.id});
+if(!myAtt.length)return toast('No attendance','error');
+var months={};
+myAtt.forEach(function(a){
+var d=new Date(a.date),k=d.toLocaleString('en-IN',{month:'long',year:'numeric'});
+if(!months[k]){months[k]={p:[],a:[]}}
+var day=d.getDate();
+if(a.status==='present')months[k].p.push(day);else months[k].a.push(day);
+});
+var jsPDF=window.jspdf.jsPDF,doc=new jsPDF();
+doc.setFillColor(26,53,93);doc.rect(0,0,210,42,'F');
+doc.setFillColor(237,137,54);doc.roundedRect(18,12,30,20,3,3,'F');
+doc.setTextColor(255);doc.setFontSize(12);doc.setFont('helvetica','bold');
+doc.text('USP',33,25,{align:'center'});
+doc.setFontSize(18);doc.text('UNIQUE STUDY POINT',115,18,{align:'center'});
+doc.setFontSize(9);doc.setFont('helvetica','normal');
+doc.text('By Sumeet Sahu | www.uniquestudyonline.com',115,28,{align:'center'});
+doc.setFillColor(237,137,54);doc.rect(0,42,210,11,'F');
+doc.setFontSize(11);doc.setFont('helvetica','bold');
+doc.text('ATTENDANCE REPORT - '+s.name,105,49,{align:'center'});
+var tableData=[];
+Object.keys(months).forEach(function(k){
+var m=months[k],pct=Math.round((m.p.length/(m.p.length+m.a.length))*100);
+var remark=pct>=90?'Excellent':pct>=75?'Good':pct>=50?'Average':'Poor';
+tableData.push([k,m.p.length,m.p.sort(function(a,b){return a-b}).join(', '),m.a.length,m.a.length?m.a.sort(function(a,b){return a-b}).join(', '):'-',pct+'%',remark]);
+});
+doc.autoTable({startY:58,head:[['Month','P','Present Dates','A','Absent Dates','%','Remark']],body:tableData,theme:'grid',headStyles:{fillColor:[26,53,93],fontSize:8},bodyStyles:{fontSize:7}});
+doc.setFillColor(26,53,93);doc.rect(0,280,210,17,'F');
+doc.setTextColor(255);doc.setFontSize(7);
+doc.text('www.uniquestudyonline.com | Contact: '+PHONE,105,290,{align:'center'});
+doc.save(s.name+'_Attendance.pdf');toast('Downloaded!','success');
+}
+
+// Notification Badge
+function updateNotifBadge(){
+if(!cu||cu.role!=='parent')return;
+var unread=alerts.filter(function(a){
+return(a.sid===cu.id||a.sid==='ALL')&&a.time>(cu.lastSeen||0);
+}).length;
+var badge=document.getElementById('notifCount');
+if(unread>0){badge.textContent=unread;badge.style.display='block'}
+else{badge.style.display='none'}
+}
+
+// Bar Chart
+var barChart=null;
+function renderBarChart(myRes){
+var box=document.getElementById('barChartBox');
+if(myRes.length===0){box.style.display='none';return}
+box.style.display='block';
+var labels=[],data=[],colors=[];
+myRes.slice(0,10).reverse().forEach(function(r){
+var pct=Math.round((r.marks/r.test.totalMarks)*100);
+labels.push(r.test.name.substring(0,8));
+data.push(pct);
+colors.push(pct>=80?'#25D366':pct>=60?'#667eea':pct>=40?'#f1c40f':'#ff6b6b');
+});
+if(barChart)barChart.destroy();
+barChart=new Chart(document.getElementById('barChart'),{
+type:'bar',
+data:{labels:labels,datasets:[{data:data,backgroundColor:colors}]},
+options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100}}}
+});
+}
+
+// Fee Edit/Delete Functions
+function openEditF(id){
+var f=fee.find(function(x){return x.id===id});
+if(!f)return;
+document.getElementById('editFId').value=f.id;
+document.getElementById('editFAmt').value=f.amount;
+document.getElementById('editFDate').value=f.date;
+document.getElementById('editFRemark').value=f.remark||'';
+openM('editFModal');
+}
+
+function updateFee(){
+var id=document.getElementById('editFId').value;
+var amt=document.getElementById('editFAmt').value;
+var d=document.getElementById('editFDate').value;
+var rem=document.getElementById('editFRemark').value;
+if(!amt)return toast('Enter amount','error');
+db.ref('fees/'+id).update({amount:parseInt(amt),date:d,remark:rem}).then(function(){
+closeM('editFModal');toast('Updated!','success');
+});
+}
+
+function deleteFee(){
+var id=document.getElementById('editFId').value;
+if(confirm('Delete this fee record?')){
+db.ref('fees/'+id).remove();
+closeM('editFModal');toast('Deleted!','success');
+}
+}
+
+// Alert Template
+function setAlertTpl(msg){
+document.getElementById('alertMsg').value=msg;
+closeM('alertTplModal');
+}
+
 </script>
 </body>
 </html>
