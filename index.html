@@ -135,9 +135,16 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <p>UNIQUE STUDY POINT</p>
 </div>
 <div class="stats">
-<div class="stat"><div class="stat-val" id="pAttDays">0</div><div class="stat-lbl">PRESENT</div></div>
+<div class="stat"><div class="stat-val" id="pRank">#-</div><div class="stat-lbl">CLASS RANK</div></div>
 <div class="stat"><div class="stat-val" id="pAvgPct">0%</div><div class="stat-lbl">AVG SCORE</div></div>
-<div class="stat"><div class="stat-val" id="pTestCnt">0</div><div class="stat-lbl">TESTS</div></div>
+<div class="stat"><div class="stat-val" id="pAttPct">0%</div><div class="stat-lbl">ATTENDANCE</div></div>
+</div>
+<div style="background:#fff;margin:0 20px 15px;padding:15px;border-radius:16px">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div><span style="font-size:11px;color:#888">Tests Taken</span><br><strong id="pTestCnt">0</strong></div>
+<div><span style="font-size:11px;color:#888">Present Days</span><br><strong id="pAttDays">0</strong></div>
+<div><span style="font-size:11px;color:#888">Class Average</span><br><strong id="pClassAvg">0%</strong></div>
+</div>
 </div>
 <div class="section"><h3 class="section-title">🔔 Recent Alerts</h3></div>
 <div class="list" id="notifList"></div>
@@ -168,6 +175,18 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <div class="header"><h1>🔔 Alert History</h1></div>
 <div style="padding:15px 20px"><button class="btn btn-dl" onclick="downloadAlertPDF()">📥 Download Report</button></div>
 <div class="list" id="pAlertsList"></div>
+</div>
+
+<div class="page" id="pLeave">
+<div class="header"><h1>📝 Leave Request</h1></div>
+<div class="section" style="padding-top:15px">
+<div class="form-group"><label>From Date</label><input type="date" id="leaveFrom"></div>
+<div class="form-group"><label>To Date</label><input type="date" id="leaveTo"></div>
+<div class="form-group"><label>Reason</label><textarea id="leaveReason" rows="3" placeholder="Enter reason for leave..."></textarea></div>
+<button class="btn" onclick="submitLeave()">📤 Submit Leave Request</button>
+</div>
+<h3 class="section-title" style="margin-top:20px">📋 My Leave Requests</h3>
+<div class="list" id="pLeaveList"></div>
 </div>
 
 <div class="page" id="pAttendance">
@@ -261,6 +280,17 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <button class="btn" onclick="ldDD();openM('alertModal')">📤 Send New Alert</button>
 </div>
 <div class="list" id="adminAlertList" style="margin-top:12px"></div>
+</div>
+
+<div class="page" id="aLeave">
+<div class="header"><h1>✋ Leave Requests</h1></div>
+<div class="filter-row" style="margin-top:15px">
+<button class="filter-btn active" onclick="setLeaveF(this,'all')">All</button>
+<button class="filter-btn" onclick="setLeaveF(this,'pending')">Pending</button>
+<button class="filter-btn" onclick="setLeaveF(this,'approved')">Approved</button>
+<button class="filter-btn" onclick="setLeaveF(this,'rejected')">Rejected</button>
+</div>
+<div class="list" id="adminLeaveList" style="margin-top:12px"></div>
 </div>
 
 <div class="nav" id="aNav"></div>
@@ -374,7 +404,7 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <script>
 firebase.initializeApp({apiKey:"AIzaSyA5FjFHqFRBiGlLVe-jn7njpfXzf8hQ1cY",authDomain:"unique-study-point-2.firebaseapp.com",databaseURL:"https://unique-study-point-2-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"unique-study-point-2"});
 var db=firebase.database(),cu=null,ut='parent',stu=[],tst=[],res=[],att=[],fee=[],alerts=[],worksheets=[],ctid=null,curFilter='all',wsFilter='all',resFilter='all',matFilter='all',pieChart=null,addPhotoUrl='',editPhotoUrl='',
-td=new Date().toISOString().split('T')[0],PHONE='8103405051',CLOUD='dukrrfqf6';
+td=new Date().toISOString().split('T')[0],PHONE='8103405051',CLOUD='dukrrfqf6',leaves=[],leaveFilter='all';
 document.getElementById('tD').value=td;document.getElementById('fDate').value=td;document.getElementById('attD').value=td;document.getElementById('sJoin').value=td;document.getElementById('attMonth').value=td.substring(0,7);
 
 function toast(m,t){var e=document.getElementById('toast');e.textContent=m;e.className='toast show '+(t||'');setTimeout(function(){e.classList.remove('show')},3000)}
@@ -434,6 +464,7 @@ db.ref('attendance').on('value',function(s){att=[];s.forEach(function(c){att.pus
 db.ref('fees').on('value',function(s){fee=[];s.forEach(function(c){fee.push(Object.assign({id:c.key},c.val()))});render()});
 db.ref('alerts').on('value',function(s){alerts=[];s.forEach(function(c){alerts.push(Object.assign({id:c.key},c.val()))});render()});
 db.ref('worksheets').on('value',function(s){worksheets=[];s.forEach(function(c){worksheets.push(Object.assign({id:c.key},c.val()))});render()});
+db.ref('leaves').on('value',function(s){leaves=[];s.forEach(function(c){leaves.push(Object.assign({id:c.key},c.val()))});render()});
 
 var sv=localStorage.getItem('usp_user');if(sv){cu=JSON.parse(sv);if(cu.role==='admin')showAdmin();else showParent()}
 
@@ -452,16 +483,16 @@ else toast('Invalid','error')
 }
 
 function showAdmin(){document.getElementById('loginPage').style.display='none';document.getElementById('adminDash').classList.add('active');initAdmin();toast('Welcome Admin!','success')}
-function showParent(){document.getElementById('loginPage').style.display='none';document.getElementById('parentDash').classList.add('active');initParent();toast('Welcome!','success')}
+function showParent(){document.getElementById('loginPage').style.display='none';document.getElementById('parentDash').classList.add('active');initParent();toast('Welcome!','success');setTimeout(checkFeeReminder,2000)}
 
 function initParent(){
-document.getElementById('pNav').innerHTML='<button class="nav-item active" onclick="showP(\'pHome\')"><span>🏠</span><span>Home</span></button><button class="nav-item" onclick="showP(\'pResults\');renPRes()"><span>📝</span><span>Results</span></button><button class="nav-item" onclick="showP(\'pAttendance\');renPAtt()"><span>📋</span><span>Attend</span></button><button class="nav-item" onclick="showP(\'pMaterials\');renPMat()"><span>📚</span><span>Materials</span></button><button class="nav-item" onclick="showP(\'pFees\')"><span>💰</span><span>Fees</span></button>';
+document.getElementById('pNav').innerHTML='<button class="nav-item active" onclick="showP(\'pHome\')"><span>🏠</span><span>Home</span></button><button class="nav-item" onclick="showP(\'pResults\');renPRes()"><span>📝</span><span>Results</span></button><button class="nav-item" onclick="showP(\'pAttendance\');renPAtt()"><span>📋</span><span>Attend</span></button><button class="nav-item" onclick="showP(\'pLeave\');renPLeave()"><span>✋</span><span>Leave</span></button><button class="nav-item" onclick="showP(\'pFees\')"><span>💰</span><span>Fees</span></button>';
 document.getElementById('resFilters').innerHTML='<button class="filter-btn active" onclick="setResF(this,\'all\')">All</button><button class="filter-btn" onclick="setResF(this,\'5\')">Last 5</button><button class="filter-btn" onclick="setResF(this,\'10\')">Last 10</button><button class="filter-btn" onclick="setResF(this,\'Mathematics\')">Maths</button><button class="filter-btn" onclick="setResF(this,\'Science\')">Science</button><button class="filter-btn" onclick="setResF(this,\'Social Science\')">Social Science</button>';
 document.getElementById('pMatFilters').innerHTML='<button class="filter-btn active" onclick="setMatF(this,\'all\')">All</button><button class="filter-btn" onclick="setMatF(this,\'Mathematics\')">Maths</button><button class="filter-btn" onclick="setMatF(this,\'Science\')">Science</button><button class="filter-btn" onclick="setMatF(this,\'Social Science\')">Social Science</button>';
 }
 
 function initAdmin(){
-document.getElementById('aNav').innerHTML='<button class="nav-item active" onclick="showA(\'aHome\')"><span>🏠</span><span>Home</span></button><button class="nav-item" onclick="showA(\'aAtt\');renAtt()"><span>📋</span><span>Attend</span></button><button class="nav-item" onclick="showA(\'aTests\')"><span>📝</span><span>Tests</span></button><button class="nav-item" onclick="showA(\'aAlerts\');renAdminAlerts()"><span>🔔</span><span>Alerts</span></button><button class="nav-item" onclick="showA(\'aFees\')"><span>💰</span><span>Fees</span></button>';
+document.getElementById('aNav').innerHTML='<button class="nav-item active" onclick="showA(\'aHome\')"><span>🏠</span><span>Home</span></button><button class="nav-item" onclick="showA(\'aAtt\');renAtt()"><span>📋</span><span>Attend</span></button><button class="nav-item" onclick="showA(\'aTests\')"><span>📝</span><span>Tests</span></button><button class="nav-item" onclick="showA(\'aLeave\');renAdminLeave()"><span>✋</span><span>Leave</span></button><button class="nav-item" onclick="showA(\'aFees\')"><span>💰</span><span>Fees</span></button>';
 document.getElementById('quickActions').innerHTML='<button class="action" onclick="openM(\'addSModal\')"><div class="action-icon">➕</div><div class="action-label">Add Student</div></button><button class="action" onclick="showA(\'aAtt\');renAtt()"><div class="action-icon">📋</div><div class="action-label">Attendance</div></button><button class="action" onclick="openM(\'addTModal\')"><div class="action-icon">📝</div><div class="action-label">Add Test</div></button><button class="action" onclick="ldDD();openM(\'alertModal\')"><div class="action-icon">🔔</div><div class="action-label">Send Alert</div></button>';
 document.getElementById('clsFilters').innerHTML='<button class="filter-btn active" onclick="setClsF(this,\'all\')">All</button><button class="filter-btn" onclick="setClsF(this,\'VI\')">VI</button><button class="filter-btn" onclick="setClsF(this,\'VII\')">VII</button><button class="filter-btn" onclick="setClsF(this,\'VIII\')">VIII</button><button class="filter-btn" onclick="setClsF(this,\'IX\')">IX</button><button class="filter-btn" onclick="setClsF(this,\'X\')">X</button>';
 document.getElementById('wsFilters').innerHTML='<button class="filter-btn active" onclick="setWsF(this,\'all\')">All</button><button class="filter-btn" onclick="setWsF(this,\'Mathematics\')">Maths</button><button class="filter-btn" onclick="setWsF(this,\'Science\')">Science</button><button class="filter-btn" onclick="setWsF(this,\'Social Science\')">Social Science</button>';
@@ -488,11 +519,17 @@ document.getElementById('pWelcome').textContent='Welcome, '+(s.name||'');
 // Stats
 var pres=0;for(var i=0;i<att.length;i++){if(att[i].sid===cu.id&&att[i].status==='present')pres++}
 document.getElementById('pAttDays').textContent=pres;
+var totalAtt=att.filter(function(a){return a.sid===cu.id}).length;
+var attPct=totalAtt>0?Math.round((pres/totalAtt)*100):0;
+document.getElementById('pAttPct').textContent=attPct+'%';
 var myRes=[],avgPct=0;
 for(var i=0;i<res.length;i++){if(res[i].sid===cu.id)myRes.push(res[i])}
 if(myRes.length){var t=0;for(var i=0;i<myRes.length;i++){var test=null;for(var j=0;j<tst.length;j++){if(tst[j].id===myRes[i].tid){test=tst[j];break}}if(test)t+=Math.round((myRes[i].marks/test.totalMarks)*100)}avgPct=Math.round(t/myRes.length)}
 document.getElementById('pAvgPct').textContent=avgPct+'%';
 document.getElementById('pTestCnt').textContent=myRes.length;
+var rankInfo=calculateRank(cu.id);
+document.getElementById('pRank').textContent='#'+rankInfo.rank;
+document.getElementById('pClassAvg').textContent=rankInfo.classAvg+'%';
 // Alerts
 var myAlerts=[];for(var i=0;i<alerts.length;i++){if(alerts[i].sid===cu.id||alerts[i].sid==='ALL')myAlerts.push(alerts[i])}
 myAlerts.sort(function(a,b){return(b.time||0)-(a.time||0)});
@@ -613,7 +650,7 @@ document.getElementById('feePend').textContent='₹'+pending;
 document.getElementById('feeStat').textContent=pending>0?'⚠️ Due':'✅ Clear';
 myFee.sort(function(a,b){return new Date(b.date)-new Date(a.date)});
 var html='';
-for(var i=0;i<myFee.length;i++){html+='<div class="card"><div class="avatar" style="background:#d4fc79;color:#333">💰</div><div class="card-info"><div class="card-title">₹'+myFee[i].amount+'</div><div class="card-sub">'+formatDate(myFee[i].date)+'</div></div></div>'}
+for(var i=0;i<myFee.length;i++){html+='<div class="card"><div class="avatar" style="background:#d4fc79;color:#333">💰</div><div class="card-info"><div class="card-title">₹'+myFee[i].amount+'</div><div class="card-sub">'+formatDate(myFee[i].date)+(myFee[i].remark?' • '+myFee[i].remark:'')+'</div></div><button class="btn-small" style="background:#25D366" onclick="genReceipt(\''+myFee[i].id+'\');">🧾</button></div>'}
 document.getElementById('feeList').innerHTML=html||'<div class="empty">No payments</div>';
 }
 // PDF Functions - Exact layout like sample
@@ -940,7 +977,7 @@ var html='';
 for(var i=0;i<sorted.length;i++){
 var f=sorted[i],s=null;
 for(var j=0;j<stu.length;j++){if(stu[j].id===f.sid){s=stu[j];break}}
-if(s)html+='<div class="card"><div class="avatar">💰</div><div class="card-info"><div class="card-title">'+s.name+'</div><div class="card-sub">₹'+f.amount+' • '+formatDate(f.date)+(f.remark?' • '+f.remark:'')+'</div></div><button class="btn-small" style="background:#667eea" onclick="openEditF(\''+f.id+'\')">✏️</button></div>';
+if(s)html+='<div class="card"><div class="avatar">💰</div><div class="card-info"><div class="card-title">'+s.name+'</div><div class="card-sub">₹'+f.amount+' • '+formatDate(f.date)+(f.remark?' • '+f.remark:'')+'</div></div><button class="btn-small" style="background:#25D366" onclick="genReceipt(\''+f.id+'\')">🧾</button><button class="btn-small" style="background:#667eea;margin-left:5px" onclick="openEditF(\''+f.id+'\')">✏️</button></div>';
 }
 document.getElementById('feeL').innerHTML=html||'<div class="empty">No payments</div>';
 }
@@ -1303,6 +1340,211 @@ if(confirm('Delete this alert?')){
 db.ref('alerts/'+id).remove();
 toast('Deleted!','success');
 }
+}
+
+// Calculate Student Rank
+function calculateRank(studentId){
+var classStudents=stu.filter(function(s){
+var target=stu.find(function(x){return x.id===studentId});
+return target&&s.class===target.class;
+});
+var avgScores=[];
+classStudents.forEach(function(s){
+var myRes=res.filter(function(r){return r.sid===s.id});
+if(myRes.length>0){
+var total=0;
+myRes.forEach(function(r){
+var t=tst.find(function(x){return x.id===r.tid});
+if(t)total+=Math.round((r.marks/t.totalMarks)*100);
+});
+avgScores.push({id:s.id,avg:Math.round(total/myRes.length)});
+}else{
+avgScores.push({id:s.id,avg:0});
+}
+});
+avgScores.sort(function(a,b){return b.avg-a.avg});
+var rank=1;
+for(var i=0;i<avgScores.length;i++){
+if(avgScores[i].id===studentId){rank=i+1;break}
+}
+return{rank:rank,total:classStudents.length,classAvg:avgScores.length?Math.round(avgScores.reduce(function(a,b){return a+b.avg},0)/avgScores.length):0};
+}
+
+// Auto Fee Reminder
+function checkFeeReminder(){
+if(!cu||cu.role!=='parent')return;
+var s=stu.find(function(x){return x.id===cu.id});
+if(!s)return;
+var myFee=fee.filter(function(f){return f.sid===cu.id});
+var paid=myFee.reduce(function(a,b){return a+b.amount},0);
+var join=new Date(s.joinDate||td),now=new Date();
+var months=Math.max(1,(now.getFullYear()-join.getFullYear())*12+(now.getMonth()-join.getMonth())+1);
+var due=(s.fee||500)*months,pending=Math.max(0,due-paid);
+if(pending>0){
+var today=new Date().getDate();
+var lastReminder=localStorage.getItem('usp_feeReminder_'+cu.id);
+var thisMonth=new Date().getMonth()+'-'+new Date().getFullYear();
+if(lastReminder!==thisMonth&&(today===1||today===5||today===10||today===15)){
+db.ref('alerts').push({sid:cu.id,msg:'Fee Reminder: Rs.'+pending+' pending. Please clear your dues.',time:Date.now(),type:'info'});
+localStorage.setItem('usp_feeReminder_'+cu.id,thisMonth);
+}
+}
+}
+
+// Generate Fee Receipt PDF
+function genReceipt(fid){
+var f=fee.find(function(x){return x.id===fid});
+if(!f)return toast('Receipt not found','error');
+var s=stu.find(function(x){return x.id===f.sid});
+if(!s)return toast('Student not found','error');
+var receiptNo='USP'+Date.now().toString().slice(-6);
+var jsPDF=window.jspdf.jsPDF,doc=new jsPDF();
+
+// Header
+doc.setFillColor(26,53,93);doc.rect(0,0,210,45,'F');
+doc.setFillColor(237,137,54);doc.roundedRect(15,10,35,25,3,3,'F');
+doc.setTextColor(255);doc.setFontSize(14);doc.setFont('helvetica','bold');
+doc.text('USP',32,26,{align:'center'});
+doc.setFontSize(20);doc.text('UNIQUE STUDY POINT',120,20,{align:'center'});
+doc.setFontSize(10);doc.setFont('helvetica','normal');
+doc.text('By Sumeet Sahu | Amitesh Nagar, Indore',120,30,{align:'center'});
+doc.text('www.uniquestudyonline.com | '+PHONE,120,38,{align:'center'});
+
+// Receipt Title
+doc.setFillColor(237,137,54);doc.rect(0,45,210,12,'F');
+doc.setFontSize(12);doc.setFont('helvetica','bold');
+doc.text('FEE RECEIPT',105,53,{align:'center'});
+
+// Receipt Details Box
+doc.setDrawColor(26,53,93);doc.setLineWidth(0.5);
+doc.roundedRect(15,65,180,70,3,3,'S');
+
+doc.setTextColor(26,53,93);doc.setFontSize(10);doc.setFont('helvetica','bold');
+doc.text('Receipt No:',25,78);
+doc.text('Date:',120,78);
+doc.text('Student Name:',25,92);
+doc.text('Class:',120,92);
+doc.text('Mobile:',25,106);
+doc.text('Amount Paid:',25,120);
+doc.text('Remark:',120,120);
+
+doc.setFont('helvetica','normal');doc.setTextColor(0);
+doc.text(receiptNo,65,78);
+doc.text(formatDate(f.date),145,78);
+doc.text(s.name,65,92);
+doc.text(s.class,145,92);
+doc.text(s.mobile,65,106);
+doc.setFontSize(14);doc.setFont('helvetica','bold');doc.setTextColor(34,139,34);
+doc.text('Rs. '+f.amount+'/-',65,120);
+doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(0);
+doc.text(f.remark||'-',145,120);
+
+// Amount in words
+doc.setTextColor(26,53,93);doc.setFont('helvetica','bold');
+doc.text('Amount in Words:',25,145);
+doc.setFont('helvetica','normal');doc.setTextColor(0);
+doc.text(numberToWords(f.amount)+' Rupees Only',75,145);
+
+// Signature area
+doc.setDrawColor(100);doc.setLineWidth(0.3);
+doc.line(25,175,80,175);
+doc.line(130,175,185,175);
+doc.setFontSize(8);doc.setTextColor(100);
+doc.text('Student/Parent Signature',35,180);
+doc.text('Authorized Signature',145,180);
+
+// Footer
+doc.setFillColor(26,53,93);doc.rect(0,275,210,22,'F');
+doc.setTextColor(255);doc.setFontSize(8);
+doc.text('This is a computer generated receipt from UNIQUE STUDY POINT',105,283,{align:'center'});
+doc.text('Thank you for your payment!',105,290,{align:'center'});
+
+doc.save('Receipt_'+s.name+'_'+formatDate(f.date)+'.pdf');
+toast('Receipt Downloaded!','success');
+}
+
+function numberToWords(n){
+var a=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+var b=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+if(n<20)return a[n];
+if(n<100)return b[Math.floor(n/10)]+(n%10?' '+a[n%10]:'');
+if(n<1000)return a[Math.floor(n/100)]+' Hundred'+(n%100?' '+numberToWords(n%100):'');
+if(n<100000)return numberToWords(Math.floor(n/1000))+' Thousand'+(n%1000?' '+numberToWords(n%1000):'');
+return numberToWords(Math.floor(n/100000))+' Lakh'+(n%100000?' '+numberToWords(n%100000):'');
+}
+
+// Leave Request Functions
+function submitLeave(){
+if(!cu||cu.role!=='parent')return;
+var from=document.getElementById('leaveFrom').value;
+var to=document.getElementById('leaveTo').value;
+var reason=document.getElementById('leaveReason').value.trim();
+if(!from||!to||!reason)return toast('Fill all fields','error');
+if(new Date(from)>new Date(to))return toast('Invalid dates','error');
+var s=stu.find(function(x){return x.id===cu.id});
+db.ref('leaves').push({
+sid:cu.id,
+name:s?s.name:'',
+class:s?s.class:'',
+fromDate:from,
+toDate:to,
+reason:reason,
+status:'pending',
+createdAt:Date.now()
+}).then(function(){
+document.getElementById('leaveFrom').value='';
+document.getElementById('leaveTo').value='';
+document.getElementById('leaveReason').value='';
+toast('Leave request submitted!','success');
+});
+}
+
+function renPLeave(){
+if(!cu||cu.role!=='parent')return;
+var myLeaves=leaves.filter(function(l){return l.sid===cu.id});
+myLeaves.sort(function(a,b){return(b.createdAt||0)-(a.createdAt||0)});
+var html='';
+myLeaves.forEach(function(l){
+var statusColor=l.status==='approved'?'#25D366':l.status==='rejected'?'#ff6b6b':'#f1c40f';
+var statusIcon=l.status==='approved'?'✅':l.status==='rejected'?'❌':'⏳';
+html+='<div class="card" style="border-left:4px solid '+statusColor+'"><div class="card-info"><div class="card-title">'+formatDate(l.fromDate)+' to '+formatDate(l.toDate)+'</div><div class="card-sub">'+l.reason+'</div><div style="margin-top:5px;font-size:11px;font-weight:600;color:'+statusColor+'">'+statusIcon+' '+l.status.toUpperCase()+'</div></div></div>';
+});
+document.getElementById('pLeaveList').innerHTML=html||'<div class="empty">No leave requests</div>';
+}
+
+function renAdminLeave(){
+var filtered=leaveFilter==='all'?leaves:leaves.filter(function(l){return l.status===leaveFilter});
+filtered.sort(function(a,b){return(b.createdAt||0)-(a.createdAt||0)});
+var html='';
+filtered.forEach(function(l){
+var statusColor=l.status==='approved'?'#25D366':l.status==='rejected'?'#ff6b6b':'#f1c40f';
+html+='<div class="card" style="border-left:4px solid '+statusColor+'"><div class="card-info"><div class="card-title">'+l.name+' ('+l.class+')</div><div class="card-sub">'+formatDate(l.fromDate)+' to '+formatDate(l.toDate)+'</div><div style="font-size:11px;color:#666;margin-top:3px">'+l.reason+'</div></div>';
+if(l.status==='pending'){
+html+='<div style="display:flex;flex-direction:column;gap:5px"><button class="btn-small" style="background:#25D366" onclick="updateLeave(\''+l.id+'\',\'approved\')">✓</button><button class="btn-small btn-del" onclick="updateLeave(\''+l.id+'\',\'rejected\')">✗</button></div>';
+}else{
+html+='<span style="font-size:11px;font-weight:600;color:'+statusColor+'">'+(l.status==='approved'?'✅':'❌')+'</span>';
+}
+html+='</div>';
+});
+document.getElementById('adminLeaveList').innerHTML=html||'<div class="empty">No leave requests</div>';
+}
+
+function setLeaveF(btn,f){
+document.querySelectorAll('#aLeave .filter-btn').forEach(function(b){b.classList.remove('active')});
+btn.classList.add('active');
+leaveFilter=f;
+renAdminLeave();
+}
+
+function updateLeave(id,status){
+db.ref('leaves/'+id).update({status:status}).then(function(){
+var l=leaves.find(function(x){return x.id===id});
+if(l){
+var msg=status==='approved'?'Your leave request ('+formatDate(l.fromDate)+' to '+formatDate(l.toDate)+') has been APPROVED.':'Your leave request ('+formatDate(l.fromDate)+' to '+formatDate(l.toDate)+') has been REJECTED.';
+db.ref('alerts').push({sid:l.sid,msg:msg,time:Date.now(),type:status==='approved'?'positive':'negative'});
+}
+toast('Leave '+status+'!','success');
+});
 }
 </script>
 </body>
