@@ -146,7 +146,16 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <div><span style="font-size:11px;color:#888">Class Average</span><br><strong id="pClassAvg">0%</strong></div>
 </div>
 </div>
-<div class="section"><h3 class="section-title">🔔 Recent Alerts</h3></div>
+<div class="section">
+<h3 class="section-title">⚡ Quick Access</h3>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:15px">
+<button style="background:#fff;border:none;padding:12px 8px;border-radius:12px;cursor:pointer" onclick="showP('pAttendance');renPAtt()"><div style="font-size:20px">📋</div><div style="font-size:9px;font-weight:600">Attendance</div></button>
+<button style="background:#fff;border:none;padding:12px 8px;border-radius:12px;cursor:pointer" onclick="showP('pAlerts');renPAlerts()"><div style="font-size:20px">🔔</div><div style="font-size:9px;font-weight:600">Alerts</div></button>
+<button style="background:#fff;border:none;padding:12px 8px;border-radius:12px;cursor:pointer" onclick="showP('pMaterials');renPMat()"><div style="font-size:20px">📚</div><div style="font-size:9px;font-weight:600">Materials</div></button>
+<button style="background:#fff;border:none;padding:12px 8px;border-radius:12px;cursor:pointer" onclick="showP('pLeave');renPLeave()"><div style="font-size:20px">✋</div><div style="font-size:9px;font-weight:600">Leave</div></button>
+</div>
+<h3 class="section-title">🔔 Recent Alerts</h3>
+</div>
 <div class="list" id="notifList"></div>
 </div>
 
@@ -462,7 +471,7 @@ db.ref('tests').on('value',function(s){tst=[];s.forEach(function(c){if(c.val()&&
 db.ref('results').on('value',function(s){res=[];s.forEach(function(c){res.push(Object.assign({id:c.key},c.val()))});render()});
 db.ref('attendance').on('value',function(s){att=[];s.forEach(function(c){att.push(Object.assign({id:c.key},c.val()))});render()});
 db.ref('fees').on('value',function(s){fee=[];s.forEach(function(c){fee.push(Object.assign({id:c.key},c.val()))});render()});
-db.ref('alerts').on('value',function(s){alerts=[];s.forEach(function(c){alerts.push(Object.assign({id:c.key},c.val()))});render()});
+db.ref('alerts').on('value',function(s){alerts=[];s.forEach(function(c){alerts.push(Object.assign({id:c.key},c.val()))});render();updateNotifBadge()});
 db.ref('worksheets').on('value',function(s){worksheets=[];s.forEach(function(c){worksheets.push(Object.assign({id:c.key},c.val()))});render()});
 db.ref('leaves').on('value',function(s){leaves=[];s.forEach(function(c){leaves.push(Object.assign({id:c.key},c.val()))});render()});
 
@@ -486,14 +495,14 @@ function showAdmin(){document.getElementById('loginPage').style.display='none';d
 function showParent(){document.getElementById('loginPage').style.display='none';document.getElementById('parentDash').classList.add('active');initParent();toast('Welcome!','success');setTimeout(checkFeeReminder,2000)}
 
 function initParent(){
-document.getElementById('pNav').innerHTML='<button class="nav-item active" onclick="showP(\'pHome\')"><span>🏠</span><span>Home</span></button><button class="nav-item" onclick="showP(\'pResults\');renPRes()"><span>📝</span><span>Results</span></button><button class="nav-item" onclick="showP(\'pAttendance\');renPAtt()"><span>📋</span><span>Attend</span></button><button class="nav-item" onclick="showP(\'pLeave\');renPLeave()"><span>✋</span><span>Leave</span></button><button class="nav-item" onclick="showP(\'pFees\')"><span>💰</span><span>Fees</span></button>';
+document.getElementById('pNav').innerHTML='<button class="nav-item active" onclick="showP(\'pHome\')"><span>🏠</span><span>Home</span></button><button class="nav-item" onclick="showP(\'pResults\');renPRes()"><span>📝</span><span>Results</span></button><button class="nav-item" onclick="showP(\'pMaterials\');renPMat()"><span>📚</span><span>Materials</span></button><button class="nav-item" onclick="showP(\'pLeave\');renPLeave()"><span>✋</span><span>Leave</span></button><button class="nav-item" onclick="showP(\'pFees\')"><span>💰</span><span>Fees</span></button>';
 document.getElementById('resFilters').innerHTML='<button class="filter-btn active" onclick="setResF(this,\'all\')">All</button><button class="filter-btn" onclick="setResF(this,\'5\')">Last 5</button><button class="filter-btn" onclick="setResF(this,\'10\')">Last 10</button><button class="filter-btn" onclick="setResF(this,\'Mathematics\')">Maths</button><button class="filter-btn" onclick="setResF(this,\'Science\')">Science</button><button class="filter-btn" onclick="setResF(this,\'Social Science\')">Social Science</button>';
 document.getElementById('pMatFilters').innerHTML='<button class="filter-btn active" onclick="setMatF(this,\'all\')">All</button><button class="filter-btn" onclick="setMatF(this,\'Mathematics\')">Maths</button><button class="filter-btn" onclick="setMatF(this,\'Science\')">Science</button><button class="filter-btn" onclick="setMatF(this,\'Social Science\')">Social Science</button>';
 }
 
 function initAdmin(){
-document.getElementById('aNav').innerHTML='<button class="nav-item active" onclick="showA(\'aHome\')"><span>🏠</span><span>Home</span></button><button class="nav-item" onclick="showA(\'aAtt\');renAtt()"><span>📋</span><span>Attend</span></button><button class="nav-item" onclick="showA(\'aTests\')"><span>📝</span><span>Tests</span></button><button class="nav-item" onclick="showA(\'aLeave\');renAdminLeave()"><span>✋</span><span>Leave</span></button><button class="nav-item" onclick="showA(\'aFees\')"><span>💰</span><span>Fees</span></button>';
-document.getElementById('quickActions').innerHTML='<button class="action" onclick="openM(\'addSModal\')"><div class="action-icon">➕</div><div class="action-label">Add Student</div></button><button class="action" onclick="showA(\'aAtt\');renAtt()"><div class="action-icon">📋</div><div class="action-label">Attendance</div></button><button class="action" onclick="openM(\'addTModal\')"><div class="action-icon">📝</div><div class="action-label">Add Test</div></button><button class="action" onclick="ldDD();openM(\'alertModal\')"><div class="action-icon">🔔</div><div class="action-label">Send Alert</div></button>';
+document.getElementById('aNav').innerHTML='<button class="nav-item active" onclick="showA(\'aHome\')"><span>🏠</span><span>Home</span></button><button class="nav-item" onclick="showA(\'aAtt\');renAtt()"><span>📋</span><span>Attend</span></button><button class="nav-item" onclick="showA(\'aTests\')"><span>📝</span><span>Tests</span></button><button class="nav-item" onclick="showA(\'aWorksheets\');renAWs()"><span>📚</span><span>Sheets</span></button><button class="nav-item" onclick="showA(\'aFees\')"><span>💰</span><span>Fees</span></button>';
+document.getElementById('quickActions').innerHTML='<button class="action" onclick="openM(\'addSModal\')"><div class="action-icon">➕</div><div class="action-label">Add Student</div></button><button class="action" onclick="showA(\'aAtt\');renAtt()"><div class="action-icon">📋</div><div class="action-label">Attendance</div></button><button class="action" onclick="openM(\'addTModal\')"><div class="action-icon">📝</div><div class="action-label">Add Test</div></button><button class="action" onclick="ldDD();openM(\'alertModal\')"><div class="action-icon">🔔</div><div class="action-label">Send Alert</div></button><button class="action" onclick="showA(\'aAlerts\');renAdminAlerts()"><div class="action-icon">📢</div><div class="action-label">All Alerts</div></button><button class="action" onclick="showA(\'aLeave\');renAdminLeave()"><div class="action-icon">✋</div><div class="action-label">Leave Req</div></button>';
 document.getElementById('clsFilters').innerHTML='<button class="filter-btn active" onclick="setClsF(this,\'all\')">All</button><button class="filter-btn" onclick="setClsF(this,\'VI\')">VI</button><button class="filter-btn" onclick="setClsF(this,\'VII\')">VII</button><button class="filter-btn" onclick="setClsF(this,\'VIII\')">VIII</button><button class="filter-btn" onclick="setClsF(this,\'IX\')">IX</button><button class="filter-btn" onclick="setClsF(this,\'X\')">X</button>';
 document.getElementById('wsFilters').innerHTML='<button class="filter-btn active" onclick="setWsF(this,\'all\')">All</button><button class="filter-btn" onclick="setWsF(this,\'Mathematics\')">Maths</button><button class="filter-btn" onclick="setWsF(this,\'Science\')">Science</button><button class="filter-btn" onclick="setWsF(this,\'Social Science\')">Social Science</button>';
 }
@@ -1243,18 +1252,22 @@ doc.save(s.name+'_Attendance.pdf');toast('Downloaded!','success');
 // Notification Badge
 function updateNotifBadge(){
 if(!cu||cu.role!=='parent')return;
+var badge=document.getElementById('notifCount');
+var notifBtn=document.getElementById('notifBadge');
+if(!badge||!notifBtn)return;
 var lastSeen=parseInt(localStorage.getItem('usp_lastSeen_'+cu.id)||'0');
 var unread=alerts.filter(function(a){
 return(a.sid===cu.id||a.sid==='ALL')&&(a.time||0)>lastSeen;
 }).length;
-var badge=document.getElementById('notifCount');
 if(unread>0){
 badge.textContent=unread;
-badge.style.display='block';
-document.getElementById('notifBadge').style.background='rgba(255,0,0,0.3)';
+badge.style.display='inline-block';
+badge.style.background='#ff0000';
+badge.style.animation='pulse 1s infinite';
+notifBtn.style.background='rgba(255,0,0,0.4)';
 }else{
 badge.style.display='none';
-document.getElementById('notifBadge').style.background='rgba(255,255,255,0.2)';
+notifBtn.style.background='rgba(255,255,255,0.2)';
 }
 }
 
