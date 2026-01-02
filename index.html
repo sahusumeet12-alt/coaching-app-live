@@ -96,8 +96,9 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 .alert-card{background:#fff;border-radius:12px;padding:12px;margin-bottom:8px;border-left:4px solid #ff6b6b}
 .alert-card.positive{border-left-color:#25D366}
 .alert-card.info{border-left-color:#667eea}
-@keyframes pulse{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,0,0,0.7)}70%{transform:scale(1.1);box-shadow:0 0 0 10px rgba(255,0,0,0)}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,0,0,0)}}
+@keyframes pulse{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,0,0,0.7)}50%{transform:scale(1.1);box-shadow:0 0 0 8px rgba(255,0,0,0)}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,0,0,0)}}
 #notifCount{animation:pulse 1.5s infinite}
+#notifBadge{transition:background 0.3s}
 .notif-unread{background:#fff0f0!important;border-left:4px solid #ff0000!important}
 </style>
 </head>
@@ -128,7 +129,7 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <div class="page active" id="pHome">
 <div class="header">
 <div style="position:absolute;top:20px;right:20px;display:flex;gap:8px">
-<button id="notifBadge" onclick="showP('pAlerts');renPAlerts();markAlertsRead()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:8px 14px;border-radius:10px;cursor:pointer;position:relative">🔔<span id="notifCount" style="position:absolute;top:-8px;right:-8px;background:#ff0000;color:#fff;font-size:11px;font-weight:bold;padding:4px 8px;border-radius:50%;min-width:20px;text-align:center;box-shadow:0 2px 5px rgba(255,0,0,0.5)">0</span></button>
+<button id="notifBadge" onclick="showP('pAlerts');renPAlerts();markAlertsRead()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:8px 14px;border-radius:10px;cursor:pointer;position:relative;animation:none">🔔<span id="notifCount" style="position:absolute;top:-8px;right:-8px;background:#ff0000;color:#fff;font-size:11px;font-weight:bold;padding:4px 8px;border-radius:50%;min-width:20px;text-align:center;box-shadow:0 2px 8px rgba(255,0,0,0.6);display:none;align-items:center;justify-content:center">0</span></button>
 <button class="logout-btn" onclick="logout()" style="position:static">🚪</button>
 </div>
 <div class="profile-pic" id="pPhoto"><span id="pInit">S</span></div>
@@ -703,74 +704,117 @@ doc.setFillColor(237,137,54);doc.rect(0,42,210,11,'F');
 doc.setFontSize(11);doc.setFont('helvetica','bold');
 doc.text('MONTHLY PROGRESS REPORT - '+getMonth().toUpperCase(),105,49,{align:'center'});
 
-// Student info box
+// Student info box - FIX 1: Remove subjects from header, move to separate line
 doc.setDrawColor(26,53,93);doc.setLineWidth(0.5);
-doc.roundedRect(14,58,182,26,2,2,'S');
+doc.roundedRect(14,58,182,20,2,2,'S');
 doc.setTextColor(26,53,93);doc.setFontSize(9);doc.setFont('helvetica','bold');
-doc.text('Student Name :',18,66);doc.text('Class :',18,73);doc.text('Roll No :',18,80);
-doc.text('Subjects :',115,66);doc.text('Report Date :',115,73);
+doc.text('Student Name:',18,66);doc.text('Class:',85,66);doc.text('Roll No:',130,66);doc.text('Date:',170,66);
 doc.setFont('helvetica','normal');doc.setTextColor(0);
-doc.text(s.name||'',50,66);doc.text('Class '+(s.class||''),50,73);doc.text(s.userId||'',50,80);
-var subjList=Object.keys(subjects).join(', ');
-doc.text(subjList||'All',150,66);doc.text(formatDate(Date.now()),150,73);
+doc.text(s.name||'',48,66);doc.text(s.class||'',100,66);doc.text(s.userId||'',150,66);doc.text(formatDate(Date.now()),182,66);
 
-// Table
+// Table - FIX 1: Add Subject column
 var tableData=[];
 for(var i=0;i<myRes.length;i++){
 var r=myRes[i],pct=Math.round((r.marks/r.test.totalMarks)*100),g=getGrade(pct);
-tableData.push([r.test.name,formatDate(r.test.date),r.marks+'/'+r.test.totalMarks,pct+'%',g.g]);
+tableData.push([r.test.name,r.test.subject,formatDate(r.test.date),r.marks+'/'+r.test.totalMarks,pct+'%',g.g]);
 }
 doc.autoTable({
-startY:90,
-head:[['Test Name','Date','Marks','%','Grade']],
+startY:82,
+head:[['Test Name','Subject','Date','Marks','%','Grade']],
 body:tableData,
 theme:'grid',
-headStyles:{fillColor:[26,53,93],textColor:255,fontSize:9,fontStyle:'bold'},
-bodyStyles:{fontSize:9,textColor:80},
-columnStyles:{0:{cellWidth:55},1:{cellWidth:35},2:{cellWidth:30},3:{cellWidth:25},4:{cellWidth:20}}
+headStyles:{fillColor:[26,53,93],textColor:255,fontSize:8,fontStyle:'bold'},
+bodyStyles:{fontSize:8,textColor:80},
+columnStyles:{0:{cellWidth:40},1:{cellWidth:30},2:{cellWidth:25},3:{cellWidth:22},4:{cellWidth:18},5:{cellWidth:15}}
 });
 
-var y=doc.lastAutoTable.finalY+8;
+var y=doc.lastAutoTable.finalY+6;
 // Performance Summary
-doc.setFillColor(26,53,93);doc.roundedRect(14,y,182,18,2,2,'F');
-doc.setTextColor(255);doc.setFontSize(9);doc.setFont('helvetica','bold');
-doc.text('PERFORMANCE SUMMARY',105,y+6,{align:'center'});
+doc.setFillColor(26,53,93);doc.roundedRect(14,y,182,14,2,2,'F');
+doc.setTextColor(255);doc.setFontSize(8);doc.setFont('helvetica','bold');
+doc.text('PERFORMANCE SUMMARY',105,y+5,{align:'center'});
 doc.setFont('helvetica','normal');
-doc.text('Tests: '+myRes.length,35,y+13);
-doc.text('Marks: '+totalMarks+'/'+totalMax,75,y+13);
-doc.text('Average: '+avgPct+'%',125,y+13);
-doc.text('Grade: '+overall.g,170,y+13);
-
-y+=25;
-// Subject-wise boxes
-doc.setTextColor(26,53,93);doc.setFontSize(10);doc.setFont('helvetica','bold');
-doc.text('Subject-wise Performance:',14,y);
-y+=5;
-var subKeys=Object.keys(subjects);
-var boxW=55,boxX=14;
-doc.setFillColor(72,187,120);
-for(var i=0;i<subKeys.length;i++){
-doc.roundedRect(boxX,y,boxW,12,2,2,'F');
-doc.setTextColor(255);doc.setFontSize(8);
-var avg=Math.round(subjects[subKeys[i]].total/subjects[subKeys[i]].cnt);
-doc.text(subKeys[i]+': '+avg+'%',boxX+boxW/2,y+8,{align:'center'});
-boxX+=boxW+5;
-}
+doc.text('Tests: '+myRes.length,30,y+11);
+doc.text('Marks: '+totalMarks+'/'+totalMax,70,y+11);
+doc.text('Average: '+avgPct+'%',120,y+11);
+doc.text('Grade: '+overall.g,165,y+11);
 
 y+=20;
-// Remarks box
+// FIX 2: Subject-wise Performance - Show ALL subjects properly
+doc.setTextColor(26,53,93);doc.setFontSize(9);doc.setFont('helvetica','bold');
+doc.text('Subject-wise Performance:',14,y);
+y+=6;
+var subKeys=Object.keys(subjects);
+var boxW=Math.min(55,180/Math.max(subKeys.length,1)-2);
+var startX=14;
+doc.setFillColor(72,187,120);
+for(var i=0;i<subKeys.length;i++){
+var avg=Math.round(subjects[subKeys[i]].total/subjects[subKeys[i]].cnt);
+var boxColor=avg>=80?[39,174,96]:avg>=60?[52,152,219]:avg>=40?[241,196,15]:[231,76,60];
+doc.setFillColor(boxColor[0],boxColor[1],boxColor[2]);
+doc.roundedRect(startX,y,boxW,10,2,2,'F');
+doc.setTextColor(255);doc.setFontSize(7);
+doc.text(subKeys[i].substring(0,8)+': '+avg+'%',startX+boxW/2,y+7,{align:'center'});
+startX+=boxW+3;
+}
+
+y+=16;
+// FIX 3: Subject-wise Remarks (detailed)
 doc.setFillColor(255,250,235);doc.setDrawColor(237,137,54);doc.setLineWidth(0.5);
-doc.roundedRect(14,y,182,18,2,2,'FD');
+var remarkHeight=8+subKeys.length*6;
+doc.roundedRect(14,y,182,remarkHeight,2,2,'FD');
 doc.setTextColor(26,53,93);doc.setFontSize(9);doc.setFont('helvetica','bold');
 doc.text("Teacher's Remarks:",18,y+6);
-doc.setFont('helvetica','normal');doc.setTextColor(0);doc.setFontSize(8);
-doc.text(overall.r,18,y+13);
+doc.setFont('helvetica','normal');doc.setTextColor(0);doc.setFontSize(7);
+var ry=y+12;
+for(var i=0;i<subKeys.length;i++){
+var avg=Math.round(subjects[subKeys[i]].total/subjects[subKeys[i]].cnt);
+var rem=avg>=90?'Outstanding!':avg>=80?'Excellent work!':avg>=70?'Very good progress.':avg>=60?'Good effort, keep improving.':avg>=50?'Average, needs more practice.':avg>=40?'Below average, needs attention.':'Needs significant improvement.';
+doc.text(subKeys[i]+': '+rem,20,ry);
+ry+=5;
+}
 
-// Footer
-doc.setFillColor(26,53,93);doc.rect(0,280,210,17,'F');
+y+=remarkHeight+6;
+// FIX 4: Add Line Chart to PDF
+if(myRes.length>1){
+doc.setTextColor(26,53,93);doc.setFontSize(9);doc.setFont('helvetica','bold');
+doc.text('Performance Trend:',14,y);
+y+=4;
+// Draw simple line chart
+var chartW=170,chartH=30,chartX=20,chartY=y;
+doc.setDrawColor(200);doc.setLineWidth(0.2);
+doc.rect(chartX,chartY,chartW,chartH);
+// Draw grid lines
+for(var g=0;g<=4;g++){
+var gy=chartY+(chartH/4)*g;
+doc.line(chartX,gy,chartX+chartW,gy);
+}
+// Plot data points
+var pts=myRes.slice(0,10).reverse();
+var stepX=chartW/(pts.length-1||1);
+doc.setDrawColor(102,126,234);doc.setLineWidth(1);
+for(var i=1;i<pts.length;i++){
+var p1=Math.round((pts[i-1].marks/pts[i-1].test.totalMarks)*100);
+var p2=Math.round((pts[i].marks/pts[i].test.totalMarks)*100);
+var x1=chartX+(i-1)*stepX,y1=chartY+chartH-(p1/100)*chartH;
+var x2=chartX+i*stepX,y2=chartY+chartH-(p2/100)*chartH;
+doc.line(x1,y1,x2,y2);
+doc.setFillColor(102,126,234);doc.circle(x1,y1,1.5,'F');
+if(i===pts.length-1)doc.circle(x2,y2,1.5,'F');
+}
+// Labels
+doc.setFontSize(6);doc.setTextColor(100);
+doc.text('100%',chartX-8,chartY+3);doc.text('0%',chartX-6,chartY+chartH);
+y+=chartH+8;
+}
+
+// Footer - adjust position based on content
+var footerY=Math.max(y+10,275);
+if(footerY>285)footerY=285;
+doc.setFillColor(26,53,93);doc.rect(0,footerY,210,17,'F');
 doc.setTextColor(255);doc.setFontSize(7);
-doc.text('This is a computer generated report from UNIQUE STUDY POINT',105,286,{align:'center'});
-doc.text('www.uniquestudyonline.com | Contact: '+PHONE,105,292,{align:'center'});
+doc.text('This is a computer generated report from UNIQUE STUDY POINT',105,footerY+6,{align:'center'});
+doc.text('www.uniquestudyonline.com | Contact: '+PHONE,105,footerY+12,{align:'center'});
 
 doc.save(s.name+'_Report_'+getMonth().replace(' ','_')+'.pdf');
 toast('Downloaded!','success');
@@ -1242,33 +1286,40 @@ doc.text('www.uniquestudyonline.com | Contact: '+PHONE,105,290,{align:'center'})
 doc.save(s.name+'_Attendance.pdf');toast('Downloaded!','success');
 }
 
-// Notification Badge
+// Notification Badge - FIX 5: Proper update on new alerts
 function updateNotifBadge(){
 if(!cu||cu.role!=='parent')return;
 var badge=document.getElementById('notifCount');
 var notifBtn=document.getElementById('notifBadge');
 if(!badge||!notifBtn)return;
 var lastSeen=parseInt(localStorage.getItem('usp_lastSeen_'+cu.id)||'0');
-var unread=alerts.filter(function(a){
-return(a.sid===cu.id||a.sid==='ALL')&&(a.time||0)>lastSeen;
-}).length;
-console.log('Unread alerts:',unread,'LastSeen:',lastSeen);
-if(unread>0){
+// Count unread alerts for this student or ALL
+var unread=0;
+for(var i=0;i<alerts.length;i++){
+var a=alerts[i];
+if((a.sid===cu.id||a.sid==='ALL')&&(a.time||0)>lastSeen){
+unread++;
+}
+}
+// Update badge
 badge.textContent=unread;
+if(unread>0){
+badge.style.display='flex';
 badge.style.visibility='visible';
-badge.style.opacity='1';
 notifBtn.style.background='rgba(255,0,0,0.5)';
+notifBtn.style.animation='pulse 1.5s infinite';
 }else{
+badge.style.display='none';
 badge.style.visibility='hidden';
-badge.style.opacity='0';
 notifBtn.style.background='rgba(255,255,255,0.2)';
+notifBtn.style.animation='none';
 }
 }
 
 function markAlertsRead(){
 if(cu&&cu.role==='parent'){
 localStorage.setItem('usp_lastSeen_'+cu.id,Date.now().toString());
-setTimeout(updateNotifBadge,300);
+updateNotifBadge();
 }
 }
 
