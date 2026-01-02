@@ -96,6 +96,8 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 .alert-card{background:#fff;border-radius:12px;padding:12px;margin-bottom:8px;border-left:4px solid #ff6b6b}
 .alert-card.positive{border-left-color:#25D366}
 .alert-card.info{border-left-color:#667eea}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
+.notif-unread{background:#fff0f0!important;border-left:4px solid #ff0000!important}
 </style>
 </head>
 <body>
@@ -125,7 +127,7 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <div class="page active" id="pHome">
 <div class="header">
 <div style="position:absolute;top:20px;right:20px;display:flex;gap:8px">
-<button id="notifBadge" onclick="showP('pAlerts');renPAlerts()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:8px 14px;border-radius:10px;cursor:pointer;position:relative">🔔<span id="notifCount" style="position:absolute;top:-5px;right:-5px;background:#ff6b6b;color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;display:none">0</span></button>
+<button id="notifBadge" onclick="showP('pAlerts');renPAlerts();markAlertsRead()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:8px 14px;border-radius:10px;cursor:pointer;position:relative">🔔<span id="notifCount" style="position:absolute;top:-5px;right:-5px;background:#ff0000;color:#fff;font-size:10px;font-weight:bold;padding:3px 7px;border-radius:10px;display:none;animation:pulse 1s infinite">0</span></button>
 <button class="logout-btn" onclick="logout()" style="position:static">🚪</button>
 </div>
 <div class="profile-pic" id="pPhoto"><span id="pInit">S</span></div>
@@ -146,7 +148,7 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <div class="filter-row" id="resFilters" style="margin-top:15px"></div>
 <div id="resultsList"></div>
 <div class="chart-box" id="barChartBox" style="display:none">
-<h3>📊 Performance Bar Chart</h3>
+<h3>📈 Performance Trend</h3>
 <div class="chart-wrap"><canvas id="barChart"></canvas></div>
 </div>
 <div class="chart-box" id="pieChartBox" style="display:none">
@@ -253,6 +255,14 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <div class="list" id="feeL" style="margin-top:12px"></div>
 </div>
 
+<div class="page" id="aAlerts">
+<div class="header"><h1>🔔 Manage Alerts</h1></div>
+<div class="section" style="padding-top:15px">
+<button class="btn" onclick="ldDD();openM('alertModal')">📤 Send New Alert</button>
+</div>
+<div class="list" id="adminAlertList" style="margin-top:12px"></div>
+</div>
+
 <div class="nav" id="aNav"></div>
 </div>
 </div>
@@ -262,7 +272,9 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <input type="file" id="addPhotoInput" accept="image/*" style="display:none" onchange="upPhoto(this,'add')">
 <div class="form-group"><label>Name *</label><input type="text" id="sN"></div>
 <div class="form-group"><label>Class *</label><select id="sC"><option value="">Select</option><option>VI</option><option>VII</option><option>VIII</option><option>IX</option><option>X</option></select></div>
-<div class="form-group"><label>Mobile *</label><input type="tel" id="sM" maxlength="10"></div>
+<div class="form-group"><label>Mobile 1 (Primary) *</label><input type="tel" id="sM" maxlength="10" placeholder="Student/Father"></div>
+<div class="form-group"><label>Mobile 2 (Optional)</label><input type="tel" id="sM2" maxlength="10" placeholder="Mother"></div>
+<div class="form-group"><label>Mobile 3 (Optional)</label><input type="tel" id="sM3" maxlength="10" placeholder="Guardian"></div>
 <div class="form-group"><label>User ID *</label><input type="text" id="sU"></div>
 <div class="form-group"><label>Password *</label><input type="text" id="sP"></div>
 <div class="form-group"><label>Fee</label><input type="number" id="sFee" value="500"></div>
@@ -275,7 +287,9 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <input type="hidden" id="editSId">
 <div class="form-group"><label>Name</label><input type="text" id="editSN"></div>
 <div class="form-group"><label>Class</label><select id="editSC"><option value="">Select</option><option>VI</option><option>VII</option><option>VIII</option><option>IX</option><option>X</option></select></div>
-<div class="form-group"><label>Mobile</label><input type="tel" id="editSM" maxlength="10"></div>
+<div class="form-group"><label>Mobile 1 (Primary)</label><input type="tel" id="editSM" maxlength="10"></div>
+<div class="form-group"><label>Mobile 2</label><input type="tel" id="editSM2" maxlength="10"></div>
+<div class="form-group"><label>Mobile 3</label><input type="tel" id="editSM3" maxlength="10"></div>
 <div class="form-group"><label>User ID</label><input type="text" id="editSU"></div>
 <div class="form-group"><label>Password</label><input type="text" id="editSP"></div>
 <div class="form-group"><label>Fee</label><input type="number" id="editSFee"></div>
@@ -447,7 +461,7 @@ document.getElementById('pMatFilters').innerHTML='<button class="filter-btn acti
 }
 
 function initAdmin(){
-document.getElementById('aNav').innerHTML='<button class="nav-item active" onclick="showA(\'aHome\')"><span>🏠</span><span>Home</span></button><button class="nav-item" onclick="showA(\'aAtt\');renAtt()"><span>📋</span><span>Attend</span></button><button class="nav-item" onclick="showA(\'aTests\')"><span>📝</span><span>Tests</span></button><button class="nav-item" onclick="showA(\'aWorksheets\');renAWs()"><span>📚</span><span>Sheets</span></button><button class="nav-item" onclick="showA(\'aFees\')"><span>💰</span><span>Fees</span></button>';
+document.getElementById('aNav').innerHTML='<button class="nav-item active" onclick="showA(\'aHome\')"><span>🏠</span><span>Home</span></button><button class="nav-item" onclick="showA(\'aAtt\');renAtt()"><span>📋</span><span>Attend</span></button><button class="nav-item" onclick="showA(\'aTests\')"><span>📝</span><span>Tests</span></button><button class="nav-item" onclick="showA(\'aAlerts\');renAdminAlerts()"><span>🔔</span><span>Alerts</span></button><button class="nav-item" onclick="showA(\'aFees\')"><span>💰</span><span>Fees</span></button>';
 document.getElementById('quickActions').innerHTML='<button class="action" onclick="openM(\'addSModal\')"><div class="action-icon">➕</div><div class="action-label">Add Student</div></button><button class="action" onclick="showA(\'aAtt\');renAtt()"><div class="action-icon">📋</div><div class="action-label">Attendance</div></button><button class="action" onclick="openM(\'addTModal\')"><div class="action-icon">📝</div><div class="action-label">Add Test</div></button><button class="action" onclick="ldDD();openM(\'alertModal\')"><div class="action-icon">🔔</div><div class="action-label">Send Alert</div></button>';
 document.getElementById('clsFilters').innerHTML='<button class="filter-btn active" onclick="setClsF(this,\'all\')">All</button><button class="filter-btn" onclick="setClsF(this,\'VI\')">VI</button><button class="filter-btn" onclick="setClsF(this,\'VII\')">VII</button><button class="filter-btn" onclick="setClsF(this,\'VIII\')">VIII</button><button class="filter-btn" onclick="setClsF(this,\'IX\')">IX</button><button class="filter-btn" onclick="setClsF(this,\'X\')">X</button>';
 document.getElementById('wsFilters').innerHTML='<button class="filter-btn active" onclick="setWsF(this,\'all\')">All</button><button class="filter-btn" onclick="setWsF(this,\'Mathematics\')">Maths</button><button class="filter-btn" onclick="setWsF(this,\'Science\')">Science</button><button class="filter-btn" onclick="setWsF(this,\'Social Science\')">Social Science</button>';
@@ -572,12 +586,16 @@ toast('File not available','error');
 
 function renPAlerts(){
 if(!cu||cu.role!=='parent')return;
+var lastSeen=parseInt(localStorage.getItem('usp_lastSeen_'+cu.id)||'0');
 var myAlerts=alerts.filter(function(a){return a.sid===cu.id||a.sid==='ALL'});
 myAlerts.sort(function(a,b){return(b.time||0)-(a.time||0)});
 var html='';
 for(var i=0;i<myAlerts.length;i++){
 var a=myAlerts[i],type=getAlertType(a.msg);
-html+='<div class="alert-card '+(type==='positive'?'positive':'')+'"><div style="font-size:12px;font-weight:600">'+a.msg+'</div><div style="font-size:10px;color:#888;margin-top:4px">'+formatDate(a.time)+'</div></div>';
+var isUnread=(a.time||0)>lastSeen;
+var cls=type==='positive'?'positive':type==='info'?'info':'';
+if(isUnread)cls+=' notif-unread';
+html+='<div class="alert-card '+cls+'"><div style="font-size:12px;font-weight:600">'+(isUnread?'🔴 ':'')+a.msg+'</div><div style="font-size:10px;color:#888;margin-top:4px">'+formatDate(a.time)+'</div></div>';
 }
 document.getElementById('pAlertsList').innerHTML=html||'<div class="empty">No alerts</div>';
 }
@@ -822,6 +840,8 @@ document.getElementById('editSId').value=s.id;
 document.getElementById('editSN').value=s.name;
 document.getElementById('editSC').value=s.class;
 document.getElementById('editSM').value=s.mobile;
+document.getElementById('editSM2').value=s.mobile2||'';
+document.getElementById('editSM3').value=s.mobile3||'';
 document.getElementById('editSU').value=s.userId;
 document.getElementById('editSP').value=s.password;
 document.getElementById('editSFee').value=s.fee||500;
@@ -832,21 +852,23 @@ openM('editSModal');
 }
 
 function saveS(){
-var n=document.getElementById('sN').value.trim(),c=document.getElementById('sC').value,m=document.getElementById('sM').value.trim(),u=document.getElementById('sU').value.trim(),p=document.getElementById('sP').value.trim(),f=document.getElementById('sFee').value,j=document.getElementById('sJoin').value;
+var n=document.getElementById('sN').value.trim(),c=document.getElementById('sC').value,m=document.getElementById('sM').value.trim(),m2=document.getElementById('sM2').value.trim(),m3=document.getElementById('sM3').value.trim(),u=document.getElementById('sU').value.trim(),p=document.getElementById('sP').value.trim(),f=document.getElementById('sFee').value,j=document.getElementById('sJoin').value;
 if(!n||!c||!m||!u||!p)return toast('Fill all fields','error');
-if(m.length!==10)return toast('Mobile: 10 digits','error');
-db.ref('students').push({name:n,class:c,mobile:m,userId:u,password:p,fee:parseInt(f)||500,joinDate:j,photo:addPhotoUrl}).then(function(){
+if(m.length!==10)return toast('Mobile 1: 10 digits','error');
+if(m2&&m2.length!==10)return toast('Mobile 2: 10 digits','error');
+if(m3&&m3.length!==10)return toast('Mobile 3: 10 digits','error');
+db.ref('students').push({name:n,class:c,mobile:m,mobile2:m2||'',mobile3:m3||'',userId:u,password:p,fee:parseInt(f)||500,joinDate:j,photo:addPhotoUrl}).then(function(){
 closeM('addSModal');
-document.getElementById('sN').value='';document.getElementById('sC').value='';document.getElementById('sM').value='';document.getElementById('sU').value='';document.getElementById('sP').value='';
+document.getElementById('sN').value='';document.getElementById('sC').value='';document.getElementById('sM').value='';document.getElementById('sM2').value='';document.getElementById('sM3').value='';document.getElementById('sU').value='';document.getElementById('sP').value='';
 addPhotoUrl='';document.getElementById('addPhotoBox').innerHTML='<span style="font-size:28px">📷</span>';
 toast('Added!','success');
 });
 }
 
 function updateS(){
-var id=document.getElementById('editSId').value,n=document.getElementById('editSN').value.trim(),c=document.getElementById('editSC').value,m=document.getElementById('editSM').value.trim(),u=document.getElementById('editSU').value.trim(),p=document.getElementById('editSP').value.trim(),f=document.getElementById('editSFee').value,j=document.getElementById('editSJoin').value;
+var id=document.getElementById('editSId').value,n=document.getElementById('editSN').value.trim(),c=document.getElementById('editSC').value,m=document.getElementById('editSM').value.trim(),m2=document.getElementById('editSM2').value.trim(),m3=document.getElementById('editSM3').value.trim(),u=document.getElementById('editSU').value.trim(),p=document.getElementById('editSP').value.trim(),f=document.getElementById('editSFee').value,j=document.getElementById('editSJoin').value;
 if(!n||!c||!m||!u||!p)return toast('Fill all','error');
-db.ref('students/'+id).update({name:n,class:c,mobile:m,userId:u,password:p,fee:parseInt(f)||500,joinDate:j,photo:editPhotoUrl}).then(function(){closeM('editSModal');toast('Updated!','success')});
+db.ref('students/'+id).update({name:n,class:c,mobile:m,mobile2:m2||'',mobile3:m3||'',userId:u,password:p,fee:parseInt(f)||500,joinDate:j,photo:editPhotoUrl}).then(function(){closeM('editSModal');toast('Updated!','success')});
 }
 
 function deleteS(){
@@ -876,6 +898,13 @@ btn.style.background=st==='present'?'#25D366':'#ff6b6b';btn.style.color='#fff';
 toast('Marked!','success');
 }
 
+function getAllMobiles(s){
+var nums=[s.mobile];
+if(s.mobile2)nums.push(s.mobile2);
+if(s.mobile3)nums.push(s.mobile3);
+return nums;
+}
+
 function sendAttSMS(){
 var d=document.getElementById('attD').value||td,absent=[];
 for(var i=0;i<stu.length;i++){
@@ -884,7 +913,7 @@ if(att[j].sid===stu[i].id&&att[j].date===d&&att[j].status==='absent'){absent.pus
 }
 }
 if(absent.length){
-var nums=absent.map(function(s){return s.mobile}).join(',');
+var nums=[];absent.forEach(function(s){getAllMobiles(s).forEach(function(n){nums.push(n)})});nums=nums.join(',');
 fetch('https://www.fast2sms.com/dev/bulkV2?authorization=P3WtxzoqRgB58mSnZ1vJAwGQ2p7UTY0ci6dLjlhbkDCf4auKHI2qKczUL1AMVRj6WSDItJekFaZxP8no&route=q&message='+encodeURIComponent('UNIQUE STUDY POINT: Your ward was ABSENT on '+formatDate(d)+'. -Sumeet Sahu, '+PHONE)+'&flash=0&numbers='+nums,{method:'GET',mode:'no-cors'});
 toast('SMS Sent!','success');
 }else toast('No absent','error');
@@ -936,7 +965,7 @@ var sid=document.getElementById('alertStu').value,msg=document.getElementById('a
 if(!sid)return toast('Select student','error');
 if(!msg)return toast('Enter message','error');
 if(sid==='ALL'){
-var nums=stu.map(function(s){return s.mobile}).join(',');
+var nums=[];stu.forEach(function(s){getAllMobiles(s).forEach(function(n){nums.push(n)})});nums=nums.join(',');
 fetch('https://www.fast2sms.com/dev/bulkV2?authorization=P3WtxzoqRgB58mSnZ1vJAwGQ2p7UTY0ci6dLjlhbkDCf4auKHI2qKczUL1AMVRj6WSDItJekFaZxP8no&route=q&message='+encodeURIComponent('UNIQUE STUDY POINT: '+msg+' -Sumeet Sahu, '+PHONE)+'&flash=0&numbers='+nums,{method:'GET',mode:'no-cors'});
 db.ref('alerts').push({sid:'ALL',msg:msg,time:Date.now()});
 }else{
@@ -986,10 +1015,10 @@ function saveT(){
 var n=document.getElementById('tN').value.trim(),subj=document.getElementById('tSubj').value,cls=document.getElementById('tClass').value,m=document.getElementById('tM').value,d=document.getElementById('tD').value,notify=document.getElementById('tNotify').value;
 if(!n||!subj){toast('Fill name & subject','error');return}
 // Always create alert for dashboard notification
-db.ref('alerts').push({sid:'ALL',msg:'📝 New Test: '+n+' ('+subj+') scheduled for '+formatDate(d),time:Date.now(),type:'info'});
+db.ref('alerts').push({sid:'ALL',msg:'New Test: '+n+' ('+subj+') on '+formatDate(d),time:Date.now(),type:'info'});
 db.ref('tests').push({name:n,subject:subj,testClass:cls||'All',totalMarks:parseInt(m)||50,date:d,createdAt:Date.now()}).then(function(){
 if(notify==='all'&&stu.length){
-var nums=stu.map(function(s){return s.mobile}).join(',');
+var nums=[];stu.forEach(function(s){getAllMobiles(s).forEach(function(n){nums.push(n)})});nums=nums.join(',');
 fetch('https://www.fast2sms.com/dev/bulkV2?authorization=P3WtxzoqRgB58mSnZ1vJAwGQ2p7UTY0ci6dLjlhbkDCf4auKHI2qKczUL1AMVRj6WSDItJekFaZxP8no&route=q&message='+encodeURIComponent('UNIQUE STUDY POINT: Test '+n+' ('+subj+') on '+formatDate(d)+'. -Sumeet Sahu')+'&flash=0&numbers='+nums,{method:'GET',mode:'no-cors'});
 db.ref('alerts').push({sid:'ALL',msg:'Test: '+n+' on '+formatDate(d),time:Date.now()});
 }else if(notify==='class'&&cls){
@@ -1042,6 +1071,9 @@ if(ex)db.ref('results/'+ex.id).update({marks:parseInt(inp.value)});
 else db.ref('results').push({tid:ctid,sid:s.id,marks:parseInt(inp.value)});
 }
 }
+// Create alert for marks upload
+var t=tst.find(function(x){return x.id===ctid});
+if(t){db.ref('alerts').push({sid:'ALL',msg:'Results declared for '+t.name+'. Check your results!',time:Date.now(),type:'info'})}
 closeM('addMkModal');toast('Marks Saved!','success');
 }
 
@@ -1174,31 +1206,44 @@ doc.save(s.name+'_Attendance.pdf');toast('Downloaded!','success');
 // Notification Badge
 function updateNotifBadge(){
 if(!cu||cu.role!=='parent')return;
+var lastSeen=parseInt(localStorage.getItem('usp_lastSeen_'+cu.id)||'0');
 var unread=alerts.filter(function(a){
-return(a.sid===cu.id||a.sid==='ALL')&&a.time>(cu.lastSeen||0);
+return(a.sid===cu.id||a.sid==='ALL')&&(a.time||0)>lastSeen;
 }).length;
 var badge=document.getElementById('notifCount');
-if(unread>0){badge.textContent=unread;badge.style.display='block'}
-else{badge.style.display='none'}
+if(unread>0){
+badge.textContent=unread;
+badge.style.display='block';
+document.getElementById('notifBadge').style.background='rgba(255,0,0,0.3)';
+}else{
+badge.style.display='none';
+document.getElementById('notifBadge').style.background='rgba(255,255,255,0.2)';
+}
 }
 
-// Bar Chart
-var barChart=null;
+function markAlertsRead(){
+if(cu&&cu.role==='parent'){
+localStorage.setItem('usp_lastSeen_'+cu.id,Date.now().toString());
+setTimeout(updateNotifBadge,500);
+}
+}
+
+// Line Chart for Performance Trend
+var lineChart=null;
 function renderBarChart(myRes){
 var box=document.getElementById('barChartBox');
 if(myRes.length===0){box.style.display='none';return}
 box.style.display='block';
-var labels=[],data=[],colors=[];
+var labels=[],data=[];
 myRes.slice(0,10).reverse().forEach(function(r){
 var pct=Math.round((r.marks/r.test.totalMarks)*100);
 labels.push(r.test.name.substring(0,8));
 data.push(pct);
-colors.push(pct>=80?'#25D366':pct>=60?'#667eea':pct>=40?'#f1c40f':'#ff6b6b');
 });
-if(barChart)barChart.destroy();
-barChart=new Chart(document.getElementById('barChart'),{
-type:'bar',
-data:{labels:labels,datasets:[{data:data,backgroundColor:colors}]},
+if(lineChart)lineChart.destroy();
+lineChart=new Chart(document.getElementById('barChart'),{
+type:'line',
+data:{labels:labels,datasets:[{label:'Score %',data:data,borderColor:'#667eea',backgroundColor:'rgba(102,126,234,0.1)',fill:true,tension:0.4,pointBackgroundColor:'#667eea',pointRadius:5}]},
 options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100}}}
 });
 }
@@ -1239,6 +1284,26 @@ document.getElementById('alertMsg').value=msg;
 closeM('alertTplModal');
 }
 
+
+// Admin Alert Management
+function renAdminAlerts(){
+var sorted=alerts.slice().sort(function(a,b){return(b.time||0)-(a.time||0)});
+var html='';
+sorted.forEach(function(a){
+var type=getAlertType(a.msg);
+var color=type==='negative'?'#ff6b6b':type==='positive'?'#25D366':'#667eea';
+var stuName=a.sid==='ALL'?'ALL STUDENTS':stu.find(function(s){return s.id===a.sid})?.name||'Unknown';
+html+='<div class="card" style="border-left:4px solid '+color+'"><div class="card-info"><div class="card-title">'+a.msg+'</div><div class="card-sub">To: '+stuName+' • '+formatDate(a.time)+'</div></div><button class="btn-small btn-del" onclick="delAlert(\''+a.id+'\')">🗑️</button></div>';
+});
+document.getElementById('adminAlertList').innerHTML=html||'<div class="empty">No alerts</div>';
+}
+
+function delAlert(id){
+if(confirm('Delete this alert?')){
+db.ref('alerts/'+id).remove();
+toast('Deleted!','success');
+}
+}
 </script>
 </body>
 </html>
