@@ -96,7 +96,8 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 .alert-card{background:#fff;border-radius:12px;padding:12px;margin-bottom:8px;border-left:4px solid #ff6b6b}
 .alert-card.positive{border-left-color:#25D366}
 .alert-card.info{border-left-color:#667eea}
-@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
+@keyframes pulse{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,0,0,0.7)}70%{transform:scale(1.1);box-shadow:0 0 0 10px rgba(255,0,0,0)}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,0,0,0)}}
+#notifCount{animation:pulse 1.5s infinite}
 .notif-unread{background:#fff0f0!important;border-left:4px solid #ff0000!important}
 </style>
 </head>
@@ -127,7 +128,7 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <div class="page active" id="pHome">
 <div class="header">
 <div style="position:absolute;top:20px;right:20px;display:flex;gap:8px">
-<button id="notifBadge" onclick="showP('pAlerts');renPAlerts();markAlertsRead()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:8px 14px;border-radius:10px;cursor:pointer;position:relative">🔔<span id="notifCount" style="position:absolute;top:-5px;right:-5px;background:#ff0000;color:#fff;font-size:10px;font-weight:bold;padding:3px 7px;border-radius:10px;display:none;animation:pulse 1s infinite">0</span></button>
+<button id="notifBadge" onclick="showP('pAlerts');renPAlerts();markAlertsRead()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:8px 14px;border-radius:10px;cursor:pointer;position:relative">🔔<span id="notifCount" style="position:absolute;top:-8px;right:-8px;background:#ff0000;color:#fff;font-size:11px;font-weight:bold;padding:4px 8px;border-radius:50%;min-width:20px;text-align:center;box-shadow:0 2px 5px rgba(255,0,0,0.5)">0</span></button>
 <button class="logout-btn" onclick="logout()" style="position:static">🚪</button>
 </div>
 <div class="profile-pic" id="pPhoto"><span id="pInit">S</span></div>
@@ -427,29 +428,12 @@ function getAlertType(msg){var neg=['absent','late','indiscipline','poor','low']
 
 function uploadToCloudinary(file,cb){
 toast('Uploading...','');
-// Convert file to base64 and store in Firebase
 var reader=new FileReader();
 reader.onload=function(e){
 var base64=e.target.result;
-// For images, store base64 directly
-if(file.type.startsWith('image/')){
+// Store all files as base64 in Firebase (works for images, PDFs, docs)
 cb(base64);
 toast('Uploaded!','success');
-}else{
-// For PDFs and docs, upload to free file hosting
-var fd=new FormData();
-fd.append('file',file);
-fetch('https://tmpfiles.org/api/v1/upload',{method:'POST',body:fd})
-.then(function(r){return r.json()})
-.then(function(d){
-if(d.data&&d.data.url){
-var dlUrl=d.data.url.replace('tmpfiles.org/','tmpfiles.org/dl/');
-cb(dlUrl);
-toast('Uploaded!','success');
-}else{cb(null);toast('Upload failed','error')}
-})
-.catch(function(){cb(null);toast('Upload failed','error')});
-}
 };
 reader.onerror=function(){cb(null);toast('Read failed','error')};
 reader.readAsDataURL(file);
@@ -623,8 +607,17 @@ window.open(url,'_blank');
 
 function openFile(el){
 var url=el.getAttribute('data-url');
-if(url&&url!=='undefined'&&url!=='null'){
+if(url&&url!=='undefined'&&url!=='null'&&url!==''){
+if(url.startsWith('data:')){
+// For base64 data, create blob and open
+var arr=url.split(','),mime=arr[0].match(/:(.*?);/)[1],bstr=atob(arr[1]),n=bstr.length,u8arr=new Uint8Array(n);
+while(n--){u8arr[n]=bstr.charCodeAt(n)}
+var blob=new Blob([u8arr],{type:mime});
+var blobUrl=URL.createObjectURL(blob);
+window.open(blobUrl,'_blank');
+}else{
 window.open(url,'_blank');
+}
 }else{
 toast('File not available','error');
 }
@@ -1259,14 +1252,15 @@ var lastSeen=parseInt(localStorage.getItem('usp_lastSeen_'+cu.id)||'0');
 var unread=alerts.filter(function(a){
 return(a.sid===cu.id||a.sid==='ALL')&&(a.time||0)>lastSeen;
 }).length;
+console.log('Unread alerts:',unread,'LastSeen:',lastSeen);
 if(unread>0){
 badge.textContent=unread;
-badge.style.display='inline-block';
-badge.style.background='#ff0000';
-badge.style.animation='pulse 1s infinite';
-notifBtn.style.background='rgba(255,0,0,0.4)';
+badge.style.visibility='visible';
+badge.style.opacity='1';
+notifBtn.style.background='rgba(255,0,0,0.5)';
 }else{
-badge.style.display='none';
+badge.style.visibility='hidden';
+badge.style.opacity='0';
 notifBtn.style.background='rgba(255,255,255,0.2)';
 }
 }
@@ -1274,7 +1268,7 @@ notifBtn.style.background='rgba(255,255,255,0.2)';
 function markAlertsRead(){
 if(cu&&cu.role==='parent'){
 localStorage.setItem('usp_lastSeen_'+cu.id,Date.now().toString());
-setTimeout(updateNotifBadge,500);
+setTimeout(updateNotifBadge,300);
 }
 }
 
