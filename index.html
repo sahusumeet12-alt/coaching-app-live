@@ -408,6 +408,16 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 </div>
 </div></div></div>
 
+<div class="modal" id="editAlertModal"><div class="modal-content"><div class="modal-header"><h2 class="modal-title">✏️ Edit Alert</h2><button class="modal-close" onclick="closeM('editAlertModal')">×</button></div><div class="modal-body">
+<input type="hidden" id="editAlertId">
+<div class="form-group"><label>Sent To</label><input type="text" id="editAlertTo" disabled style="background:#f0f2f5"></div>
+<div class="form-group"><label>Message</label><textarea id="editAlertMsg" rows="3"></textarea></div>
+<div class="form-group"><label>Sent On</label><input type="text" id="editAlertTime" disabled style="background:#f0f2f5"></div>
+</div><div class="modal-footer">
+<button class="btn btn-green" onclick="updateAlert()">💾 Update</button>
+<button class="btn btn-del" onclick="confirmDelAlert()">🗑️ Delete</button>
+</div></div></div>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -1388,9 +1398,39 @@ sorted.forEach(function(a){
 var type=getAlertType(a.msg);
 var color=type==='negative'?'#ff6b6b':type==='positive'?'#25D366':'#667eea';
 var stuName=a.sid==='ALL'?'ALL STUDENTS':stu.find(function(s){return s.id===a.sid})?.name||'Unknown';
-html+='<div class="card" style="border-left:4px solid '+color+'"><div class="card-info"><div class="card-title">'+a.msg+'</div><div class="card-sub">To: '+stuName+' • '+formatDate(a.time)+'</div></div><button class="btn-small btn-del" onclick="delAlert(\''+a.id+'\')">🗑️</button></div>';
+html+='<div class="card" style="border-left:4px solid '+color+'"><div class="card-info"><div class="card-title">'+a.msg+'</div><div class="card-sub">To: '+stuName+' • '+formatDate(a.time)+'</div></div><button class="btn-small" style="background:#667eea" onclick="openEditAlert(\''+a.id+'\')">✏️</button><button class="btn-small btn-del" style="margin-left:5px" onclick="delAlert(\''+a.id+'\')">🗑️</button></div>';
 });
 document.getElementById('adminAlertList').innerHTML=html||'<div class="empty">No alerts</div>';
+}
+
+function openEditAlert(id){
+var a=alerts.find(function(x){return x.id===id});
+if(!a)return toast('Alert not found','error');
+var stuName=a.sid==='ALL'?'ALL STUDENTS':stu.find(function(s){return s.id===a.sid})?.name||'Unknown';
+document.getElementById('editAlertId').value=a.id;
+document.getElementById('editAlertTo').value=stuName;
+document.getElementById('editAlertMsg').value=a.msg;
+document.getElementById('editAlertTime').value=formatDate(a.time);
+openM('editAlertModal');
+}
+
+function updateAlert(){
+var id=document.getElementById('editAlertId').value;
+var msg=document.getElementById('editAlertMsg').value.trim();
+if(!msg)return toast('Enter message','error');
+db.ref('alerts/'+id).update({msg:msg}).then(function(){
+closeM('editAlertModal');
+toast('Alert Updated!','success');
+});
+}
+
+function confirmDelAlert(){
+var id=document.getElementById('editAlertId').value;
+if(confirm('Delete this alert permanently?')){
+db.ref('alerts/'+id).remove();
+closeM('editAlertModal');
+toast('Deleted!','success');
+}
 }
 
 function delAlert(id){
