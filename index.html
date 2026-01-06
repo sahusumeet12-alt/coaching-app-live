@@ -148,6 +148,7 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <div><span style="font-size:11px;color:#888">Class Average</span><br><strong id="pClassAvg">0%</strong></div>
 </div>
 </div>
+<div id="parentBadges" style="padding:0 20px;margin-bottom:10px"></div>
 <div class="section">
 <h3 class="section-title">⚡ Quick Access</h3>
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:15px">
@@ -283,6 +284,27 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <button class="btn" onclick="ldDD();openM('addFModal')">💰 Record Payment</button>
 </div>
 <div class="list" id="feeL" style="margin-top:12px"></div>
+</div>
+
+<div class="page" id="aAnalytics">
+<div class="header"><h1>📊 Analytics</h1></div>
+<div class="section" style="padding-top:15px">
+<button class="btn btn-dl" onclick="genAllReports()" style="margin-bottom:10px">📥 Generate All Monthly Reports</button>
+</div>
+
+<!-- Class-wise Topper List -->
+<div class="section"><h3 class="section-title">🏆 Class-wise Toppers</h3></div>
+<div id="topperList" style="padding:0 20px"></div>
+
+<!-- Weak Students -->
+<div class="section"><h3 class="section-title">⚠️ Weak Students (Below 40%)</h3></div>
+<div id="weakList" style="padding:0 20px"></div>
+<div style="padding:10px 20px"><button class="btn btn-sms" onclick="alertWeakParents()">📱 Alert All Weak Students' Parents</button></div>
+
+<!-- Attendance Warning -->
+<div class="section"><h3 class="section-title">📋 Low Attendance (Below 75%)</h3></div>
+<div id="lowAttList" style="padding:0 20px"></div>
+<div style="padding:10px 20px 80px"><button class="btn btn-sms" onclick="alertLowAttParents()">📱 Alert Low Attendance Parents</button></div>
 </div>
 
 <div class="page" id="aAlerts">
@@ -496,7 +518,7 @@ document.getElementById('pMatFilters').innerHTML='<button class="filter-btn acti
 }
 
 function initAdmin(){
-document.getElementById('aNav').innerHTML='<button class="nav-item active" onclick="showA(\'aHome\')"><span>🏠</span><span>Home</span></button><button class="nav-item" onclick="showA(\'aAtt\');renAtt()"><span>📋</span><span>Attend</span></button><button class="nav-item" onclick="showA(\'aTests\')"><span>📝</span><span>Tests</span></button><button class="nav-item" onclick="showA(\'aAlerts\');renAdminAlerts()"><span>🔔</span><span>Alerts</span></button><button class="nav-item" onclick="showA(\'aWorksheets\');renAWs()"><span>📚</span><span>Sheets</span></button><button class="nav-item" onclick="showA(\'aFees\')"><span>💰</span><span>Fees</span></button>';
+document.getElementById('aNav').innerHTML='<button class="nav-item active" onclick="showA(\'aHome\')"><span>🏠</span><span>Home</span></button><button class="nav-item" onclick="showA(\'aAtt\');renAtt()"><span>📋</span><span>Attend</span></button><button class="nav-item" onclick="showA(\'aTests\')"><span>📝</span><span>Tests</span></button><button class="nav-item" onclick="showA(\'aAnalytics\');renAnalytics()"><span>📊</span><span>Stats</span></button><button class="nav-item" onclick="showA(\'aAlerts\');renAdminAlerts()"><span>🔔</span><span>Alerts</span></button><button class="nav-item" onclick="showA(\'aFees\')"><span>💰</span><span>Fees</span></button>';
 document.getElementById('quickActions').innerHTML='<button class="action" onclick="openM(\'addSModal\')"><div class="action-icon">➕</div><div class="action-label">Add Student</div></button><button class="action" onclick="showA(\'aAtt\');renAtt()"><div class="action-icon">📋</div><div class="action-label">Attendance</div></button><button class="action" onclick="openM(\'addTModal\')"><div class="action-icon">📝</div><div class="action-label">Add Test</div></button><button class="action" onclick="ldDD();openM(\'alertModal\')"><div class="action-icon">🔔</div><div class="action-label">Send Alert</div></button><button class="action" onclick="showA(\'aAlerts\');renAdminAlerts()"><div class="action-icon">📢</div><div class="action-label">All Alerts</div></button><button class="action" onclick="showA(\'aLeave\');renAdminLeave()"><div class="action-icon">✋</div><div class="action-label">Leave Req</div></button>';
 document.getElementById('clsFilters').innerHTML='<button class="filter-btn active" onclick="setClsF(this,\'all\')">All</button><button class="filter-btn" onclick="setClsF(this,\'VI\')">VI</button><button class="filter-btn" onclick="setClsF(this,\'VII\')">VII</button><button class="filter-btn" onclick="setClsF(this,\'VIII\')">VIII</button><button class="filter-btn" onclick="setClsF(this,\'IX\')">IX</button><button class="filter-btn" onclick="setClsF(this,\'X\')">X</button>';
 document.getElementById('wsFilters').innerHTML='<button class="filter-btn active" onclick="setWsF(this,\'all\')">All</button><button class="filter-btn" onclick="setWsF(this,\'Mathematics\')">Maths</button><button class="filter-btn" onclick="setWsF(this,\'Science\')">Science</button><button class="filter-btn" onclick="setWsF(this,\'Social Science\')">Social Science</button>';
@@ -534,6 +556,7 @@ document.getElementById('pTestCnt').textContent=myRes.length;
 var rankInfo=calculateRank(cu.id);
 document.getElementById('pRank').textContent='#'+rankInfo.rank;
 document.getElementById('pClassAvg').textContent=rankInfo.classAvg+'%';
+renderParentBadges();
 // Alerts
 var myAlerts=[];for(var i=0;i<alerts.length;i++){if(alerts[i].sid===cu.id||alerts[i].sid==='ALL')myAlerts.push(alerts[i])}
 myAlerts.sort(function(a,b){return(b.time||0)-(a.time||0)});
@@ -1050,7 +1073,13 @@ document.getElementById('fStu').innerHTML=fOpts;
 function saveF(){
 var sid=document.getElementById('fStu').value,amt=document.getElementById('fAmt').value,d=document.getElementById('fDate').value,rem=document.getElementById('fRemark').value;
 if(!sid||!amt)return toast('Fill all','error');
-db.ref('fees').push({sid:sid,amount:parseInt(amt),date:d,remark:rem}).then(function(){closeM('addFModal');document.getElementById('fAmt').value='';document.getElementById('fRemark').value='';toast('Saved!','success')});
+var s=stu.find(function(x){return x.id===sid});
+db.ref('fees').push({sid:sid,amount:parseInt(amt),date:d,remark:rem}).then(function(){
+// Send fee received alert to parent
+var msg='Fee Received: Rs.'+amt+'/- on '+formatDate(d)+(rem?' ('+rem+')':'')+'. Thank you! - UNIQUE STUDY POINT';
+db.ref('alerts').push({sid:sid,msg:msg,time:Date.now(),type:'positive'});
+closeM('addFModal');document.getElementById('fAmt').value='';document.getElementById('fRemark').value='';toast('Saved & Alert Sent!','success');
+});
 }
 
 function sendAlertSMS(){
@@ -1643,6 +1672,303 @@ db.ref('alerts').push({sid:l.sid,msg:msg,time:Date.now(),type:status==='approved
 }
 toast('Leave '+status+'!','success');
 });
+}
+
+// Analytics Functions
+function renAnalytics(){
+renderToppers();
+renderWeakStudents();
+renderLowAttendance();
+renderFeePending();
+}
+
+function renderToppers(){
+var classes=['VI','VII','VIII','IX','X'];
+var html='';
+classes.forEach(function(cls){
+var clsStu=stu.filter(function(s){return s.class===cls});
+if(clsStu.length===0)return;
+var scores=[];
+clsStu.forEach(function(s){
+var myRes=res.filter(function(r){return r.sid===s.id});
+if(myRes.length>0){
+var total=0;
+myRes.forEach(function(r){
+var t=tst.find(function(x){return x.id===r.tid});
+if(t)total+=Math.round((r.marks/t.totalMarks)*100);
+});
+scores.push({id:s.id,name:s.name,avg:Math.round(total/myRes.length),tests:myRes.length});
+}
+});
+scores.sort(function(a,b){return b.avg-a.avg});
+var top5=scores.slice(0,5);
+if(top5.length>0){
+html+='<div style="background:#fff;border-radius:12px;padding:12px;margin-bottom:12px"><h4 style="color:#667eea;margin-bottom:8px">🏆 Class '+cls+'</h4>';
+top5.forEach(function(s,i){
+var medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+html+='<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f0f0"><span>'+medal+' #'+(i+1)+' '+s.name+'</span><span style="font-weight:700;color:#25D366">'+s.avg+'%</span></div>';
+});
+html+='</div>';
+}
+});
+document.getElementById('topperList').innerHTML=html||'<div class="empty">No data yet</div>';
+}
+
+function renderWeakStudents(){
+var weak=[];
+stu.forEach(function(s){
+var myRes=res.filter(function(r){return r.sid===s.id});
+if(myRes.length>0){
+var total=0;
+myRes.forEach(function(r){
+var t=tst.find(function(x){return x.id===r.tid});
+if(t)total+=Math.round((r.marks/t.totalMarks)*100);
+});
+var avg=Math.round(total/myRes.length);
+if(avg<40)weak.push({id:s.id,name:s.name,class:s.class,avg:avg,mobile:s.mobile});
+}
+});
+weak.sort(function(a,b){return a.avg-b.avg});
+var html='';
+if(weak.length>0){
+html+='<div style="background:#fff;border-radius:12px;padding:12px">';
+weak.forEach(function(s){
+html+='<div class="card" style="border-left:4px solid #ff6b6b;margin-bottom:8px"><div class="card-info"><div class="card-title">'+s.name+'</div><div class="card-sub">Class '+s.class+' • Average: <span style="color:#ff6b6b;font-weight:700">'+s.avg+'%</span></div></div><button class="btn-small btn-sms" onclick="alertOneParent(\''+s.id+'\',\'weak\')">📱</button></div>';
+});
+html+='</div>';
+}
+document.getElementById('weakList').innerHTML=html||'<div class="empty" style="color:#25D366">✅ No weak students! Great job!</div>';
+}
+
+function renderLowAttendance(){
+var lowAtt=[];
+stu.forEach(function(s){
+var myAtt=att.filter(function(a){return a.sid===s.id});
+if(myAtt.length>0){
+var pres=myAtt.filter(function(a){return a.status==='present'}).length;
+var pct=Math.round((pres/myAtt.length)*100);
+if(pct<75)lowAtt.push({id:s.id,name:s.name,class:s.class,present:pres,total:myAtt.length,pct:pct,mobile:s.mobile});
+}
+});
+lowAtt.sort(function(a,b){return a.pct-b.pct});
+var html='';
+if(lowAtt.length>0){
+html+='<div style="background:#fff;border-radius:12px;padding:12px">';
+lowAtt.forEach(function(s){
+var color=s.pct<50?'#ff6b6b':s.pct<65?'#f1c40f':'#667eea';
+html+='<div class="card" style="border-left:4px solid '+color+';margin-bottom:8px"><div class="card-info"><div class="card-title">'+s.name+'</div><div class="card-sub">Class '+s.class+' • '+s.present+'/'+s.total+' days • <span style="color:'+color+';font-weight:700">'+s.pct+'%</span></div></div><button class="btn-small btn-sms" onclick="alertOneParent(\''+s.id+'\',\'attendance\')">📱</button></div>';
+});
+html+='</div>';
+}
+document.getElementById('lowAttList').innerHTML=html||'<div class="empty" style="color:#25D366">✅ All students have good attendance!</div>';
+}
+
+function alertOneParent(sid,type){
+var s=stu.find(function(x){return x.id===sid});
+if(!s)return;
+var msg='';
+if(type==='weak'){
+var myRes=res.filter(function(r){return r.sid===sid});
+var total=0;myRes.forEach(function(r){var t=tst.find(function(x){return x.id===r.tid});if(t)total+=Math.round((r.marks/t.totalMarks)*100)});
+var avg=myRes.length?Math.round(total/myRes.length):0;
+msg='Dear Parent, '+s.name+'\'s average score is '+avg+'%. Please pay attention to studies. - UNIQUE STUDY POINT';
+}else{
+var myAtt=att.filter(function(a){return a.sid===sid});
+var pres=myAtt.filter(function(a){return a.status==='present'}).length;
+var pct=myAtt.length?Math.round((pres/myAtt.length)*100):0;
+msg='Dear Parent, '+s.name+'\'s attendance is '+pct+'% ('+pres+'/'+myAtt.length+' days). Regular attendance is important. - UNIQUE STUDY POINT';
+}
+db.ref('alerts').push({sid:sid,msg:msg,time:Date.now(),type:'negative'});
+toast('Alert sent to '+s.name+'\'s parent!','success');
+}
+
+function alertWeakParents(){
+var weak=[];
+stu.forEach(function(s){
+var myRes=res.filter(function(r){return r.sid===s.id});
+if(myRes.length>0){
+var total=0;myRes.forEach(function(r){var t=tst.find(function(x){return x.id===r.tid});if(t)total+=Math.round((r.marks/t.totalMarks)*100)});
+var avg=Math.round(total/myRes.length);
+if(avg<40)weak.push({id:s.id,name:s.name,avg:avg});
+}
+});
+if(weak.length===0)return toast('No weak students!','success');
+if(!confirm('Send alert to '+weak.length+' weak students\' parents?'))return;
+weak.forEach(function(s){
+var msg='Dear Parent, your child\'s average score is '+s.avg+'%. Please pay attention to studies. - UNIQUE STUDY POINT';
+db.ref('alerts').push({sid:s.id,msg:msg,time:Date.now(),type:'negative'});
+});
+toast('Alerts sent to '+weak.length+' parents!','success');
+}
+
+function alertLowAttParents(){
+var lowAtt=[];
+stu.forEach(function(s){
+var myAtt=att.filter(function(a){return a.sid===s.id});
+if(myAtt.length>0){
+var pres=myAtt.filter(function(a){return a.status==='present'}).length;
+var pct=Math.round((pres/myAtt.length)*100);
+if(pct<75)lowAtt.push({id:s.id,name:s.name,pres:pres,total:myAtt.length,pct:pct});
+}
+});
+if(lowAtt.length===0)return toast('All students have good attendance!','success');
+if(!confirm('Send alert to '+lowAtt.length+' low attendance students\' parents?'))return;
+lowAtt.forEach(function(s){
+var msg='Dear Parent, your child\'s attendance is '+s.pct+'% ('+s.pres+'/'+s.total+' days). Regular attendance is important. - UNIQUE STUDY POINT';
+db.ref('alerts').push({sid:s.id,msg:msg,time:Date.now(),type:'negative'});
+});
+toast('Alerts sent to '+lowAtt.length+' parents!','success');
+}
+
+// Generate All Monthly Reports
+function genAllReports(){
+if(stu.length===0)return toast('No students!','error');
+if(!confirm('Generate reports for all '+stu.length+' students?'))return;
+toast('Generating reports...','');
+var count=0;
+stu.forEach(function(s,idx){
+setTimeout(function(){
+genSingleReport(s);
+count++;
+if(count===stu.length)toast('All '+count+' reports generated!','success');
+},idx*500);
+});
+}
+
+function genSingleReport(s){
+var myRes=res.filter(function(r){return r.sid===s.id});
+var myAtt=att.filter(function(a){return a.sid===s.id});
+var totalMarks=0,totalMax=0,subjects={};
+myRes.forEach(function(r){
+var t=tst.find(function(x){return x.id===r.tid});
+if(t){
+totalMarks+=r.marks;totalMax+=t.totalMarks;
+if(!subjects[t.subject])subjects[t.subject]={total:0,cnt:0};
+subjects[t.subject].total+=Math.round((r.marks/t.totalMarks)*100);
+subjects[t.subject].cnt++;
+}
+});
+var avgPct=totalMax?Math.round((totalMarks/totalMax)*100):0;
+var overall=getGrade(avgPct);
+var pres=myAtt.filter(function(a){return a.status==='present'}).length;
+var attPct=myAtt.length?Math.round((pres/myAtt.length)*100):0;
+
+var jsPDF=window.jspdf.jsPDF,doc=new jsPDF();
+// Header
+doc.setFillColor(26,53,93);doc.rect(0,0,210,42,'F');
+doc.setFillColor(237,137,54);doc.roundedRect(15,10,35,25,3,3,'F');
+doc.setTextColor(255);doc.setFontSize(14);doc.setFont('helvetica','bold');
+doc.text('USP',32,26,{align:'center'});
+doc.setFontSize(18);doc.text('UNIQUE STUDY POINT',120,18,{align:'center'});
+doc.setFontSize(9);doc.setFont('helvetica','normal');
+doc.text('By Sumeet Sahu | Excellence in Education',120,26,{align:'center'});
+doc.text('Amitesh Nagar, Indore, M.P. | www.uniquestudyonline.com',120,34,{align:'center'});
+doc.setFillColor(237,137,54);doc.rect(0,42,210,11,'F');
+doc.setFontSize(11);doc.setFont('helvetica','bold');
+doc.text('MONTHLY PROGRESS REPORT - '+getMonth().toUpperCase(),105,49,{align:'center'});
+// Info
+doc.setDrawColor(26,53,93);doc.setLineWidth(0.5);doc.roundedRect(14,58,182,16,2,2,'S');
+doc.setTextColor(26,53,93);doc.setFontSize(9);doc.setFont('helvetica','bold');
+doc.text('Student: '+s.name,18,67);doc.text('Class: '+s.class,90,67);doc.text('Roll: '+s.userId,140,67);
+// Summary
+doc.setFillColor(26,53,93);doc.roundedRect(14,78,182,14,2,2,'F');
+doc.setTextColor(255);doc.setFontSize(9);
+doc.text('Tests: '+myRes.length,30,87);doc.text('Average: '+avgPct+'%',70,87);doc.text('Grade: '+overall.g,115,87);doc.text('Attendance: '+attPct+'%',155,87);
+// Footer
+doc.setFillColor(26,53,93);doc.rect(0,280,210,17,'F');
+doc.setTextColor(255);doc.setFontSize(7);
+doc.text('UNIQUE STUDY POINT | www.uniquestudyonline.com | '+PHONE,105,290,{align:'center'});
+doc.save(s.name.replace(/\s+/g,'_')+'_Report.pdf');
+}
+
+// Parent Badges
+function renderParentBadges(){
+if(!cu||cu.role!=='parent')return;
+var html='';
+// Check rank
+var rankInfo=calculateRank(cu.id);
+if(rankInfo.rank<=5){
+html+='<div style="background:linear-gradient(135deg,#f1c40f,#f39c12);color:#fff;padding:12px;border-radius:12px;margin-bottom:8px;text-align:center"><span style="font-size:18px">🏆</span> <strong>Congratulations!</strong> You are #'+rankInfo.rank+' in your class!</div>';
+}
+// Check weak
+var myRes=res.filter(function(r){return r.sid===cu.id});
+if(myRes.length>0){
+var total=0;myRes.forEach(function(r){var t=tst.find(function(x){return x.id===r.tid});if(t)total+=Math.round((r.marks/t.totalMarks)*100)});
+var avg=Math.round(total/myRes.length);
+if(avg<40){
+html+='<div style="background:linear-gradient(135deg,#ff6b6b,#ee5a5a);color:#fff;padding:12px;border-radius:12px;margin-bottom:8px;text-align:center"><span style="font-size:18px">⚠️</span> Your average is <strong>'+avg+'%</strong>. Need more practice!</div>';
+}
+}
+// Check attendance
+var myAtt=att.filter(function(a){return a.sid===cu.id});
+if(myAtt.length>0){
+var pres=myAtt.filter(function(a){return a.status==='present'}).length;
+var attPct=Math.round((pres/myAtt.length)*100);
+if(attPct<75){
+html+='<div style="background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;padding:12px;border-radius:12px;margin-bottom:8px;text-align:center"><span style="font-size:18px">📋</span> Attendance is <strong>'+attPct+'%</strong>. Regular attendance is important!</div>';
+}else if(attPct>=95){
+html+='<div style="background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;padding:12px;border-radius:12px;margin-bottom:8px;text-align:center"><span style="font-size:18px">⭐</span> <strong>Excellent!</strong> '+attPct+'% attendance. Keep it up!</div>';
+}
+}
+document.getElementById('parentBadges').innerHTML=html;
+}
+
+// Fee Pending Functions
+function renderFeePending(){
+var pending=[];
+stu.forEach(function(s){
+var myFee=fee.filter(function(f){return f.sid===s.id});
+var paid=myFee.reduce(function(a,b){return a+b.amount},0);
+var join=new Date(s.joinDate||td),now=new Date();
+var months=Math.max(1,(now.getFullYear()-join.getFullYear())*12+(now.getMonth()-join.getMonth())+1);
+var due=(s.fee||500)*months;
+var pend=Math.max(0,due-paid);
+if(pend>0)pending.push({id:s.id,name:s.name,class:s.class,paid:paid,due:due,pending:pend,mobile:s.mobile});
+});
+pending.sort(function(a,b){return b.pending-a.pending});
+var html='';
+if(pending.length>0){
+html+='<div style="background:#fff;border-radius:12px;padding:12px">';
+pending.forEach(function(s){
+html+='<div class="card" style="border-left:4px solid #f39c12;margin-bottom:8px"><div class="card-info"><div class="card-title">'+s.name+'</div><div class="card-sub">Class '+s.class+' • Paid: ₹'+s.paid+' • <span style="color:#ff6b6b;font-weight:700">Pending: ₹'+s.pending+'</span></div></div><button class="btn-small btn-sms" onclick="sendFeeReminder(\''+s.id+'\')">📱</button></div>';
+});
+html+='</div>';
+}
+document.getElementById('feePendingList').innerHTML=html||'<div class="empty" style="color:#25D366">✅ All fees cleared!</div>';
+}
+
+function sendFeeReminder(sid){
+var s=stu.find(function(x){return x.id===sid});
+if(!s)return;
+var myFee=fee.filter(function(f){return f.sid===sid});
+var paid=myFee.reduce(function(a,b){return a+b.amount},0);
+var join=new Date(s.joinDate||td),now=new Date();
+var months=Math.max(1,(now.getFullYear()-join.getFullYear())*12+(now.getMonth()-join.getMonth())+1);
+var due=(s.fee||500)*months;
+var pend=Math.max(0,due-paid);
+var msg='Fee Reminder: Rs.'+pend+'/- pending. Please clear your dues at the earliest. - UNIQUE STUDY POINT';
+db.ref('alerts').push({sid:sid,msg:msg,time:Date.now(),type:'info'});
+toast('Fee reminder sent to '+s.name+'!','success');
+}
+
+function alertFeePending(){
+var pending=[];
+stu.forEach(function(s){
+var myFee=fee.filter(function(f){return f.sid===s.id});
+var paid=myFee.reduce(function(a,b){return a+b.amount},0);
+var join=new Date(s.joinDate||td),now=new Date();
+var months=Math.max(1,(now.getFullYear()-join.getFullYear())*12+(now.getMonth()-join.getMonth())+1);
+var due=(s.fee||500)*months;
+var pend=Math.max(0,due-paid);
+if(pend>0)pending.push({id:s.id,name:s.name,pending:pend});
+});
+if(pending.length===0)return toast('All fees cleared!','success');
+if(!confirm('Send fee reminder to '+pending.length+' students?'))return;
+pending.forEach(function(s){
+var msg='Fee Reminder: Rs.'+s.pending+'/- pending. Please clear your dues at the earliest. - UNIQUE STUDY POINT';
+db.ref('alerts').push({sid:s.id,msg:msg,time:Date.now(),type:'info'});
+});
+toast('Fee reminders sent to '+pending.length+' parents!','success');
 }
 </script>
 </body>
