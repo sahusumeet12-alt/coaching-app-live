@@ -305,7 +305,25 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <!-- Attendance Warning -->
 <div class="section"><h3 class="section-title">📋 Low Attendance (Below 75%)</h3></div>
 <div id="lowAttList" style="padding:0 20px"></div>
-<div style="padding:10px 20px 80px"><button class="btn btn-sms" onclick="alertLowAttParents()">📱 Alert Low Attendance Parents</button></div>
+<div style="padding:10px 20px"><button class="btn btn-sms" onclick="alertLowAttParents()">📱 Alert Low Attendance Parents</button></div>
+
+<!-- Fee Pending -->
+<div class="section"><h3 class="section-title">💰 Fee Pending Students</h3></div>
+<div id="feePendingList" style="padding:0 20px"></div>
+<div style="padding:10px 20px"><button class="btn btn-sms" onclick="alertFeePending()">📱 Send Fee Reminder to All</button></div>
+
+<!-- Clear Data Section -->
+<div class="section"><h3 class="section-title">🗑️ Clear Data (Reset)</h3></div>
+<div style="padding:10px 20px 100px">
+<p style="color:#ff6b6b;font-size:12px;margin-bottom:15px">⚠️ Warning: This will permanently delete selected data. Students will NOT be deleted.</p>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<button class="btn" style="background:#ff6b6b" onclick="clearAttendance()">🗑️ Attendance</button>
+<button class="btn" style="background:#ff6b6b" onclick="clearTests()">🗑️ Tests/Results</button>
+<button class="btn" style="background:#ff6b6b" onclick="clearAlerts()">🗑️ All Alerts</button>
+<button class="btn" style="background:#ff6b6b" onclick="clearFees()">🗑️ Fee Records</button>
+</div>
+<button class="btn" style="background:#cc0000;margin-top:15px;width:100%" onclick="clearAllData()">⚠️ CLEAR ALL DATA</button>
+</div>
 </div>
 
 <div class="page" id="aAlerts">
