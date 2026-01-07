@@ -2039,6 +2039,59 @@ if(birthdays.length===0)return '';
 var names=birthdays.map(function(s){return s.name}).join(', ');
 return '<div style="background:linear-gradient(135deg,#f1c40f,#e67e22);color:#fff;padding:15px;margin:0 20px 15px;border-radius:16px;text-align:center"><span style="font-size:24px">🎂</span><br><strong>Today\'s Birthday!</strong><br>'+names+'</div>';
 }
+
+// Clear Data Functions
+function clearAttendance(){
+if(!confirm('Delete ALL attendance records?'))return;
+if(!confirm('Are you SURE? This cannot be undone!'))return;
+db.ref('attendance').remove().then(function(){
+toast('All attendance deleted!','success');
+renAnalytics();
+});
+}
+
+function clearTests(){
+if(!confirm('Delete ALL tests and results?'))return;
+if(!confirm('Are you SURE? This cannot be undone!'))return;
+db.ref('tests').remove();
+db.ref('results').remove().then(function(){
+toast('All tests & results deleted!','success');
+renAnalytics();
+});
+}
+
+function clearAlerts(){
+if(!confirm('Delete ALL alerts?'))return;
+if(!confirm('Are you SURE? This cannot be undone!'))return;
+db.ref('alerts').remove().then(function(){
+toast('All alerts deleted!','success');
+renAnalytics();
+});
+}
+
+function clearFees(){
+if(!confirm('Delete ALL fee records?'))return;
+if(!confirm('Are you SURE? This cannot be undone!'))return;
+db.ref('fees').remove().then(function(){
+toast('All fee records deleted!','success');
+renAnalytics();
+});
+}
+
+function clearAllData(){
+if(!confirm('⚠️ DELETE ALL DATA (Attendance, Tests, Results, Alerts, Fees)?'))return;
+if(!confirm('⚠️ Are you ABSOLUTELY SURE? This cannot be undone!'))return;
+if(prompt('Type "DELETE" to confirm:')!=='DELETE')return toast('Cancelled','error');
+db.ref('attendance').remove();
+db.ref('tests').remove();
+db.ref('results').remove();
+db.ref('alerts').remove();
+db.ref('fees').remove();
+db.ref('leaves').remove().then(function(){
+toast('All data cleared! Students are safe.','success');
+renAnalytics();
+});
+}
 </script>
 </body>
 </html>
