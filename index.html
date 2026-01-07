@@ -1139,19 +1139,18 @@ document.getElementById('testL').innerHTML=html||'<div class="empty">No tests</d
 function saveT(){
 var n=document.getElementById('tN').value.trim(),subj=document.getElementById('tSubj').value,cls=document.getElementById('tClass').value,m=document.getElementById('tM').value,d=document.getElementById('tD').value,notify=document.getElementById('tNotify').value;
 if(!n||!subj){toast('Fill name & subject','error');return}
-// Always create alert for dashboard notification
-db.ref('alerts').push({sid:'ALL',msg:'New Test: '+n+' ('+subj+') on '+formatDate(d),time:Date.now(),type:'info'});
+// Send alert ONLY to class-specific students (or ALL if no class selected)
+var targetStu=cls?stu.filter(function(s){return s.class===cls}):stu;
+targetStu.forEach(function(s){
+db.ref('alerts').push({sid:s.id,msg:'New Test: '+n+' ('+subj+') on '+formatDate(d),time:Date.now(),type:'info'});
+});
 db.ref('tests').push({name:n,subject:subj,testClass:cls||'All',totalMarks:parseInt(m)||50,date:d,createdAt:Date.now()}).then(function(){
-if(notify==='all'&&stu.length){
-var nums=[];stu.forEach(function(s){getAllMobiles(s).forEach(function(n){nums.push(n)})});nums=nums.join(',');
-fetch('https://www.fast2sms.com/dev/bulkV2?authorization=P3WtxzoqRgB58mSnZ1vJAwGQ2p7UTY0ci6dLjlhbkDCf4auKHI2qKczUL1AMVRj6WSDItJekFaZxP8no&route=q&message='+encodeURIComponent('UNIQUE STUDY POINT: Test '+n+' ('+subj+') on '+formatDate(d)+'. -Sumeet Sahu')+'&flash=0&numbers='+nums,{method:'GET',mode:'no-cors'});
-db.ref('alerts').push({sid:'ALL',msg:'Test: '+n+' on '+formatDate(d),time:Date.now()});
+if(notify==='all'){
+var nums=[];targetStu.forEach(function(s){getAllMobiles(s).forEach(function(n){nums.push(n)})});nums=nums.join(',');
+if(nums)fetch('https://www.fast2sms.com/dev/bulkV2?authorization=P3WtxzoqRgB58mSnZ1vJAwGQ2p7UTY0ci6dLjlhbkDCf4auKHI2qKczUL1AMVRj6WSDItJekFaZxP8no&route=q&message='+encodeURIComponent('UNIQUE STUDY POINT: Test '+n+' ('+subj+')'+(cls?' for Class '+cls:'')+' on '+formatDate(d)+'. -Sumeet Sahu')+'&flash=0&numbers='+nums,{method:'GET',mode:'no-cors'});
 }else if(notify==='class'&&cls){
-var clsStu=stu.filter(function(s){return s.class===cls});
-if(clsStu.length){
-var nums=clsStu.map(function(s){return s.mobile}).join(',');
-fetch('https://www.fast2sms.com/dev/bulkV2?authorization=P3WtxzoqRgB58mSnZ1vJAwGQ2p7UTY0ci6dLjlhbkDCf4auKHI2qKczUL1AMVRj6WSDItJekFaZxP8no&route=q&message='+encodeURIComponent('UNIQUE STUDY POINT: Test '+n+' for Class '+cls+' on '+formatDate(d)+'. -Sumeet Sahu')+'&flash=0&numbers='+nums,{method:'GET',mode:'no-cors'});
-}
+var nums=[];targetStu.forEach(function(s){getAllMobiles(s).forEach(function(n){nums.push(n)})});nums=nums.join(',');
+if(nums)fetch('https://www.fast2sms.com/dev/bulkV2?authorization=P3WtxzoqRgB58mSnZ1vJAwGQ2p7UTY0ci6dLjlhbkDCf4auKHI2qKczUL1AMVRj6WSDItJekFaZxP8no&route=q&message='+encodeURIComponent('UNIQUE STUDY POINT: Test '+n+' for Class '+cls+' on '+formatDate(d)+'. -Sumeet Sahu')+'&flash=0&numbers='+nums,{method:'GET',mode:'no-cors'});
 }
 closeM('addTModal');
 document.getElementById('tN').value='';document.getElementById('tSubj').value='';document.getElementById('tClass').value='';document.getElementById('tNotify').value='none';
@@ -1196,9 +1195,17 @@ if(ex)db.ref('results/'+ex.id).update({marks:parseInt(inp.value)});
 else db.ref('results').push({tid:ctid,sid:s.id,marks:parseInt(inp.value)});
 }
 }
-// Create alert for marks upload
+// Create alert for marks upload - ONLY to students who got marks
 var t=tst.find(function(x){return x.id===ctid});
-if(t){db.ref('alerts').push({sid:'ALL',msg:'Results declared for '+t.name+'. Check your results!',time:Date.now(),type:'info'})}
+if(t){
+var targetStu=t.testClass&&t.testClass!=='All'?stu.filter(function(s){return s.class===t.testClass}):stu;
+targetStu.forEach(function(s){
+var hasMarks=res.some(function(r){return r.tid===ctid&&r.sid===s.id})||document.getElementById('mk_'+s.id)?.value;
+if(hasMarks){
+db.ref('alerts').push({sid:s.id,msg:'Results declared for '+t.name+'. Check your results!',time:Date.now(),type:'info'});
+}
+});
+}
 closeM('addMkModal');toast('Marks Saved!','success');
 }
 
