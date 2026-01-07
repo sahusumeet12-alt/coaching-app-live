@@ -1186,24 +1186,22 @@ openM('addMkModal');
 function saveMk(){
 var t=null;for(var i=0;i<tst.length;i++){if(tst[i].id===ctid){t=tst[i];break}}
 var testStu=t&&t.testClass&&t.testClass!=='All'?stu.filter(function(s){return s.class===t.testClass}):stu;
+var marksEnteredFor=[];
 for(var i=0;i<testStu.length;i++){
 var s=testStu[i],inp=document.getElementById('mk_'+s.id);
 if(inp&&inp.value!==''){
+marksEnteredFor.push(s.id);
 var ex=null;
 for(var j=0;j<res.length;j++){if(res[j].tid===ctid&&res[j].sid===s.id){ex=res[j];break}}
 if(ex)db.ref('results/'+ex.id).update({marks:parseInt(inp.value)});
 else db.ref('results').push({tid:ctid,sid:s.id,marks:parseInt(inp.value)});
 }
 }
-// Create alert for marks upload - ONLY to students who got marks
+// Create alert ONLY for students whose marks were just entered
 var t=tst.find(function(x){return x.id===ctid});
-if(t){
-var targetStu=t.testClass&&t.testClass!=='All'?stu.filter(function(s){return s.class===t.testClass}):stu;
-targetStu.forEach(function(s){
-var hasMarks=res.some(function(r){return r.tid===ctid&&r.sid===s.id})||document.getElementById('mk_'+s.id)?.value;
-if(hasMarks){
-db.ref('alerts').push({sid:s.id,msg:'Results declared for '+t.name+'. Check your results!',time:Date.now(),type:'info'});
-}
+if(t&&marksEnteredFor.length>0){
+marksEnteredFor.forEach(function(sid){
+db.ref('alerts').push({sid:sid,msg:'Results declared for '+t.name+'. Check your results!',time:Date.now(),type:'info'});
 });
 }
 closeM('addMkModal');toast('Marks Saved!','success');
