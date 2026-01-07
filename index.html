@@ -238,6 +238,7 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <div class="stat"><div class="stat-val" id="aPre">0</div><div class="stat-lbl">PRESENT</div></div>
 <div class="stat"><div class="stat-val" id="aTst">0</div><div class="stat-lbl">TESTS</div></div>
 </div>
+<div id="adminBirthdayBanner"></div>
 <div class="section">
 <h3 class="section-title">⚡ Quick Actions</h3>
 <div class="actions" id="quickActions"></div>
@@ -342,6 +343,7 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <div class="form-group"><label>Password *</label><input type="text" id="sP"></div>
 <div class="form-group"><label>Fee</label><input type="number" id="sFee" value="500"></div>
 <div class="form-group"><label>Join Date</label><input type="date" id="sJoin"></div>
+<div class="form-group"><label>Date of Birth</label><input type="date" id="sDOB"></div>
 </div><div class="modal-footer"><button class="btn" onclick="saveS()">Add Student</button></div></div></div>
 
 <div class="modal" id="editSModal"><div class="modal-content"><div class="modal-header"><h2 class="modal-title">✏️ Edit Student</h2><button class="modal-close" onclick="closeM('editSModal')">×</button></div><div class="modal-body">
@@ -357,6 +359,7 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <div class="form-group"><label>Password</label><input type="text" id="editSP"></div>
 <div class="form-group"><label>Fee</label><input type="number" id="editSFee"></div>
 <div class="form-group"><label>Join</label><input type="date" id="editSJoin"></div>
+<div class="form-group"><label>DOB</label><input type="date" id="editSDOB"></div>
 </div><div class="modal-footer"><button class="btn btn-green" onclick="updateS()">💾 Update</button><button class="btn btn-del" style="background:#ff6b6b" onclick="deleteS()">🗑️ Delete</button></div></div></div>
 
 <div class="modal" id="addTModal"><div class="modal-content"><div class="modal-header"><h2 class="modal-title">📝 Create Test</h2><button class="modal-close" onclick="closeM('addTModal')">×</button></div><div class="modal-body">
@@ -968,12 +971,12 @@ openM('editSModal');
 }
 
 function saveS(){
-var n=document.getElementById('sN').value.trim(),c=document.getElementById('sC').value,m=document.getElementById('sM').value.trim(),m2=document.getElementById('sM2').value.trim(),m3=document.getElementById('sM3').value.trim(),u=document.getElementById('sU').value.trim(),p=document.getElementById('sP').value.trim(),f=document.getElementById('sFee').value,j=document.getElementById('sJoin').value;
+var n=document.getElementById('sN').value.trim(),c=document.getElementById('sC').value,m=document.getElementById('sM').value.trim(),m2=document.getElementById('sM2').value.trim(),m3=document.getElementById('sM3').value.trim(),u=document.getElementById('sU').value.trim(),p=document.getElementById('sP').value.trim(),f=document.getElementById('sFee').value,j=document.getElementById('sJoin').value,dob=document.getElementById('sDOB').value;
 if(!n||!c||!m||!u||!p)return toast('Fill all fields','error');
 if(m.length!==10)return toast('Mobile 1: 10 digits','error');
 if(m2&&m2.length!==10)return toast('Mobile 2: 10 digits','error');
 if(m3&&m3.length!==10)return toast('Mobile 3: 10 digits','error');
-db.ref('students').push({name:n,class:c,mobile:m,mobile2:m2||'',mobile3:m3||'',userId:u,password:p,fee:parseInt(f)||500,joinDate:j,photo:addPhotoUrl}).then(function(){
+db.ref('students').push({name:n,class:c,mobile:m,mobile2:m2||'',mobile3:m3||'',userId:u,password:p,fee:parseInt(f)||500,joinDate:j,dob:dob||'',photo:addPhotoUrl}).then(function(){
 closeM('addSModal');
 document.getElementById('sN').value='';document.getElementById('sC').value='';document.getElementById('sM').value='';document.getElementById('sM2').value='';document.getElementById('sM3').value='';document.getElementById('sU').value='';document.getElementById('sP').value='';
 addPhotoUrl='';document.getElementById('addPhotoBox').innerHTML='<span style="font-size:28px">📷</span>';
@@ -982,9 +985,9 @@ toast('Added!','success');
 }
 
 function updateS(){
-var id=document.getElementById('editSId').value,n=document.getElementById('editSN').value.trim(),c=document.getElementById('editSC').value,m=document.getElementById('editSM').value.trim(),m2=document.getElementById('editSM2').value.trim(),m3=document.getElementById('editSM3').value.trim(),u=document.getElementById('editSU').value.trim(),p=document.getElementById('editSP').value.trim(),f=document.getElementById('editSFee').value,j=document.getElementById('editSJoin').value;
+var id=document.getElementById('editSId').value,n=document.getElementById('editSN').value.trim(),c=document.getElementById('editSC').value,m=document.getElementById('editSM').value.trim(),m2=document.getElementById('editSM2').value.trim(),m3=document.getElementById('editSM3').value.trim(),u=document.getElementById('editSU').value.trim(),p=document.getElementById('editSP').value.trim(),f=document.getElementById('editSFee').value,j=document.getElementById('editSJoin').value,dob=document.getElementById('editSDOB').value;
 if(!n||!c||!m||!u||!p)return toast('Fill all','error');
-db.ref('students/'+id).update({name:n,class:c,mobile:m,mobile2:m2||'',mobile3:m3||'',userId:u,password:p,fee:parseInt(f)||500,joinDate:j,photo:editPhotoUrl}).then(function(){closeM('editSModal');toast('Updated!','success')});
+db.ref('students/'+id).update({name:n,class:c,mobile:m,mobile2:m2||'',mobile3:m3||'',userId:u,password:p,fee:parseInt(f)||500,joinDate:j,dob:dob||'',photo:editPhotoUrl}).then(function(){closeM('editSModal');toast('Updated!','success')});
 }
 
 function deleteS(){
@@ -1986,6 +1989,46 @@ fetch('https://www.fast2sms.com/dev/bulkV2?authorization=P3WtxzoqRgB58mSnZ1vJAwG
 // Also send app notification
 db.ref('alerts').push({sid:sid,msg:s.name+' was '+status+' on '+formatDate(d),time:Date.now(),type:a.status==='present'?'positive':'negative'});
 toast('SMS sent to '+s.name+'\'s parent!','success');
+}
+
+// Birthday Alert Functions
+function checkBirthdays(){
+var today=new Date();
+var todayStr=(today.getMonth()+1).toString().padStart(2,'0')+'-'+today.getDate().toString().padStart(2,'0');
+var birthdays=[];
+stu.forEach(function(s){
+if(s.dob){
+var dob=new Date(s.dob);
+var dobStr=(dob.getMonth()+1).toString().padStart(2,'0')+'-'+dob.getDate().toString().padStart(2,'0');
+if(todayStr===dobStr){
+birthdays.push(s);
+}
+}
+});
+return birthdays;
+}
+
+function sendBirthdayAlerts(){
+var birthdays=checkBirthdays();
+if(birthdays.length===0)return;
+var lastSent=localStorage.getItem('usp_birthday_'+td);
+if(lastSent)return;
+birthdays.forEach(function(s){
+var msg='🎂 Happy Birthday '+s.name+'! Wishing you a wonderful year ahead. - UNIQUE STUDY POINT';
+db.ref('alerts').push({sid:s.id,msg:msg,time:Date.now(),type:'positive'});
+// Also send SMS
+var nums=getAllMobiles(s).join(',');
+fetch('https://www.fast2sms.com/dev/bulkV2?authorization=P3WtxzoqRgB58mSnZ1vJAwGQ2p7UTY0ci6dLjlhbkDCf4auKHI2qKczUL1AMVRj6WSDItJekFaZxP8no&route=q&message='+encodeURIComponent(msg)+'&flash=0&numbers='+nums,{method:'GET',mode:'no-cors'});
+});
+localStorage.setItem('usp_birthday_'+td,'sent');
+if(birthdays.length>0)toast('🎂 Birthday wishes sent to '+birthdays.length+' student(s)!','success');
+}
+
+function renderBirthdayBanner(){
+var birthdays=checkBirthdays();
+if(birthdays.length===0)return '';
+var names=birthdays.map(function(s){return s.name}).join(', ');
+return '<div style="background:linear-gradient(135deg,#f1c40f,#e67e22);color:#fff;padding:15px;margin:0 20px 15px;border-radius:16px;text-align:center"><span style="font-size:24px">🎂</span><br><strong>Today\'s Birthday!</strong><br>'+names+'</div>';
 }
 </script>
 </body>
