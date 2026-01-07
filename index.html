@@ -528,7 +528,7 @@ document.getElementById('wsFilters').innerHTML='<button class="filter-btn active
 }
 
 function showP(id){document.querySelectorAll('#parentDash .page').forEach(function(p){p.classList.remove('active')});document.getElementById(id).classList.add('active');document.querySelectorAll('#pNav .nav-item').forEach(function(b){b.classList.remove('active')});event.target.closest('.nav-item').classList.add('active')}
-function showA(id){document.querySelectorAll('#adminDash .page').forEach(function(p){p.classList.remove('active')});document.getElementById(id).classList.add('active');document.querySelectorAll('#aNav .nav-item').forEach(function(b){b.classList.remove('active')});event.target.closest('.nav-item').classList.add('active')}
+function showA(id){document.querySelectorAll('#adminDash .page').forEach(function(p){p.classList.remove('active')});document.getElementById(id).classList.add('active');document.querySelectorAll('#aNav .nav-item').forEach(function(b){b.classList.remove('active')});var navBtn=event&&event.target?event.target.closest('.nav-item'):null;if(navBtn)navBtn.classList.add('active')}
 
 function setClsF(btn,c){document.querySelectorAll('#clsFilters .filter-btn').forEach(function(b){b.classList.remove('active')});btn.classList.add('active');curFilter=c;renStu()}
 function setWsF(btn,c){document.querySelectorAll('#wsFilters .filter-btn').forEach(function(b){b.classList.remove('active')});btn.classList.add('active');wsFilter=c;renAWs()}
