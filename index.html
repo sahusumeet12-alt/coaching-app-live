@@ -998,7 +998,7 @@ for(var i=0;i<stu.length;i++){
 var s=stu[i],a=null;
 for(var j=0;j<att.length;j++){if(att[j].sid===s.id&&att[j].date===d){a=att[j];break}}
 var st=a?a.status:'',av=s.photo?'<img src="'+s.photo+'">':s.name.charAt(0);
-html+='<div class="card"><div class="avatar">'+av+'</div><div class="card-info"><div class="card-title">'+s.name+'</div><div class="card-sub">'+s.class+'</div></div><div style="display:flex;gap:5px"><button class="btn-small" style="background:'+(st==='present'?'#25D366':'#e8e8e8')+';color:'+(st==='present'?'#fff':'#333')+'" onclick="mAtt(\''+s.id+'\',\'present\',this)">✓</button><button class="btn-small" style="background:'+(st==='absent'?'#ff6b6b':'#e8e8e8')+';color:'+(st==='absent'?'#fff':'#333')+'" onclick="mAtt(\''+s.id+'\',\'absent\',this)">✗</button></div></div>';
+html+='<div class="card"><div class="avatar">'+av+'</div><div class="card-info"><div class="card-title">'+s.name+'</div><div class="card-sub">'+s.class+'</div></div><div style="display:flex;gap:5px"><button class="btn-small" style="background:'+(st==='present'?'#25D366':'#e8e8e8')+';color:'+(st==='present'?'#fff':'#333')+'" onclick="mAtt(\''+s.id+'\',\'present\',this)">✓</button><button class="btn-small" style="background:'+(st==='absent'?'#ff6b6b':'#e8e8e8')+';color:'+(st==='absent'?'#fff':'#333')+'" onclick="mAtt(\''+s.id+'\',\'absent\',this)">✗</button><button class="btn-small" style="background:#667eea" onclick="sendIndAttSMS(\''+s.id+'\')">📱</button></div></div>';
 }
 document.getElementById('attL').innerHTML=html||'<div class="empty">No students</div>';
 }
@@ -1969,6 +1969,23 @@ var msg='Fee Reminder: Rs.'+s.pending+'/- pending. Please clear your dues at the
 db.ref('alerts').push({sid:s.id,msg:msg,time:Date.now(),type:'info'});
 });
 toast('Fee reminders sent to '+pending.length+' parents!','success');
+}
+
+// Individual Attendance SMS
+function sendIndAttSMS(sid){
+var s=stu.find(function(x){return x.id===sid});
+if(!s)return toast('Student not found','error');
+var d=document.getElementById('attD').value||td;
+var a=att.find(function(x){return x.sid===sid&&x.date===d});
+if(!a)return toast('Mark attendance first','error');
+var status=a.status==='present'?'PRESENT ✅':'ABSENT ❌';
+var msg=s.name+' was '+status+' on '+formatDate(d)+'. - UNIQUE STUDY POINT';
+// Send SMS
+var nums=getAllMobiles(s).join(',');
+fetch('https://www.fast2sms.com/dev/bulkV2?authorization=P3WtxzoqRgB58mSnZ1vJAwGQ2p7UTY0ci6dLjlhbkDCf4auKHI2qKczUL1AMVRj6WSDItJekFaZxP8no&route=q&message='+encodeURIComponent(msg)+'&flash=0&numbers='+nums,{method:'GET',mode:'no-cors'});
+// Also send app notification
+db.ref('alerts').push({sid:sid,msg:s.name+' was '+status+' on '+formatDate(d),time:Date.now(),type:a.status==='present'?'positive':'negative'});
+toast('SMS sent to '+s.name+'\'s parent!','success');
 }
 </script>
 </body>
