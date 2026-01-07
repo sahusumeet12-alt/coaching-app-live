@@ -1431,7 +1431,11 @@ closeM('alertTplModal');
 
 // Admin Alert Management
 function renAdminAlerts(){
-var sorted=alerts.slice().sort(function(a,b){return(b.time||0)-(a.time||0)});
+// Filter out ALL attendance alerts (both present and absent) - show only important alerts
+var filtered=alerts.filter(function(a){
+return !(a.category==='attendance'||a.msg&&(a.msg.indexOf(' was PRESENT')>-1||a.msg.indexOf(' was ABSENT')>-1));
+});
+var sorted=filtered.slice().sort(function(a,b){return(b.time||0)-(a.time||0)});
 var html='';
 sorted.forEach(function(a){
 var type=getAlertType(a.msg);
@@ -1993,8 +1997,8 @@ var msg=s.name+' was '+status+' on '+formatDate(d)+'. - UNIQUE STUDY POINT';
 // Send SMS
 var nums=getAllMobiles(s).join(',');
 fetch('https://www.fast2sms.com/dev/bulkV2?authorization=P3WtxzoqRgB58mSnZ1vJAwGQ2p7UTY0ci6dLjlhbkDCf4auKHI2qKczUL1AMVRj6WSDItJekFaZxP8no&route=q&message='+encodeURIComponent(msg)+'&flash=0&numbers='+nums,{method:'GET',mode:'no-cors'});
-// Also send app notification
-db.ref('alerts').push({sid:sid,msg:s.name+' was '+status+' on '+formatDate(d),time:Date.now(),type:a.status==='present'?'positive':'negative'});
+// App notification for BOTH present and absent (category:attendance so admin can filter)
+db.ref('alerts').push({sid:sid,msg:s.name+' was '+status+' on '+formatDate(d),time:Date.now(),type:a.status==='present'?'positive':'negative',category:'attendance'});
 toast('SMS sent to '+s.name+'\'s parent!','success');
 }
 
