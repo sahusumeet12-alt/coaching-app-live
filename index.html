@@ -1457,22 +1457,27 @@ if(!msg)return toast('Enter message','error');
 db.ref('alerts/'+id).update({msg:msg}).then(function(){
 closeM('editAlertModal');
 toast('Alert Updated!','success');
+setTimeout(renAdminAlerts,300);
 });
 }
 
 function confirmDelAlert(){
 var id=document.getElementById('editAlertId').value;
 if(confirm('Delete this alert permanently?')){
-db.ref('alerts/'+id).remove();
+db.ref('alerts/'+id).remove().then(function(){
 closeM('editAlertModal');
 toast('Deleted!','success');
+setTimeout(renAdminAlerts,300);
+});
 }
 }
 
 function delAlert(id){
 if(confirm('Delete this alert?')){
-db.ref('alerts/'+id).remove();
+db.ref('alerts/'+id).remove().then(function(){
 toast('Deleted!','success');
+setTimeout(renAdminAlerts,300);
+});
 }
 }
 
