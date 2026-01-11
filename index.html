@@ -412,7 +412,7 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 <div style="font-size:40px">📁</div>
 <div style="color:#667eea;font-weight:600">Click to Select File</div>
 </div>
-<div class="file-preview" id="filePreview"><span>📄</span><span id="fileName" style="flex:1"></span></div>
+<div class="file-preview" id="filePreview"><span>📄</span><span id="fileName" style="flex:1"></span><button type="button" onclick="clearFileSelection()" style="background:#ff6b6b;color:#fff;border:none;padding:5px 10px;border-radius:5px;cursor:pointer">✕</button></div>
 <input type="file" id="wsFile" style="display:none" onchange="if(this.files.length){document.getElementById('fileName').textContent=this.files[0].name;document.getElementById('filePreview').style.display='flex';document.getElementById('uploadBox').style.display='none'}">
 </div><div class="modal-footer"><button class="btn btn-green" onclick="saveWs()">📤 Upload</button></div></div></div>
 
@@ -1190,10 +1190,27 @@ for(var i=0;i<testStu.length;i++){
 var s=testStu[i],r=null;
 for(var j=0;j<res.length;j++){if(res[j].tid===tid&&res[j].sid===s.id){r=res[j];break}}
 var av=s.photo?'<img src="'+s.photo+'">':s.name.charAt(0);
-html+='<div class="card"><div class="avatar">'+av+'</div><div class="card-info"><div class="card-title">'+s.name+' <small>('+s.class+')</small></div></div><input type="number" id="mk_'+s.id+'" value="'+(r?r.marks:'')+'" placeholder="Marks" style="width:70px;padding:8px;border:2px solid #e8e8e8;border-radius:8px"></div>';
+var isAbs=r&&r.marks===-1;
+html+='<div class="card"><div class="avatar">'+av+'</div><div class="card-info"><div class="card-title">'+s.name+' <small>('+s.class+')</small></div></div><div style="display:flex;gap:5px;align-items:center"><input type="number" id="mk_'+s.id+'" value="'+(r&&r.marks>=0?r.marks:'')+'" placeholder="Marks" style="width:60px;padding:8px;border:2px solid #e8e8e8;border-radius:8px"><button type="button" class="btn-small" id="abs_'+s.id+'" style="background:'+(isAbs?'#ff6b6b':'#e8e8e8')+';color:'+(isAbs?'#fff':'#333')+'" onclick="markAbs(\''+s.id+'\')">AB</button></div></div>';
 }
 document.getElementById('mkL').innerHTML=html;
 openM('addMkModal');
+}
+
+function markAbs(sid){
+var inp=document.getElementById('mk_'+sid);
+var btn=document.getElementById('abs_'+sid);
+if(btn.style.background==='rgb(255, 107, 107)'||btn.style.backgroundColor==='rgb(255, 107, 107)'){
+btn.style.background='#e8e8e8';
+btn.style.color='#333';
+inp.value='';
+inp.disabled=false;
+}else{
+btn.style.background='#ff6b6b';
+btn.style.color='#fff';
+inp.value='-1';
+inp.disabled=true;
+}
 }
 
 function saveMk(){
@@ -1202,7 +1219,7 @@ var testStu=t&&t.testClass&&t.testClass!=='All'?stu.filter(function(s){return s.
 var marksEnteredFor=[];
 for(var i=0;i<testStu.length;i++){
 var s=testStu[i],inp=document.getElementById('mk_'+s.id);
-if(inp&&inp.value!==''){
+if(inp&&inp.value!==''&&inp.value!=='-1'){
 marksEnteredFor.push(s.id);
 var ex=null;
 for(var j=0;j<res.length;j++){if(res[j].tid===ctid&&res[j].sid===s.id){ex=res[j];break}}
@@ -2109,6 +2126,13 @@ db.ref('leaves').remove().then(function(){
 toast('All data cleared! Students are safe.','success');
 renAnalytics();
 });
+}
+
+// Clear file selection
+function clearFileSelection(){
+document.getElementById('wsFile').value='';
+document.getElementById('filePreview').style.display='none';
+document.getElementById('uploadBox').style.display='block';
 }
 </script>
 </body>
