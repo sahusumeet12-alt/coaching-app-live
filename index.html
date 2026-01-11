@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#667eea">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=USP&background=667eea&color=fff&size=180">
 <title>UNIQUE STUDY POINT</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -465,11 +469,53 @@ body{font-family:'Poppins',sans-serif;background:#f0f2f5;min-height:100vh}
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
 <script>
 firebase.initializeApp({apiKey:"AIzaSyA5FjFHqFRBiGlLVe-jn7njpfXzf8hQ1cY",authDomain:"unique-study-point-2.firebaseapp.com",databaseURL:"https://unique-study-point-2-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"unique-study-point-2"});
 var db=firebase.database(),cu=null,ut='parent',stu=[],tst=[],res=[],att=[],fee=[],alerts=[],worksheets=[],ctid=null,curFilter='all',wsFilter='all',resFilter='all',matFilter='all',pieChart=null,addPhotoUrl='',editPhotoUrl='',
 td=new Date().toISOString().split('T')[0],PHONE='8103405051',CLOUD='dukrrfqf6',leaves=[],leaveFilter='all';
+var messaging=null,VAPID_KEY='BEK5WTxT4NhkW53BQLb51GwRbmQAgc_vE2OMBhsPZcNNKXGcpGcKoJdnA6Eog7s42k8odn_EcYFGaMq-xzBfv5k';
 document.getElementById('tD').value=td;document.getElementById('fDate').value=td;document.getElementById('attD').value=td;document.getElementById('sJoin').value=td;document.getElementById('attMonth').value=td.substring(0,7);
+
+// FCM Push Notification Functions
+function initFCM(){
+if('serviceWorker' in navigator){
+navigator.serviceWorker.register('firebase-messaging-sw.js').then(function(reg){
+console.log('SW registered');
+if(firebase.messaging){
+messaging=firebase.messaging();
+messaging.useServiceWorker(reg);
+}
+}).catch(function(e){console.log('SW error:',e)});
+}
+}
+
+function requestNotifPermission(){
+if(!('Notification' in window))return;
+Notification.requestPermission().then(function(p){
+if(p==='granted'&&messaging&&cu){
+messaging.getToken({vapidKey:VAPID_KEY}).then(function(token){
+if(token){
+db.ref('fcmTokens/'+cu.id).set({token:token,time:Date.now()});
+toast('Notifications enabled!','success');
+}
+}).catch(function(e){console.log('Token error:',e)});
+}
+});
+}
+
+function setupFCMListener(){
+if(!messaging)return;
+messaging.onMessage(function(payload){
+var body=payload.notification?.body||payload.data?.message||'New notification';
+toast(body,'success');
+if(Notification.permission==='granted'){
+new Notification('UNIQUE STUDY POINT',{body:body,icon:'https://ui-avatars.com/api/?name=USP&background=667eea&color=fff&size=192'});
+}
+});
+}
+
+initFCM();
 
 function toast(m,t){var e=document.getElementById('toast');e.textContent=m;e.className='toast show '+(t||'');setTimeout(function(){e.classList.remove('show')},3000)}
 function openM(id){document.getElementById(id).classList.add('active')}
@@ -530,7 +576,7 @@ else toast('Invalid','error')
 }
 
 function showAdmin(){document.getElementById('loginPage').style.display='none';document.getElementById('adminDash').classList.add('active');initAdmin();toast('Welcome Admin!','success')}
-function showParent(){document.getElementById('loginPage').style.display='none';document.getElementById('parentDash').classList.add('active');initParent();toast('Welcome!','success');setTimeout(checkFeeReminder,2000)}
+function showParent(){document.getElementById('loginPage').style.display='none';document.getElementById('parentDash').classList.add('active');initParent();toast('Welcome!','success');setTimeout(checkFeeReminder,2000);setTimeout(function(){requestNotifPermission();setupFCMListener()},3000)}
 
 function initParent(){
 document.getElementById('pNav').innerHTML='<button class="nav-item active" onclick="showP(\'pHome\')"><span>🏠</span><span>Home</span></button><button class="nav-item" onclick="showP(\'pResults\');renPRes()"><span>📝</span><span>Results</span></button><button class="nav-item" onclick="showP(\'pMaterials\');renPMat()"><span>📚</span><span>Materials</span></button><button class="nav-item" onclick="showP(\'pLeave\');renPLeave()"><span>✋</span><span>Leave</span></button><button class="nav-item" onclick="showP(\'pFees\')"><span>💰</span><span>Fees</span></button>';
@@ -2133,6 +2179,23 @@ function clearFileSelection(){
 document.getElementById('wsFile').value='';
 document.getElementById('filePreview').style.display='none';
 document.getElementById('uploadBox').style.display='block';
+}
+
+// Send Push Notification
+function sendPushNotification(sid,title,body){
+// Get FCM token for student
+db.ref('fcmTokens/'+sid).once('value').then(function(snap){
+var data=snap.val();
+if(data&&data.token){
+// Store notification in database for server to send
+db.ref('pushQueue').push({
+token:data.token,
+title:title,
+body:body,
+createdAt:Date.now()
+});
+}
+});
 }
 </script>
 </body>
