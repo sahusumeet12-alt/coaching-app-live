@@ -586,7 +586,7 @@ document.getElementById('pMatFilters').innerHTML='<button class="filter-btn acti
 
 function initAdmin(){
 document.getElementById('aNav').innerHTML='<button class="nav-item active" onclick="showA(\'aHome\')"><span>🏠</span><span>Home</span></button><button class="nav-item" onclick="showA(\'aAtt\');renAtt()"><span>📋</span><span>Attend</span></button><button class="nav-item" onclick="showA(\'aTests\')"><span>📝</span><span>Tests</span></button><button class="nav-item" onclick="showA(\'aWorksheets\');renAWs()"><span>📚</span><span>Upload</span></button><button class="nav-item" onclick="showA(\'aAnalytics\');renAnalytics()"><span>📊</span><span>Stats</span></button><button class="nav-item" onclick="showA(\'aFees\')"><span>💰</span><span>Fees</span></button>';
-document.getElementById('quickActions').innerHTML='<button class="action" onclick="openM(\'addSModal\')"><div class="action-icon">➕</div><div class="action-label">Add Student</div></button><button class="action" onclick="showA(\'aAtt\');renAtt()"><div class="action-icon">📋</div><div class="action-label">Attendance</div></button><button class="action" onclick="openM(\'addTModal\')"><div class="action-icon">📝</div><div class="action-label">Add Test</div></button><button class="action" onclick="ldDD();openM(\'alertModal\')"><div class="action-icon">🔔</div><div class="action-label">Send Alert</div></button><button class="action" onclick="showA(\'aAlerts\');renAdminAlerts()"><div class="action-icon">📢</div><div class="action-label">All Alerts</div></button><button class="action" onclick="showA(\'aLeave\');renAdminLeave()"><div class="action-icon">✋</div><div class="action-label">Leave Req</div></button>';
+document.getElementById('quickActions').innerHTML='<button class="action" onclick="openM(\'addSModal\')"><div class="action-icon">➕</div><div class="action-label">Add Student</div></button><button class="action" onclick="showA(\'aAtt\');renAtt()"><div class="action-icon">📋</div><div class="action-label">Attendance</div></button><button class="action" onclick="openM(\'addTModal\')"><div class="action-icon">📝</div><div class="action-label">Add Test</div></button><button class="action" onclick="showA(\'aAlerts\');renAdminAlerts()"><div class="action-icon">🔔</div><div class="action-label">Alerts</div></button><button class="action" onclick="showA(\'aWorksheets\');renAWs()"><div class="action-icon">📚</div><div class="action-label">Materials</div></button><button class="action" onclick="showA(\'aLeave\');renAdminLeave()"><div class="action-icon">✋</div><div class="action-label">Leave Req</div></button>';
 document.getElementById('clsFilters').innerHTML='<button class="filter-btn active" onclick="setClsF(this,\'all\')">All</button><button class="filter-btn" onclick="setClsF(this,\'VI\')">VI</button><button class="filter-btn" onclick="setClsF(this,\'VII\')">VII</button><button class="filter-btn" onclick="setClsF(this,\'VIII\')">VIII</button><button class="filter-btn" onclick="setClsF(this,\'IX\')">IX</button><button class="filter-btn" onclick="setClsF(this,\'X\')">X</button>';
 document.getElementById('wsFilters').innerHTML='<button class="filter-btn active" onclick="setWsF(this,\'all\')">All</button><button class="filter-btn" onclick="setWsF(this,\'Mathematics\')">Maths</button><button class="filter-btn" onclick="setWsF(this,\'Science\')">Science</button><button class="filter-btn" onclick="setWsF(this,\'Social Science\')">Social Science</button>';
 }
@@ -999,7 +999,7 @@ var f=curFilter==='all'?stu:stu.filter(function(s){return s.class===curFilter});
 var html='';
 for(var i=0;i<f.length;i++){
 var s=f[i],av=s.photo?'<img src="'+s.photo+'">':s.name.charAt(0);
-html+='<div class="card"><div class="avatar">'+av+'</div><div class="card-info"><div class="card-title">'+s.name+'</div><div class="card-sub">Class '+s.class+' • '+s.mobile+'</div></div><div style="display:flex;gap:5px"><button class="btn-small" style="background:#667eea" onclick="openEditS(\''+s.id+'\')">✏️</button><button class="btn-small btn-del" onclick="quickDel(\''+s.id+'\',\''+s.name+'\')">🗑️</button></div></div>';
+html+='<div class="card"><div class="avatar">'+av+'</div><div class="card-info"><div class="card-title">'+s.name+'</div><div class="card-sub">Class '+s.class+' • '+s.mobile+'</div></div><div style="display:flex;gap:5px"><button class="btn-small" style="background:#25D366" onclick="genPTMReport(\''+s.id+'\')">📄</button><button class="btn-small" style="background:#667eea" onclick="openEditS(\''+s.id+'\')">✏️</button><button class="btn-small btn-del" onclick="quickDel(\''+s.id+'\',\''+s.name+'\')">🗑️</button></div></div>';
 }
 document.getElementById('aList').innerHTML=html||'<div class="empty">No students</div>';
 }
@@ -2196,6 +2196,155 @@ createdAt:Date.now()
 });
 }
 });
+}
+
+// PTM Report PDF Generation
+function genPTMReport(sid){
+var s=stu.find(function(x){return x.id===sid});
+if(!s)return toast('Student not found','error');
+
+var {jsPDF}=window.jspdf;
+var doc=new jsPDF();
+var y=15;
+
+// Header
+doc.setFillColor(102,126,234);
+doc.rect(0,0,210,40,'F');
+doc.setTextColor(255,255,255);
+doc.setFontSize(20);
+doc.setFont('helvetica','bold');
+doc.text('UNIQUE STUDY POINT',105,18,{align:'center'});
+doc.setFontSize(14);
+doc.text('STUDENT ACADEMIC REPORT (PTM)',105,28,{align:'center'});
+doc.setFontSize(10);
+doc.text('Generated: '+formatDate(Date.now()),105,36,{align:'center'});
+
+// Student Info
+y=50;
+doc.setTextColor(0,0,0);
+doc.setFontSize(12);
+doc.setFont('helvetica','bold');
+doc.text('STUDENT INFORMATION',15,y);
+doc.setFont('helvetica','normal');
+y+=8;
+doc.text('Name: '+s.name,15,y);
+doc.text('Class: '+s.class,120,y);
+y+=6;
+doc.text('Mobile: '+s.mobile,15,y);
+doc.text('DOB: '+(s.dob||'N/A'),120,y);
+y+=6;
+doc.text('Join Date: '+(s.joinDate||'N/A'),15,y);
+
+// Attendance Summary
+y+=12;
+doc.setFont('helvetica','bold');
+doc.text('ATTENDANCE SUMMARY',15,y);
+doc.setFont('helvetica','normal');
+y+=8;
+var myAtt=att.filter(function(a){return a.sid===sid});
+var present=myAtt.filter(function(a){return a.status==='present'}).length;
+var absent=myAtt.filter(function(a){return a.status==='absent'}).length;
+var total=present+absent;
+var attPct=total>0?Math.round((present/total)*100):0;
+doc.text('Total Days: '+total+'    Present: '+present+'    Absent: '+absent+'    Attendance: '+attPct+'%',15,y);
+
+// Test Performance
+y+=12;
+doc.setFont('helvetica','bold');
+doc.text('TEST PERFORMANCE',15,y);
+y+=8;
+
+var myRes=res.filter(function(r){return r.sid===sid});
+if(myRes.length>0){
+var testData=[];
+var totalPct=0;
+myRes.forEach(function(r){
+var t=tst.find(function(x){return x.id===r.tid});
+if(t&&r.marks>=0){
+var pct=Math.round((r.marks/t.totalMarks)*100);
+totalPct+=pct;
+testData.push([t.name,t.subject||'General',r.marks+'/'+t.totalMarks,pct+'%']);
+}
+});
+var avgPct=testData.length>0?Math.round(totalPct/testData.length):0;
+
+doc.autoTable({
+head:[['Test Name','Subject','Marks','Percentage']],
+body:testData,
+startY:y,
+theme:'grid',
+headStyles:{fillColor:[102,126,234]},
+styles:{fontSize:9}
+});
+y=doc.lastAutoTable.finalY+5;
+doc.setFont('helvetica','bold');
+doc.text('Average: '+avgPct+'%',15,y);
+
+// Class Rank
+var rank=calculateRank(sid);
+doc.text('Class Rank: #'+rank.rank+' out of '+rank.total,100,y);
+}else{
+doc.setFont('helvetica','normal');
+doc.text('No test records found.',15,y);
+}
+
+// Fee Status
+y+=12;
+doc.setFont('helvetica','bold');
+doc.text('FEE STATUS',15,y);
+doc.setFont('helvetica','normal');
+y+=8;
+var myFee=fee.filter(function(f){return f.sid===sid});
+var totalPaid=myFee.reduce(function(a,b){return a+(b.amount||0)},0);
+var monthlyFee=s.fee||500;
+var joinDate=s.joinDate?new Date(s.joinDate):new Date();
+var months=Math.max(1,Math.ceil((Date.now()-joinDate.getTime())/(30*24*60*60*1000)));
+var totalDue=months*monthlyFee;
+var pending=totalDue-totalPaid;
+doc.text('Monthly Fee: Rs.'+monthlyFee+'    Total Paid: Rs.'+totalPaid+'    Pending: Rs.'+(pending>0?pending:0),15,y);
+
+// Leave Record
+y+=12;
+doc.setFont('helvetica','bold');
+doc.text('LEAVE RECORD',15,y);
+doc.setFont('helvetica','normal');
+y+=8;
+var myLeaves=leaves.filter(function(l){return l.sid===sid});
+if(myLeaves.length>0){
+myLeaves.slice(0,5).forEach(function(l){
+doc.text(formatDate(l.date)+' - '+l.reason+' ('+l.status+')',15,y);
+y+=5;
+});
+}else{
+doc.text('No leave records.',15,y);
+}
+
+// Alerts/Remarks
+y+=8;
+doc.setFont('helvetica','bold');
+doc.text('REMARKS/ALERTS SENT',15,y);
+doc.setFont('helvetica','normal');
+y+=8;
+var myAlerts=alerts.filter(function(a){return a.sid===sid||a.sid==='ALL'}).slice(0,5);
+if(myAlerts.length>0){
+myAlerts.forEach(function(a){
+var msg=a.msg.length>60?a.msg.substring(0,60)+'...':a.msg;
+doc.text('• '+msg+' ('+formatDate(a.time)+')',15,y);
+y+=5;
+});
+}else{
+doc.text('No remarks.',15,y);
+}
+
+// Footer
+doc.setFillColor(102,126,234);
+doc.rect(0,280,210,17,'F');
+doc.setTextColor(255,255,255);
+doc.setFontSize(10);
+doc.text('UNIQUE STUDY POINT BY SUMEET SAHU | Mobile: 8103405051',105,290,{align:'center'});
+
+doc.save(s.name.replace(/\s+/g,'_')+'_PTM_Report.pdf');
+toast('PTM Report Downloaded!','success');
 }
 </script>
 </body>
