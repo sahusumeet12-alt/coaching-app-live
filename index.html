@@ -2198,142 +2198,240 @@ createdAt:Date.now()
 });
 }
 
-// PTM Report PDF Generation
+
+// PTM Report PDF Generation (Improved)
 function genPTMReport(sid){
 var s=stu.find(function(x){return x.id===sid});
 if(!s)return toast('Student not found','error');
 
 var {jsPDF}=window.jspdf;
 var doc=new jsPDF();
-var y=15;
 
-// Header
+// Header with gradient effect
 doc.setFillColor(102,126,234);
-doc.rect(0,0,210,40,'F');
-doc.setTextColor(255,255,255);
-doc.setFontSize(20);
-doc.setFont('helvetica','bold');
-doc.text('UNIQUE STUDY POINT',105,18,{align:'center'});
+doc.rect(0,0,210,45,'F');
+doc.setFillColor(118,75,162);
+doc.rect(0,35,210,10,'F');
+
+// Logo placeholder
+doc.setFillColor(255,255,255);
+doc.circle(25,22,12,'F');
+doc.setTextColor(102,126,234);
 doc.setFontSize(14);
-doc.text('STUDENT ACADEMIC REPORT (PTM)',105,28,{align:'center'});
-doc.setFontSize(10);
-doc.text('Generated: '+formatDate(Date.now()),105,36,{align:'center'});
+doc.setFont('helvetica','bold');
+doc.text('USP',25,25,{align:'center'});
 
-// Student Info
-y=50;
-doc.setTextColor(0,0,0);
+// Title
+doc.setTextColor(255,255,255);
+doc.setFontSize(22);
+doc.setFont('helvetica','bold');
+doc.text('UNIQUE STUDY POINT',115,18,{align:'center'});
 doc.setFontSize(12);
-doc.setFont('helvetica','bold');
-doc.text('STUDENT INFORMATION',15,y);
 doc.setFont('helvetica','normal');
-y+=8;
-doc.text('Name: '+s.name,15,y);
-doc.text('Class: '+s.class,120,y);
-y+=6;
-doc.text('Mobile: '+s.mobile,15,y);
-doc.text('DOB: '+(s.dob||'N/A'),120,y);
-y+=6;
-doc.text('Join Date: '+(s.joinDate||'N/A'),15,y);
+doc.text('Student Academic Report',115,28,{align:'center'});
+doc.setFontSize(9);
+doc.text('Report Date: '+formatDate(Date.now()),115,38,{align:'center'});
 
-// Attendance Summary
-y+=12;
+// Student Info Box
+var y=55;
+doc.setFillColor(245,247,250);
+doc.roundedRect(15,y-5,180,25,3,3,'F');
+doc.setDrawColor(102,126,234);
+doc.setLineWidth(0.5);
+doc.roundedRect(15,y-5,180,25,3,3,'S');
+
+doc.setTextColor(102,126,234);
+doc.setFontSize(11);
 doc.setFont('helvetica','bold');
-doc.text('ATTENDANCE SUMMARY',15,y);
+doc.text('STUDENT DETAILS',20,y+2);
+
+doc.setTextColor(60,60,60);
+doc.setFontSize(10);
 doc.setFont('helvetica','normal');
-y+=8;
+doc.text('Name: '+s.name,20,y+12);
+doc.text('Class: '+s.class,100,y+12);
+doc.text('Contact: '+s.mobile,155,y+12);
+
+// Attendance Section
+y=90;
+doc.setFillColor(102,126,234);
+doc.roundedRect(15,y-5,180,8,2,2,'F');
+doc.setTextColor(255,255,255);
+doc.setFontSize(11);
+doc.setFont('helvetica','bold');
+doc.text('ATTENDANCE SUMMARY',20,y+1);
+
+y+=12;
 var myAtt=att.filter(function(a){return a.sid===sid});
 var present=myAtt.filter(function(a){return a.status==='present'}).length;
 var absent=myAtt.filter(function(a){return a.status==='absent'}).length;
 var total=present+absent;
 var attPct=total>0?Math.round((present/total)*100):0;
-doc.text('Total Days: '+total+'    Present: '+present+'    Absent: '+absent+'    Attendance: '+attPct+'%',15,y);
 
-// Test Performance
-y+=12;
+// Attendance boxes
+var boxW=42;
+doc.setFillColor(230,243,255);
+doc.roundedRect(15,y,boxW,18,2,2,'F');
+doc.setFillColor(220,252,231);
+doc.roundedRect(15+boxW+5,y,boxW,18,2,2,'F');
+doc.setFillColor(254,226,226);
+doc.roundedRect(15+(boxW+5)*2,y,boxW,18,2,2,'F');
+if(attPct>=75){doc.setFillColor(220,252,231)}else{doc.setFillColor(254,226,226)}
+doc.roundedRect(15+(boxW+5)*3,y,boxW,18,2,2,'F');
+
+doc.setTextColor(60,60,60);
+doc.setFontSize(8);
+doc.setFont('helvetica','normal');
+doc.text('Total Days',15+boxW/2,y+6,{align:'center'});
+doc.text('Present',15+boxW+5+boxW/2,y+6,{align:'center'});
+doc.text('Absent',15+(boxW+5)*2+boxW/2,y+6,{align:'center'});
+doc.text('Percentage',15+(boxW+5)*3+boxW/2,y+6,{align:'center'});
+
+doc.setFontSize(12);
 doc.setFont('helvetica','bold');
-doc.text('TEST PERFORMANCE',15,y);
-y+=8;
+doc.text(String(total),15+boxW/2,y+14,{align:'center'});
+doc.setTextColor(34,139,34);
+doc.text(String(present),15+boxW+5+boxW/2,y+14,{align:'center'});
+doc.setTextColor(220,38,38);
+doc.text(String(absent),15+(boxW+5)*2+boxW/2,y+14,{align:'center'});
+if(attPct>=75){doc.setTextColor(34,139,34)}else{doc.setTextColor(220,38,38)}
+doc.text(attPct+'%',15+(boxW+5)*3+boxW/2,y+14,{align:'center'});
 
+// Test Performance Section
+y+=30;
+doc.setFillColor(102,126,234);
+doc.roundedRect(15,y-5,180,8,2,2,'F');
+doc.setTextColor(255,255,255);
+doc.setFontSize(11);
+doc.setFont('helvetica','bold');
+doc.text('TEST PERFORMANCE',20,y+1);
+
+y+=8;
 var myRes=res.filter(function(r){return r.sid===sid});
 if(myRes.length>0){
 var testData=[];
 var totalPct=0;
+var subjectPerf={};
 myRes.forEach(function(r){
 var t=tst.find(function(x){return x.id===r.tid});
 if(t&&r.marks>=0){
 var pct=Math.round((r.marks/t.totalMarks)*100);
 totalPct+=pct;
-testData.push([t.name,t.subject||'General',r.marks+'/'+t.totalMarks,pct+'%']);
+var grade=pct>=90?'A+':pct>=80?'A':pct>=70?'B+':pct>=60?'B':pct>=50?'C':'D';
+testData.push([t.name,t.subject||'General',r.marks+'/'+t.totalMarks,pct+'%',grade]);
+// Track subject performance
+var subj=t.subject||'General';
+if(!subjectPerf[subj])subjectPerf[subj]={total:0,count:0};
+subjectPerf[subj].total+=pct;
+subjectPerf[subj].count++;
 }
 });
 var avgPct=testData.length>0?Math.round(totalPct/testData.length):0;
 
 doc.autoTable({
-head:[['Test Name','Subject','Marks','Percentage']],
+head:[['Test Name','Subject','Marks','%','Grade']],
 body:testData,
 startY:y,
 theme:'grid',
-headStyles:{fillColor:[102,126,234]},
-styles:{fontSize:9}
+headStyles:{fillColor:[102,126,234],textColor:[255,255,255],fontStyle:'bold',halign:'center'},
+bodyStyles:{halign:'center',fontSize:9},
+columnStyles:{0:{halign:'left',cellWidth:55},1:{cellWidth:35},2:{cellWidth:25},3:{cellWidth:20},4:{cellWidth:20}},
+alternateRowStyles:{fillColor:[245,247,250]},
+margin:{left:15,right:15}
 });
-y=doc.lastAutoTable.finalY+5;
-doc.setFont('helvetica','bold');
-doc.text('Average: '+avgPct+'%',15,y);
+y=doc.lastAutoTable.finalY+8;
 
-// Class Rank
+// Average and Rank Box
 var rank=calculateRank(sid);
-doc.text('Class Rank: #'+rank.rank+' out of '+rank.total,100,y);
-}else{
+doc.setFillColor(102,126,234);
+doc.roundedRect(15,y,85,15,2,2,'F');
+doc.setFillColor(118,75,162);
+doc.roundedRect(110,y,85,15,2,2,'F');
+
+doc.setTextColor(255,255,255);
+doc.setFontSize(11);
+doc.setFont('helvetica','bold');
+doc.text('Average: '+avgPct+'%',57,y+10,{align:'center'});
+doc.text('Class Rank: #'+rank.rank+' of '+rank.total,152,y+10,{align:'center'});
+
+// Subject-wise Performance Analysis
+y+=25;
+doc.setFillColor(102,126,234);
+doc.roundedRect(15,y-5,180,8,2,2,'F');
+doc.setTextColor(255,255,255);
+doc.setFontSize(11);
+doc.setFont('helvetica','bold');
+doc.text('SUBJECT-WISE ANALYSIS & REMARKS',20,y+1);
+
+y+=10;
+doc.setTextColor(60,60,60);
+doc.setFontSize(9);
 doc.setFont('helvetica','normal');
-doc.text('No test records found.',15,y);
+
+var remarksList=[];
+Object.keys(subjectPerf).forEach(function(subj){
+var avg=Math.round(subjectPerf[subj].total/subjectPerf[subj].count);
+var remark='';
+var emoji='';
+if(avg>=90){remark='Excellent! Outstanding performance. Keep it up!';emoji='⭐';}
+else if(avg>=80){remark='Very Good! Consistent performer.';emoji='👍';}
+else if(avg>=70){remark='Good! Shows potential, can do better.';emoji='📈';}
+else if(avg>=60){remark='Average. Needs more practice and focus.';emoji='📝';}
+else if(avg>=50){remark='Below average. Requires attention and extra effort.';emoji='⚠️';}
+else{remark='Needs improvement. Regular practice required.';emoji='🔴';}
+remarksList.push([subj,avg+'%',remark]);
+});
+
+doc.autoTable({
+head:[['Subject','Avg %','Teacher Remarks']],
+body:remarksList,
+startY:y,
+theme:'grid',
+headStyles:{fillColor:[118,75,162],textColor:[255,255,255],fontStyle:'bold'},
+bodyStyles:{fontSize:9},
+columnStyles:{0:{cellWidth:35,fontStyle:'bold'},1:{cellWidth:20,halign:'center'},2:{cellWidth:100}},
+alternateRowStyles:{fillColor:[250,245,255]},
+margin:{left:15,right:15}
+});
+y=doc.lastAutoTable.finalY+8;
+
+}else{
+doc.setTextColor(100,100,100);
+doc.text('No test records found.',20,y+5);
+y+=15;
 }
 
-// Fee Status
-y+=12;
-doc.setFont('helvetica','bold');
-doc.text('FEE STATUS',15,y);
-doc.setFont('helvetica','normal');
-y+=8;
-var myFee=fee.filter(function(f){return f.sid===sid});
-var totalPaid=myFee.reduce(function(a,b){return a+(b.amount||0)},0);
-var monthlyFee=s.fee||500;
-var joinDate=s.joinDate?new Date(s.joinDate):new Date();
-var months=Math.max(1,Math.ceil((Date.now()-joinDate.getTime())/(30*24*60*60*1000)));
-var totalDue=months*monthlyFee;
-var pending=totalDue-totalPaid;
-doc.text('Monthly Fee: Rs.'+monthlyFee+'    Total Paid: Rs.'+totalPaid+'    Pending: Rs.'+(pending>0?pending:0),15,y);
+// Teacher Remarks Section (Custom alerts only - no attendance/test/fee alerts)
+var customAlerts=alerts.filter(function(a){
+if(a.sid!==sid&&a.sid!=='ALL')return false;
+var msg=a.msg.toLowerCase();
+// Exclude system alerts
+if(msg.indexOf('present')>-1||msg.indexOf('absent')>-1)return false;
+if(msg.indexOf('result')>-1||msg.indexOf('declared')>-1)return false;
+if(msg.indexOf('fee')>-1||msg.indexOf('pending')>-1||msg.indexOf('reminder')>-1)return false;
+if(msg.indexOf('test')>-1&&msg.indexOf('new test')>-1)return false;
+if(msg.indexOf('birthday')>-1)return false;
+return true;
+}).slice(0,5);
 
-// Leave Record
-y+=12;
+if(customAlerts.length>0&&y<240){
+doc.setFillColor(102,126,234);
+doc.roundedRect(15,y-5,180,8,2,2,'F');
+doc.setTextColor(255,255,255);
+doc.setFontSize(11);
 doc.setFont('helvetica','bold');
-doc.text('LEAVE RECORD',15,y);
-doc.setFont('helvetica','normal');
-y+=8;
-var myLeaves=leaves.filter(function(l){return l.sid===sid});
-if(myLeaves.length>0){
-myLeaves.slice(0,5).forEach(function(l){
-doc.text(formatDate(l.date)+' - '+l.reason+' ('+l.status+')',15,y);
-y+=5;
-});
-}else{
-doc.text('No leave records.',15,y);
+doc.text('SPECIAL REMARKS',20,y+1);
+
+y+=10;
+doc.setTextColor(60,60,60);
+doc.setFontSize(9);
+customAlerts.forEach(function(a){
+if(y<270){
+var msg=a.msg.length>70?a.msg.substring(0,70)+'...':a.msg;
+doc.text('• '+msg+' ('+formatDate(a.time)+')',20,y);
+y+=6;
 }
-
-// Alerts/Remarks
-y+=8;
-doc.setFont('helvetica','bold');
-doc.text('REMARKS/ALERTS SENT',15,y);
-doc.setFont('helvetica','normal');
-y+=8;
-var myAlerts=alerts.filter(function(a){return a.sid===sid||a.sid==='ALL'}).slice(0,5);
-if(myAlerts.length>0){
-myAlerts.forEach(function(a){
-var msg=a.msg.length>60?a.msg.substring(0,60)+'...':a.msg;
-doc.text('• '+msg+' ('+formatDate(a.time)+')',15,y);
-y+=5;
 });
-}else{
-doc.text('No remarks.',15,y);
 }
 
 // Footer
@@ -2341,7 +2439,11 @@ doc.setFillColor(102,126,234);
 doc.rect(0,280,210,17,'F');
 doc.setTextColor(255,255,255);
 doc.setFontSize(10);
-doc.text('UNIQUE STUDY POINT BY SUMEET SAHU | Mobile: 8103405051',105,290,{align:'center'});
+doc.setFont('helvetica','bold');
+doc.text('UNIQUE STUDY POINT BY SUMEET SAHU',105,288,{align:'center'});
+doc.setFontSize(8);
+doc.setFont('helvetica','normal');
+doc.text('Contact: 8103405051 | Amitesh Nagar, Indore',105,294,{align:'center'});
 
 doc.save(s.name.replace(/\s+/g,'_')+'_PTM_Report.pdf');
 toast('PTM Report Downloaded!','success');
